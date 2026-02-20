@@ -1,0 +1,8 @@
+# Suppress unusedFunction warnings for the whole project.
+unusedFunction
+
+# Ignore system headers
+missingIncludeSystem
+
+# Ignore unmatchedSupression warnings
+unmatchedSuppression
