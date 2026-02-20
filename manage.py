@@ -49,23 +49,20 @@ def get_cpp_files():
     return files
 
 def filter_compile_commands(preset="debug"):
-    """Удаляет MOC файлы из compile_commands.json, создавая резервную копию."""
+    """Remove MOC files from compile_commands.json while creating a backup."""
     compile_commands_path = pathlib.Path(f"build-{preset}/compile_commands.json")
     backup_path = pathlib.Path(f"build-{preset}/compile_commands.json.backup")
     
     if not compile_commands_path.exists():
         return
     
-    # Создаем резервную копию только если её ещё нет
     if not backup_path.exists():
         with open(compile_commands_path, 'r', encoding='utf-8') as f:
             commands = json.load(f)
         
-        # Сохраняем оригинал
         with open(backup_path, 'w', encoding='utf-8') as f:
             json.dump(commands, f, indent=2)
         
-        # Фильтруем автогенерированные файлы
         filtered = [
             cmd for cmd in commands
             if not any(pattern in cmd['file'] for pattern in [
@@ -76,14 +73,13 @@ def filter_compile_commands(preset="debug"):
             ])
         ]
         
-        # Сохраняем отфильтрованную версию
         with open(compile_commands_path, 'w', encoding='utf-8') as f:
             json.dump(filtered, f, indent=2)
         
         print(f"✓ Filtered compile_commands.json: {len(commands)} -> {len(filtered)} entries")
 
 def restore_compile_commands(preset="debug"):
-    """Восстанавливает оригинальный compile_commands.json из резервной копии."""
+    """Restore the original compile_commands.json from the backup."""
     compile_commands_path = pathlib.Path(f"build-{preset}/compile_commands.json")
     backup_path = pathlib.Path(f"build-{preset}/compile_commands.json.backup")
     
@@ -93,12 +89,12 @@ def restore_compile_commands(preset="debug"):
         print("✓ Restored compile_commands.json")
 
 def build(preset="debug"):
-    """Настройка и сборка проекта"""
+    """Configure and build the project."""
     run_command(["cmake", "--preset", preset])
     run_command(["cmake", "--build", "--preset", preset, "-j", str(NPROCS)])
 
 def run(preset="debug"):
-    """Запуск приложения."""
+    """Run the application."""
     ext = ".exe" if os.name == 'nt' else ""
     exe_path = pathlib.Path(f"build-{preset}") / f"{PROJECT_NAME}{ext}"
     
@@ -112,7 +108,7 @@ def run(preset="debug"):
     run_command([str(exe_path)])
 
 def clean():
-    """Очистка временных файлов."""
+    """Clean temporary files."""
     dirs_to_remove = list(pathlib.Path().glob("build*")) + [pathlib.Path(".cache")]
     for d in dirs_to_remove:
         if d.is_dir():
@@ -124,7 +120,7 @@ def clean():
         file_to_remove.unlink()
 
 def format_code():
-    """Форматирование кода через clang-format."""
+    """Format code with clang-format."""
     files = get_cpp_files()
     if not files:
         print("No files found to format.")
@@ -133,7 +129,7 @@ def format_code():
     run_command(["clang-format", "-i"] + files)
 
 def format_check():
-    """Проверка форматирования кода без изменений."""
+    """Check code formatting without changes."""
     files = get_cpp_files()
     if not files:
         print("No files found to check.")
@@ -142,7 +138,7 @@ def format_check():
     run_command(["clang-format", "--dry-run", "--Werror"] + files)
 
 def cppcheck_lint():
-    """Запуск cppcheck для статического анализа."""
+    """Run cppcheck for static analysis."""
     if not pathlib.Path("build-debug/compile_commands.json").exists():
         print("compile_commands.json not found. Building first...")
         build()
@@ -169,7 +165,7 @@ def cppcheck_lint():
         restore_compile_commands()
 
 def tidy_lint():
-    """Запуск clang-tidy."""
+    """Run clang-tidy."""
     if not pathlib.Path("build-debug/compile_commands.json").exists():
         print("compile_commands.json not found. Building first...")
         build()
@@ -190,10 +186,9 @@ def tidy_lint():
         filter_compile_commands()
         
         print(f"Running clang-tidy via {run_clang_tidy_path}...")
-        # Run clang-tidy on all files in compilation database
         cmd = [sys.executable, run_clang_tidy_path,
                "-p", str(pathlib.Path("build-debug").resolve()), 
-            #    "-j", str(NPROCS),
+               "-j", str(NPROCS),
                f"-config-file={pathlib.Path(".clang-tidy").resolve()}",
                "-header-filter=/src/.*",
                "-extra-arg=-Wno-unknown-argument",
@@ -206,7 +201,7 @@ def tidy_lint():
         restore_compile_commands()
 
 def lint(steps="all"):
-    """Запуск всех линтеров."""
+    """Run all linters."""
     lint_steps = ["format-check", "cppcheck", "tidy"] if steps == "all" else steps.split(",")
     
     for step in lint_steps:
