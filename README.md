@@ -32,3 +32,5 @@ python manage.py lint
 # Run specific lint steps
 python manage.py lint format-check,cppcheck
 ```
+
+Edit `local_config.py` to change the default configuration and build options.

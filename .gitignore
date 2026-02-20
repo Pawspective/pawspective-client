@@ -61,5 +61,8 @@ Desktop.ini
 .ninja_deps
 .ninja_log
 
-# Local Makefile overrides
-Makefile.local
+# Python cache
+__pycache__/
+
+# Config overrides
+local_config.py

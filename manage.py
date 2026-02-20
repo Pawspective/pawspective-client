@@ -7,7 +7,20 @@ import multiprocessing
 import json
 
 PROJECT_NAME = "pawspective-client"
-NPROCS = 6
+
+CONFIG = {
+    "NPROCS": multiprocessing.cpu_count()
+}
+
+try: 
+    import local_config
+    for key in CONFIG:
+        if hasattr(local_config, key):
+            CONFIG[key] = getattr(local_config, key)
+except ImportError:
+    pass
+
+NPROCS = CONFIG["NPROCS"]
 
 def run_command(command, cwd=None, env=None):
     custom_env = os.environ.copy()
