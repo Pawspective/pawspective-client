@@ -34,3 +34,16 @@ python manage.py lint format-check,cppcheck
 ```
 
 Edit `local_config.py` to change the default configuration and build options.
+
+
+### Folder Descriptions
+
+- **include/** - C++ header files
+- **src/** - Source code with modular organization:
+  - **viewmodels/** - ViewModel layer
+  - **services/** - Business logic and API services
+  - **models/** - Data models and entity definitions
+  - **state/** - State management and application state
+  - **utils/** - Reusable utility functions and helpers
+- **qml/** - Qt QML markup language files
+- **resources/** - Static resources (images, icons, translations)
