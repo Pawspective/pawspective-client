@@ -12,13 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install Qt6 and Linting Tools
         run: |
           sudo apt update
-          sudo apt install -y clang-format clang-tidy cppcheck python3
-
-      - name: Run Lint Suite
-        run: python3 manage.py lint
+          sudo apt install -y \
+            cmake \
+            build-essential \
+            qt6-base-dev \
+            libargon2-dev \
+            clang-format \
+            clang-tidy \
+            cppcheck
 
   # Job 2: Build and Test
   build:
