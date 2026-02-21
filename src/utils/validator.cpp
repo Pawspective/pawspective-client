@@ -24,5 +24,13 @@ bool validate_password_strength(const std::string& password) {
     return strength_regex.match(qPass).hasMatch();
 }
 
+bool min_length(const std::string& value, size_t length) {
+    return value.length() >= length;
+}
+
+bool is_one_of(const std::string& value, const std::vector<std::string>& options) {
+    return std::find(options.begin(), options.end(), value) != options.end();
+}
+
 bool validate_not_empty(const std::string& value) { return !value.empty(); }
 }  // namespace pawspective::utils::validation
