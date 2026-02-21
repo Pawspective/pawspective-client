@@ -19,7 +19,7 @@ bool validate_password_strength(const std::string& password) {
 
     QString qPass = QString::fromStdString(password);
 
-    static const QRegularExpression strength_regex(R"((?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*]))");
+    static const QRegularExpression strength_regex(R"((?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*;,.?"'()\-_=+]))");
 
     return strength_regex.match(qPass).hasMatch();
 }
