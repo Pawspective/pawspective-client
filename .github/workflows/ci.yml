@@ -21,6 +21,9 @@ jobs:
             clang-format \
             clang-tidy \
             cppcheck
+      - name: Run linting
+        run: |
+          python3 manage.py lint
 
   # Job 2: Build and Test
   build:
