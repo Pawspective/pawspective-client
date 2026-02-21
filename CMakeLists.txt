@@ -23,6 +23,7 @@ file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
 add_executable(pawspective-client
 	src/main.cpp
 	src/mainwindow.cpp
+	src/utils/validator.cpp
 	${PROJECT_HEADERS}
 )
 
