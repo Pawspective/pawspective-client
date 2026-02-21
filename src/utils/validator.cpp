@@ -4,31 +4,31 @@
 #include <string>
 
 namespace pawspective::utils::validation {
-bool validate_email(const std::string& email) {
-    QString q_email = QString::fromStdString(email);
+bool validateEmail(const std::string& email) {
+    QString qEmail = QString::fromStdString(email);
     static const QRegularExpression
-        email_regex(R"(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$)", QRegularExpression::CaseInsensitiveOption);
-    QRegularExpressionMatch match = email_regex.match(q_email);
+        EmailRegex(R"(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$)", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = EmailRegex.match(qEmail);
     return match.hasMatch();
 }
 
-bool validate_password_strength(const std::string& password) {
+bool validatePasswordStrength(const std::string& password) {
     if (password.length() < 8) {
         return false;
     }
 
     QString qPass = QString::fromStdString(password);
 
-    static const QRegularExpression strength_regex(R"((?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*;,.?"'()\-_=+]))");
+    static const QRegularExpression StrengthRegex(R"((?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*;,.?"'()\-_=+]))");
 
-    return strength_regex.match(qPass).hasMatch();
+    return StrengthRegex.match(qPass).hasMatch();
 }
 
-bool min_length(const std::string& value, size_t length) { return value.length() >= length; }
+bool minLength(const std::string& value, size_t length) { return value.length() >= length; }
 
-bool is_one_of(const std::string& value, const std::vector<std::string>& options) {
+bool isOneOf(const std::string& value, const std::vector<std::string>& options) {
     return std::find(options.begin(), options.end(), value) != options.end();
 }
 
-bool validate_not_empty(const std::string& value) { return !value.empty(); }
+bool validateNotEmpty(const std::string& value) { return !value.empty(); }
 }  // namespace pawspective::utils::validation
