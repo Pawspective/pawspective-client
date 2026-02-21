@@ -1,10 +1,4 @@
-add_subdirectory(models)
-add_subdirectory(services)
 add_subdirectory(utils)
-add_subdirectory(state)
-add_subdirectory(viewmodels)
-
-
 
 add_library(pawspective_src INTERFACE)
 
