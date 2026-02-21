@@ -22,7 +22,8 @@ jobs:
             clang-tidy-18 \
             libc++-dev \
             libc++abi-dev \
-            cppcheck
+            cppcheck \
+            g++-mingw-w64-x86-64
 
       - name: Run linting
         run: |
