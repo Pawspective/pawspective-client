@@ -1,0 +1,54 @@
+name: Qt Client CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Job 1: Linting (Clang-Format, Tidy, Cppcheck)
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt6 and Linting Tools
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            cmake \
+            build-essential \
+            qt6-base-dev \
+            clang-format \
+            clang-tidy \
+            cppcheck
+
+  # Job 2: Build and Test
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build_type: [debug, release]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install Qt & Build Essentials
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            build-essential \
+            cmake \
+            qt6-base-dev \
+            qt6-declarative-dev \
+
+      - name: Cache Build
+        uses: actions/cache@v4
+        with:
+          path: build-${{ matrix.build_type }}
+          key: ${{ runner.os }}-qt-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+
+      - name: Build
+        run: python3 manage.py build ${{ matrix.build_type }}
