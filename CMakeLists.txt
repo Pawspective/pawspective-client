@@ -15,7 +15,7 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
-
+add_subdirectory(src)
 
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
