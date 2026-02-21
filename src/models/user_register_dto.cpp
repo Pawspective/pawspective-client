@@ -14,25 +14,20 @@ QJsonObject UserRegisterDTO::toJson() const {
     return json;
 }
 
+QString UserRegisterDTO::readString(const QJsonObject& json, const QString& key) {
+    if (!json.contains(key) || !json[key].isString()) {
+        throw std::invalid_argument("Invalid or missing " + key.toStdString() + " field");
+    }
+    return json[key].toString();
+}
+
 UserRegisterDTO UserRegisterDTO::fromJson(const QJsonObject& json) {
     UserRegisterDTO dto;
 
-    if (!json.contains("email") || !json["email"].isString()) {
-        throw std::invalid_argument("Invalid or missing email field");
-    }
-    dto.email = json["email"].toString();
-    if (!json.contains("first_name") || !json["first_name"].isString()) {
-        throw std::invalid_argument("Invalid or missing first_name field");
-    }
-    dto.firstName = json["first_name"].toString();
-    if (!json.contains("last_name") || !json["last_name"].isString()) {
-        throw std::invalid_argument("Invalid or missing last_name field");
-    }
-    dto.lastName = json["last_name"].toString();
-    if (!json.contains("password") || !json["password"].isString()) {
-        throw std::invalid_argument("Invalid or missing password field");
-    }
-    dto.password = json["password"].toString();
+    dto.email = readString(json, "email");
+    dto.firstName = readString(json, "first_name");
+    dto.lastName = readString(json, "last_name");
+    dto.password = readString(json, "password");
 
     return dto;
 }

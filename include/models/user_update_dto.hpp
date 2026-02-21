@@ -14,6 +14,9 @@ struct UserUpdateDTO {
 
     QJsonObject toJson() const;
     static UserUpdateDTO fromJson(const QJsonObject& json);
+
+private:
+    std::optional<QString> readStringField(const QJsonObject& json, const QString& key) const;
 };
 
 }  // namespace pawspective::models

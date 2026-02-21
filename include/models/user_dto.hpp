@@ -15,6 +15,8 @@ struct UserDTO {
 
     QJsonObject toJson() const;
     static UserDTO fromJson(const QJsonObject& json);
+
+    static QString readString(const QJsonObject& json, const QString& key);
 };
 
 }  // namespace pawspective::models

@@ -20,21 +20,20 @@ QJsonObject UserUpdateDTO::toJson() const {
     return json;
 }
 
+static std::optional<QString> readOptionalField(const QJsonObject& json, const QString& key) {
+    if (json.contains(key) && json[key].isString() && !json[key].isNull()) {
+        return json[key].toString();
+    }
+    return std::nullopt;
+}
+
 UserUpdateDTO UserUpdateDTO::fromJson(const QJsonObject& json) {
     UserUpdateDTO dto;
 
-    if (json.contains("email") && json["email"].isString() && !json["email"].isNull()) {
-        dto.email = json["email"].toString();
-    }
-    if (json.contains("password") && json["password"].isString() && !json["password"].isNull()) {
-        dto.password = json["password"].toString();
-    }
-    if (json.contains("first_name") && json["first_name"].isString() && !json["first_name"].isNull()) {
-        dto.firstName = json["first_name"].toString();
-    }
-    if (json.contains("last_name") && json["last_name"].isString() && !json["last_name"].isNull()) {
-        dto.lastName = json["last_name"].toString();
-    }
+    dto.email = readOptionalField(json, "email");
+    dto.password = readOptionalField(json, "password");
+    dto.firstName = readOptionalField(json, "first_name");
+    dto.lastName = readOptionalField(json, "last_name");
 
     return dto;
 }

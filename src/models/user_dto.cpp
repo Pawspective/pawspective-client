@@ -18,6 +18,13 @@ QJsonObject UserDTO::toJson() const {
     return json;
 }
 
+QString UserDTO::readString(const QJsonObject& json, const QString& key) {
+    if (!json.contains(key) || json[key].isNull() || !json[key].isString()) {
+        throw std::invalid_argument("Invalid or missing " + key.toStdString() + " field");
+    }
+    return json[key].toString();
+}
+
 UserDTO UserDTO::fromJson(const QJsonObject& json) {
     UserDTO dto;
 
@@ -25,18 +32,9 @@ UserDTO UserDTO::fromJson(const QJsonObject& json) {
         throw std::invalid_argument("Invalid or missing id field");
     }
     dto.id = json["id"].toVariant().toLongLong();
-    if (!json.contains("email") || json["email"].isNull() || !json["email"].isString()) {
-        throw std::invalid_argument("Invalid or missing email field");
-    }
-    dto.email = json["email"].toString();
-    if (!json.contains("first_name") || json["first_name"].isNull() || !json["first_name"].isString()) {
-        throw std::invalid_argument("Invalid or missing first_name field");
-    }
-    dto.firstName = json["first_name"].toString();
-    if (!json.contains("last_name") || json["last_name"].isNull() || !json["last_name"].isString()) {
-        throw std::invalid_argument("Invalid or missing last_name field");
-    }
-    dto.lastName = json["last_name"].toString();
+    dto.email = readString(json, "email");
+    dto.firstName = readString(json, "first_name");
+    dto.lastName = readString(json, "last_name");
     if (json.contains("organization_id") && !json["organization_id"].isNull()) {
         if (!json["organization_id"].isDouble()) {
             throw std::invalid_argument("organization_id must be a number");
