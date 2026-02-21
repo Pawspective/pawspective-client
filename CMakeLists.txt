@@ -9,6 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+message($(CMAKE_PREFIX_PATH))
 if(NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QT_DIR})
 	set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}" CACHE PATH "" FORCE)
 endif()
@@ -24,9 +25,15 @@ add_executable(pawspective-client
 	src/main.cpp
 	src/mainwindow.cpp
 	src/utils/validator.cpp
+	src/models/user_dto.cpp
+	src/models/user_update_dto.cpp
+	src/models/user_register_dto.cpp
 	${PROJECT_HEADERS}
 )
 
 target_include_directories(pawspective-client PRIVATE include)
 
-target_link_libraries(pawspective-client PRIVATE Qt6::Widgets)
+target_link_libraries(pawspective-client PRIVATE
+	Qt6::Core
+	Qt6::Widgets
+)

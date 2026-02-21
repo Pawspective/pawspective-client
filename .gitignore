@@ -45,8 +45,7 @@ ui_*.h
 
 # IDE specific files
 .vs/
-.vscode/settings.json
-.vscode/launch.json
+.vscode
 .idea/
 *.swp
 *.swo
