@@ -21,7 +21,8 @@ jobs:
             clang-18 \
             clang-tidy-18 \
             libc++-dev \
-            libc++abi-dev
+            libc++abi-dev \
+            cppcheck
 
       - name: Run linting
         run: |
