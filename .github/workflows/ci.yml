@@ -17,12 +17,15 @@ jobs:
           sudo apt install -y \
             cmake \
             build-essential \
+            libstdc++-12-dev \
             qt6-base-dev \
             clang-format \
             clang-tidy \
             cppcheck
+
       - name: Run linting
         run: |
+          python3 manage.py build debug
           python3 manage.py lint
 
   # Job 2: Build and Test
