@@ -83,6 +83,9 @@ def filter_compile_commands(preset="debug"):
                 'moc_',
                 'qrc_',
                 'ui_',
+                '_qmltyperegistrations',
+                'qmlcache',             
+                '.rcc',
             ])
         ]
         
