@@ -26,6 +26,8 @@ bool validatePasswordStrength(const std::string& password) {
 
 bool minLength(const std::string& value, size_t length) { return value.length() >= length; }
 
+bool maxLength(const std::string& value, size_t length) { return value.length() <= length; }
+
 bool isOneOf(const std::string& value, const std::vector<std::string>& options) {
     return std::find(options.begin(), options.end(), value) != options.end();
 }
