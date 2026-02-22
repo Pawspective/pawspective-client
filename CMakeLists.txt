@@ -17,7 +17,6 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 
-
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
@@ -25,6 +24,7 @@ file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
 add_executable(pawspective-client
 	src/main.cpp
 	src/mainwindow.cpp
+	src/utils/validator.cpp
 	src/models/user_dto.cpp
 	src/models/user_update_dto.cpp
 	src/models/user_register_dto.cpp
