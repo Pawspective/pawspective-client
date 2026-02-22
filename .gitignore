@@ -49,6 +49,7 @@ ui_*.h
 .idea/
 *.swp
 *.swo
+.qtcreator/
 *~
 
 # OS specific files
