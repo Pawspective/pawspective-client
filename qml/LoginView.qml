@@ -48,7 +48,7 @@ Rectangle {
         TextField {
             id: emailField
             placeholderText: "Email"
-            placeholderTextColor: "#f4a7b9" // Pinkish placeholder
+            placeholderTextColor: "#f4a7b9"
             color: "#f4a7b9"
             font.family: customFont
             Layout.fillWidth: true
@@ -99,7 +99,6 @@ Rectangle {
 
             enabled: !loading
 
-            // MOCK behaviour only for preview
             onClicked: {
 
                 root.loading = true
