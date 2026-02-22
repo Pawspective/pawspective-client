@@ -45,8 +45,8 @@ qt_add_qml_module(pawspective-client
         qml/Main.qml
         qml/LoginView.qml
 		qml/LoaderSpinner.qml
-        qml/assets/loading_paw.png
-        qml/assets/tricky_cat.png
+        resources/loading_paw.png
+        resources/tricky_cat.png
 )
 
 target_include_directories(pawspective-client PRIVATE include)

@@ -30,7 +30,7 @@ Rectangle {
 
             Image {
                 id: catIcon
-                source: "assets/tricky_cat.png"
+                source: "../resources/tricky_cat.png"
                 fillMode: Image.PreserveAspectFit
                 width: 120
                 height: 120

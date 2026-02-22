@@ -10,7 +10,7 @@ Item {
     Image {
         id: spinner
         anchors.fill: parent
-        source: "assets/loading_paw.png"
+        source: "../resources/loading_paw.png"
         fillMode: Image.PreserveAspectFit
         transformOrigin: Item.Center
     }
