@@ -14,7 +14,14 @@ if(NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QT_DIR})
 	set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}" CACHE PATH "" FORCE)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS
+    Core
+    Gui
+    Widgets
+    Qml
+    Quick
+    QuickControls2
+)
 
 
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
@@ -31,9 +38,24 @@ add_executable(pawspective-client
 	${PROJECT_HEADERS}
 )
 
+qt_add_qml_module(pawspective-client
+    URI pawspective
+    VERSION 1.0
+    QML_FILES
+        qml/Main.qml
+        qml/LoginView.qml
+		qml/LoaderSpinner.qml
+        qml/assets/loading_paw.png
+        qml/assets/tricky_cat.png
+)
+
 target_include_directories(pawspective-client PRIVATE include)
 
 target_link_libraries(pawspective-client PRIVATE
-	Qt6::Core
-	Qt6::Widgets
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickControls2
 )
