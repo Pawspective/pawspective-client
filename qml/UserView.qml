@@ -19,33 +19,34 @@ Rectangle {
     property string userFirstName: "Alice"
     property string userLastName: "Brown"
 
+    readonly property real leftPanelWidth: root.width * 0.7
+    readonly property real rightPanelWidth: root.width * 0.3
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
 
-        // ================= ЛЕВАЯ ЧАСТЬ =================
-        Rectangle {
+         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: parent.width * 0.7
+            Layout.preferredWidth: root.leftPanelWidth
             color: pageColor
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Math.min(width * 0.08, 120)
-                spacing: 30
+                anchors.margins: 40
+                spacing: 25
 
                 Text {
                     text: "Profile"
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     font.family: "Comic Sans MS"
-                    font.pixelSize: Math.max(root.width * 0.035, 32)
+                    font.pixelSize: 32
                     font.bold: true
                     color: "#8572af"
                 }
 
-                // Email
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 8
@@ -75,7 +76,6 @@ Rectangle {
                     }
                 }
 
-                // First Name
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 8
@@ -105,7 +105,6 @@ Rectangle {
                     }
                 }
 
-                // Last Name
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 8
@@ -135,13 +134,10 @@ Rectangle {
                     }
                 }
 
-                // Кнопка + картинка
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 20
-                    Layout.topMargin: -50  // Поднимает весь блок с кнопками выше
 
-                    // Вертикальный блок с двумя кнопками
                     ColumnLayout {
                         spacing: 15
                         Layout.alignment: Qt.AlignLeft
@@ -199,7 +195,6 @@ Rectangle {
 
                     Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 180
                     }
 
                     Image {
@@ -210,47 +205,45 @@ Rectangle {
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                     }
-                    
+                }
+                
+                Item {
+                    Layout.fillHeight: true
                 }
             }
         }
 
-        // ================= ПРАВАЯ ПАНЕЛЬ =================
-Rectangle {
-    Layout.fillHeight: true
-    Layout.preferredWidth: parent.width * 0.3
-    color: sidebarColor
+        Rectangle {
+            Layout.fillHeight: true
+            Layout.preferredWidth: root.rightPanelWidth
+            color: sidebarColor
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.topMargin: 80
-        spacing: 20
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.topMargin: 80
+                spacing: 20
 
-        SidebarItem { text: "Profile"; active: true }
-        SidebarItem { text: "Search" }
-        SidebarItem { text: "Organization" }
+                SidebarItem { text: "Profile"; active: true }
+                SidebarItem { text: "Search" }
+                SidebarItem { text: "Organization" }
 
-        // Картинка начинается сразу после Organization
-        Image {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: Math.min(parent.width * 0.8, 400)
-            Layout.preferredHeight: 900
-            Layout.topMargin: -180  // Небольшой отступ сверху
-            source: "../resources/lilac.png"
-            fillMode: Image.PreserveAspectFit
-            smooth: true
+                Image {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(parent.width * 0.8, 400)
+                    Layout.preferredHeight: 900
+                    Layout.topMargin: -180
+                    source: "../resources/lilac.png"
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                }
 
-        }
-
-        // Этот Item теперь будет в самом низу, под картинкой
-        Item { 
-            Layout.fillHeight: true 
+                Item { 
+                    Layout.fillHeight: true 
+                }
+            }
         }
     }
-}
-    }
 
-    // ================= КОМПОНЕНТ =================
     component SidebarItem : Rectangle {
         property string text: ""
         property bool active: false
