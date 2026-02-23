@@ -12,6 +12,7 @@ class NetworkClient final : public QObject {
     Q_OBJECT
 public:
     using CallbackHandler = std::function<void(const QNetworkReply&)>;
+    using TokenProvider = std::function<QString()>;
 
     explicit NetworkClient(QObject* parent = nullptr);
 
@@ -20,6 +21,8 @@ public:
     void put(const QUrl& endpoint, const QByteArray& data, CallbackHandler onSuccess, CallbackHandler onError);
     void patch(const QUrl& endpoint, const QByteArray& data, CallbackHandler onSuccess, CallbackHandler onError);
     void deleteResource(const QUrl& endpoint, CallbackHandler onSuccess, CallbackHandler onError);
+
+    void setTokenProvider(TokenProvider provider);
 
 signals:
     void unauthorizedAccess();
@@ -49,6 +52,7 @@ private:
     int m_timeout = 5000;
     QList<PendingRequest> m_pendingRequests;
     bool m_isRefreshing = false;
+    TokenProvider m_tokenProvider;
 
     const QUrl m_baseUrl = QUrl("http://localhost:8080/");
 };
