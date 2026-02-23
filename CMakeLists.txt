@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.21)
 project(pawspective-client VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
+if(MSVC)
+    add_compile_options(/Zc:__cplusplus)
+endif()
+
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
@@ -11,7 +15,7 @@ set(CMAKE_AUTORCC ON)
 
 message($(CMAKE_PREFIX_PATH))
 if(NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QT_DIR})
-	set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}" CACHE PATH "" FORCE)
+ set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}" CACHE PATH "" FORCE)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS
@@ -25,17 +29,17 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
+ "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
 
 add_executable(pawspective-client
-	src/main.cpp
-	src/mainwindow.cpp
-	src/utils/validator.cpp
-	src/models/user_dto.cpp
-	src/models/user_update_dto.cpp
-	src/models/user_register_dto.cpp
-	${PROJECT_HEADERS}
+ src/main.cpp
+ src/mainwindow.cpp
+ src/utils/validator.cpp
+ src/models/user_dto.cpp
+ src/models/user_update_dto.cpp
+ src/models/user_register_dto.cpp
+ ${PROJECT_HEADERS}
 )
 
 qt_add_qml_module(pawspective-client
@@ -43,7 +47,10 @@ qt_add_qml_module(pawspective-client
     VERSION 1.0
     QML_FILES
         qml/Main.qml
-        qml/LoginView.qml
+        qml/UserView.qml
+		resources/blue_cat.png
+		resources/lilac.png
+		qml/LoginView.qml
 		qml/LoaderSpinner.qml
         resources/loading_paw.png
         resources/tricky_cat.png
