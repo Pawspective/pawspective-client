@@ -39,6 +39,25 @@ ApplicationWindow {
                         })
                     })
                 }
+
+                var registerButton = findChild(button => 
+                    button instanceof Button && button.text === "Register")
+
+                if (registerButton) {
+                    var originalClick = registerButton.clicked
+
+                    registerButton.clicked.connect(function() {
+                        originalClick()
+                        
+                        var timer = Qt.createQmlObject(
+                            "import QtQuick 2.0; Timer { interval: 2100; running: true; repeat: false; }",
+                            registerButton
+                        )
+                        timer.triggered.connect(function() {
+                            stackView.push(registerViewComponent)
+                        })
+                    })
+                }
             }
 
             function findChild(matchFunc) {
@@ -74,5 +93,11 @@ ApplicationWindow {
         UserView {
         anchors.fill: parent  
     }
+    }
+    Component {
+        id: registerViewComponent
+        RegisterView {
+            anchors.fill: parent
+        }
     }
 }

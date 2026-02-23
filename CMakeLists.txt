@@ -51,6 +51,7 @@ qt_add_qml_module(pawspective-client
 		resources/blue_cat.png
 		resources/lilac.png
 		qml/LoginView.qml
+        qml/RegisterView.qml
 		qml/LoaderSpinner.qml
         resources/loading_paw.png
         resources/tricky_cat.png
