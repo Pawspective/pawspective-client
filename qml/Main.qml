@@ -3,11 +3,11 @@ import QtQuick.Controls 2.15
 
 ApplicationWindow {
     visible: true
-    width: 400
-    height: 500
-    title: "Login"
+    width: 1600
+    height: 1000
+    title: "Edit Profile"
 
-    LoginView {
+    UserUpdateView {
         anchors.fill: parent
     }
 }
