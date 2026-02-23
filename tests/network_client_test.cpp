@@ -4,10 +4,13 @@
 #include <QNetworkReply>
 #include "services/network_client.hpp"
 
-using namespace pawspective::services;
+using namespace pawspective::services; //  NOLINT google-build-using-namespace
 
 class TestNetworkClient : public QObject {
     Q_OBJECT
+
+
+    NetworkClient* m_client = nullptr;
 
 private slots:
     void init();
@@ -26,8 +29,6 @@ private slots:
     void testUnauthorizedAccessSignal();
     void testPendingRequestsRetry();
 
-private:
-    NetworkClient* m_client = nullptr;
 };
 
 void TestNetworkClient::init() {

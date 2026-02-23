@@ -1,6 +1,7 @@
 #include "validator.hpp"
 #include <QRegularExpression>
 #include <QString>
+#include <algorithm>
 #include <string>
 
 namespace pawspective::utils::validation {
@@ -29,7 +30,7 @@ bool minLength(const std::string& value, size_t length) { return value.length() 
 bool maxLength(const std::string& value, size_t length) { return value.length() <= length; }
 
 bool isOneOf(const std::string& value, const std::vector<std::string>& options) {
-    return std::find(options.begin(), options.end(), value) != options.end();
+    return std::ranges::find(options, value) != options.end();
 }
 
 bool validateNotEmpty(const std::string& value) { return !value.empty(); }
