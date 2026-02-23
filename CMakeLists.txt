@@ -52,6 +52,17 @@ qt_add_qml_module(pawspective-client
 		resources/lilac.png
 )
 
+qt_add_qml_module(pawspective-client
+    URI pawspective
+    VERSION 1.0
+    QML_FILES
+        qml/Main.qml
+        qml/LoginView.qml
+		qml/LoaderSpinner.qml
+        resources/loading_paw.png
+        resources/tricky_cat.png
+)
+
 target_include_directories(pawspective-client PRIVATE include)
 
 target_link_libraries(pawspective-client PRIVATE

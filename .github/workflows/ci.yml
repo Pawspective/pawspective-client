@@ -23,7 +23,9 @@ jobs:
             libc++-dev \
             libc++abi-dev \
             cppcheck \
-            g++-mingw-w64-x86-64
+            g++-mingw-w64-x86-64 \
+            libxkbcommon-dev \
+            qt6-declarative-dev
 
       - name: Run linting
         run: |
