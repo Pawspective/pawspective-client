@@ -17,6 +17,7 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
+	Network
     Widgets
     Qml
     Quick
@@ -35,6 +36,7 @@ add_executable(pawspective-client
 	src/models/user_dto.cpp
 	src/models/user_update_dto.cpp
 	src/models/user_register_dto.cpp
+	src/services/network_client.cpp
 	${PROJECT_HEADERS}
 )
 
@@ -54,6 +56,7 @@ target_include_directories(pawspective-client PRIVATE include)
 target_link_libraries(pawspective-client PRIVATE
     Qt6::Core
     Qt6::Gui
+	Qt6::Network
     Qt6::Widgets
     Qt6::Qml
     Qt6::Quick
