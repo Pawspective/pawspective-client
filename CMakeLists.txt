@@ -21,6 +21,7 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
+	Network
     Widgets
     Qml
     Quick
@@ -33,13 +34,14 @@ file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
 )
 
 add_executable(pawspective-client
- src/main.cpp
- src/mainwindow.cpp
- src/utils/validator.cpp
- src/models/user_dto.cpp
- src/models/user_update_dto.cpp
- src/models/user_register_dto.cpp
- ${PROJECT_HEADERS}
+	src/main.cpp
+	src/mainwindow.cpp
+	src/utils/validator.cpp
+	src/models/user_dto.cpp
+	src/models/user_update_dto.cpp
+	src/models/user_register_dto.cpp
+	src/services/network_client.cpp
+	${PROJECT_HEADERS}
 )
 
 qt_add_qml_module(pawspective-client
@@ -61,6 +63,7 @@ target_include_directories(pawspective-client PRIVATE include)
 target_link_libraries(pawspective-client PRIVATE
     Qt6::Core
     Qt6::Gui
+	Qt6::Network
     Qt6::Widgets
     Qt6::Qml
     Qt6::Quick
