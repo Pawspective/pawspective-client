@@ -1,36 +1,39 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 2.15
+import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
     anchors.fill: parent
 
-    readonly property color pageColor: "#e8d8cb"
-    readonly property color sidebarColor: "#e9bebb"
-    readonly property color purpleColor: "#b8abd7"
-    readonly property color fieldColor: "#e7ebf5"
-    readonly property color buttonColor: "#b8abd7"
-    readonly property color hoverColor: "#f4a7b9"
-
-    color: pageColor
+    QtObject {
+        id: theme
+        readonly property string fontName: "Comic Sans MS"
+        readonly property color pageBg: "#e8d8cb"
+        readonly property color sidebarBg: "#e9bebb"
+        readonly property color purple: "#b8abd7"
+        readonly property color fieldBg: "#e7ebf5"
+        readonly property color accentPink: "#f4a7b9"
+        readonly property color textDark: "#8572af"
+        readonly property color buttonText: "#e7ebf5"
+    }
 
     property string userEmail: "email@example.com"
     property string userFirstName: "Alice"
     property string userLastName: "Brown"
 
-    readonly property real leftPanelWidth: root.width * 0.7
-    readonly property real rightPanelWidth: root.width * 0.3
+    signal logoutClicked()
+
+    color: theme.pageBg
 
     RowLayout {
         anchors.fill: parent
         spacing: 0
 
-         Rectangle {
+        Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: root.leftPanelWidth
-            color: pageColor
+            color: theme.pageBg
 
             ColumnLayout {
                 anchors.fill: parent
@@ -41,98 +44,15 @@ Rectangle {
                     text: "Profile"
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    font.family: "Comic Sans MS"
+                    font.family: theme.fontName
                     font.pixelSize: 32
                     font.bold: true
-                    color: "#8572af"
+                    color: theme.textDark
                 }
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Text {
-                        text: "Email"
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        color: "#8572af"
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 45
-                        radius: 10
-                        color: fieldColor
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 20
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: userEmail
-                            font.family: "Comic Sans MS"
-                            font.pixelSize: 22
-                            color: "#f4a7b9"
-                        }
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Text {
-                        text: "First Name"
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        color: "#8572af"
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 45
-                        radius: 10
-                        color: fieldColor
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 20
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: userFirstName
-                            font.family: "Comic Sans MS"
-                            font.pixelSize: 22
-                            color: "#f4a7b9"
-                        }
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Text {
-                        text: "Last Name"
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        color: "#8572af"
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 45
-                        radius: 10
-                        color: fieldColor
-
-                        Text {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 20
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: userLastName
-                            font.family: "Comic Sans MS"
-                            font.pixelSize: 22
-                            color: "#f4a7b9"
-                        }
-                    }
-                }
+                ProfileDataField { label: "Email"; value: userEmail }
+                ProfileDataField { label: "First Name"; value: userFirstName }
+                ProfileDataField { label: "Last Name"; value: userLastName }
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -142,81 +62,46 @@ Rectangle {
                         spacing: 15
                         Layout.alignment: Qt.AlignLeft
 
-                        Rectangle {
-                            id: editButton
+                        CustomButton {
+                            text: "Edit Profile"
+                            baseColor: theme.purple
+                            hoverColor: theme.accentPink
+                            textColor: theme.buttonText
                             Layout.preferredWidth: 250
                             Layout.preferredHeight: 60
-                            radius: 14
-                            color: buttonColor
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "Edit Profile"
-                                font.family: "Comic Sans MS"
-                                font.pixelSize: 18
-                                color: "#e7ebf5"
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-
-                                onEntered: editButton.color = hoverColor
-                                onExited: editButton.color = buttonColor
-                                onClicked: console.log("Edit clicked")
-                            }
+                            onClicked: console.log("Edit clicked")
                         }
 
-                        Rectangle {
-                            id: logoutButton
+                        CustomButton {
+                            text: "Logout"
+                            baseColor: theme.purple
+                            hoverColor: theme.accentPink
+                            textColor: theme.buttonText
                             Layout.preferredWidth: 250
                             Layout.preferredHeight: 60
-                            radius: 14
-                            color: buttonColor
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "Logout"
-                                font.family: "Comic Sans MS"
-                                font.pixelSize: 18
-                                color: "#e7ebf5"
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-
-                                onEntered: logoutButton.color = hoverColor
-                                onExited: logoutButton.color = buttonColor
-                                onClicked: console.log("Logout clicked")
-                            }
+                            onClicked: root.logoutClicked() 
                         }
                     }
 
-                    Item {
-                        Layout.fillWidth: true
-                    }
+                    Item { Layout.fillWidth: true }
 
                     Image {
                         Layout.preferredWidth: 350
                         Layout.preferredHeight: 350
-                        Layout.alignment: Qt.AlignRight
                         source: "../resources/blue_cat.png"
                         fillMode: Image.PreserveAspectFit
                         smooth: true
                     }
                 }
                 
-                Item {
-                    Layout.fillHeight: true
-                }
+                Item { Layout.fillHeight: true }
             }
         }
 
         Rectangle {
             Layout.fillHeight: true
-            Layout.preferredWidth: root.rightPanelWidth
-            color: sidebarColor
+            Layout.preferredWidth: root.width * 0.3
+            color: theme.sidebarBg
 
             ColumnLayout {
                 anchors.fill: parent
@@ -229,53 +114,73 @@ Rectangle {
 
                 Image {
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: Math.min(parent.width * 0.8, 400)
-                    Layout.preferredHeight: 900
-                    Layout.topMargin: -180
+                    Layout.preferredWidth: parent.width * 0.8
+                    Layout.preferredHeight: 300 
                     source: "../resources/lilac.png"
                     fillMode: Image.PreserveAspectFit
-                    smooth: true
                 }
 
-                Item { 
-                    Layout.fillHeight: true 
-                }
+                Item { Layout.fillHeight: true }
             }
         }
     }
 
+    component ProfileDataField : ColumnLayout {
+        property string label: ""
+        property string value: ""
+        Layout.fillWidth: true
+        spacing: 8
+
+        Text {
+            text: parent.label
+            font.family: theme.fontName
+            font.pixelSize: 18
+            color: theme.textDark
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 45
+            radius: 10
+            color: theme.fieldBg
+
+            Text {
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                anchors.verticalCenter: parent.verticalCenter
+                text: parent.parent.value
+                font.family: theme.fontName
+                font.pixelSize: 22
+                color: theme.accentPink
+            }
+        }
+    }
+
+    // Компонент бокового меню
     component SidebarItem : Rectangle {
         property string text: ""
         property bool active: false
-
         Layout.fillWidth: true
         height: 65
         radius: 8
-
-        color: active ? root.purpleColor : "transparent"
+        color: active ? theme.purple : "transparent"
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 30
             text: parent.text
-            font.family: "Comic Sans MS"
+            font.family: theme.fontName
             font.pixelSize: 22
             font.bold: active
-            color: active ? "white" : "#8572af"
+            color: active ? "white" : theme.textDark
         }
 
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-
-            onEntered: {
-                if (!parent.active) parent.color = root.hoverColor
-            }
-
-            onExited: {
-                if (!parent.active) parent.color = "transparent"
-            }
+            onEntered: if (!parent.active) parent.color = theme.accentPink
+            onExited: if (!parent.active) parent.color = "transparent"
         }
     }
 }

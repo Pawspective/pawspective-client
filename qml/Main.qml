@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
-import pawspective 1.0
+// import pawspective 1.0 // Оставь, если нужно для других компонентов
 
 ApplicationWindow {
     id: window
@@ -13,91 +13,39 @@ ApplicationWindow {
     StackView {
         id: stackView
         anchors.fill: parent
+        // Устанавливаем начальное окно
         initialItem: loginViewComponent
     }
+
+    // --- КОМПОНЕНТЫ ЭКРАНОВ ---
 
     Component {
         id: loginViewComponent
         LoginView {
-            anchors.fill: parent
-            Component.onCompleted: {
-                var loginButton = findChild(button => 
-                    button instanceof Button && button.text === "Login")
-                
-                if (loginButton) {
-                    var originalClick = loginButton.clicked
-                    
-                    loginButton.clicked.connect(function() {
-                        originalClick()
-                        
-                        var timer = Qt.createQmlObject(
-                            "import QtQuick 2.0; Timer { interval: 2100; running: true; repeat: false; }",
-                            loginButton
-                        )
-                        timer.triggered.connect(function() {
-                            stackView.push(userViewComponent)
-                        })
-                    })
-                }
+            // Когда в LoginView нажали "Register"
+            onRegisterRequested: stackView.push(registerViewComponent)
+            
+            // Когда логин прошел успешно (после таймера внутри LoginView)
+            onLoginSuccess: stackView.replace(userViewComponent)
+        }
+    }
 
-                var registerButton = findChild(button => 
-                    button instanceof Button && button.text === "Register")
-
-                if (registerButton) {
-                    var originalClick = registerButton.clicked
-
-                    registerButton.clicked.connect(function() {
-                        originalClick()
-                        
-                        var timer = Qt.createQmlObject(
-                            "import QtQuick 2.0; Timer { interval: 2100; running: true; repeat: false; }",
-                            registerButton
-                        )
-                        timer.triggered.connect(function() {
-                            stackView.push(registerViewComponent)
-                        })
-                    })
-                }
-            }
-
-            function findChild(matchFunc) {
-                for (var i = 0; i < children.length; i++) {
-                    var child = children[i]
-                    if (matchFunc(child)) return child
-                    
-                    if (child.children) {
-                        var found = findChildRecursive(child, matchFunc)
-                        if (found) return found
-                    }
-                }
-                return null
-            }
-
-            function findChildRecursive(parent, matchFunc) {
-                for (var i = 0; i < parent.children.length; i++) {
-                    var child = parent.children[i]
-                    if (matchFunc(child)) return child
-                    
-                    if (child.children) {
-                        var found = findChildRecursive(child, matchFunc)
-                        if (found) return found
-                    }
-                }
-                return null
-            }
+    Component {
+        id: registerViewComponent
+        RegisterView {
+            // Та самая стрелочка назад, которую мы добавили
+            onBackClicked: stackView.pop()
+            
+            // Если регистрация прошла успешно
+            onRegisterSuccess: stackView.replace(userViewComponent)
         }
     }
 
     Component {
         id: userViewComponent
         UserView {
-        anchors.fill: parent  
-    }
-    }
-    Component {
-        id: registerViewComponent
-        RegisterView {
-            anchors.fill: parent
+            // Сигнал выхода
+            onLogoutClicked: stackView.replace(loginViewComponent)
         }
     }
 }

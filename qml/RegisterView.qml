@@ -4,163 +4,183 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    width: 400
-    height: 500
-    color: "#b2bb7d"
-    readonly property string customFont: "Comic Sans MS"
+    anchors.fill: parent
+    color: "#d6dec1"
+
+    QtObject {
+        id: theme
+        readonly property string fontName: "Comic Sans MS"
+        readonly property color bgMain: "#b2bb7d"
+        readonly property color bgInput: "#fdfdfd"
+        readonly property color accentPink: "#f4a7b9"
+        readonly property color accentYellow: "#ede8b0"
+        readonly property color textMain: "#f1e9bb"
+        readonly property color textError: "#6c63ff"
+        readonly property color textButton: "#b2bb7d"
+    }
+
     property bool loading: false
     property string errorMessage: ""
 
-    ColumnLayout {
+    signal backClicked()
+    signal registerSuccess()
+
+    Timer {
+        id: registerTimer
+        interval: 2000
+        onTriggered: {
+            root.loading = false
+            root.errorMessage = "Registration failed"
+        }
+    }
+    Rectangle {
+        id: loginCard
+        width: 400
+        height: 500
+        radius: 20
+        color: theme.bgMain
         anchors.centerIn: parent
-        width: parent.width * 0.8
-        spacing: 12
 
-         Item {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 120
+        Text {
+            text: "←"
+            font.pixelSize: 30
+            color: theme.textMain
+            anchors {
+                top: parent.top
+                left: parent.left
+                margins: 15
+            }
             
-            Label {
-                text: "Register"
-                font.family: customFont
-                font.pixelSize: 32
-                color: "#f1e9bb"
-                anchors.centerIn: parent
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: parent.color = theme.accentPink
+                onExited: parent.color = theme.textMain
+                onClicked: root.backClicked()
             }
-
-            Image {
-                id: catIcon
-                source: "../resources/tricky_cat.png"
-                fillMode: Image.PreserveAspectFit
-                width: 120
-                height: 120
-                
-                anchors.right: parent.right
-                anchors.rightMargin: 0
-                
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: -25
-                
-                z: 2 
-            }
-        }
-
-        TextField {
-            id: nameField
-            placeholderText: "Name"
-            placeholderTextColor: "#f4a7b9"
-            color: "#f4a7b9"
-            font.family: customFont
-            Layout.fillWidth: true
-            leftPadding: 15
             
-            background: Rectangle {
-                color: "#fdfdfd"
-                radius: 8
-            }
-        } 
-
-        TextField {
-            id: surnameField
-            placeholderText: "Surname"
-            placeholderTextColor: "#f4a7b9"
-            color: "#f4a7b9"
-            font.family: customFont
-            Layout.fillWidth: true
-            leftPadding: 15
-            background: Rectangle {
-                color: "#fdfdfd"
-                radius: 8
-            }
+            z: 10
         }
 
-        TextField {
-            id: emailField
-            placeholderText: "Email"
-            placeholderTextColor: "#f4a7b9"
-            color: "#f4a7b9"
-            font.family: customFont
-            Layout.fillWidth: true
-            leftPadding: 15
-            background: Rectangle {
-                color: "#fdfdfd"
-                radius: 8
-            }
-        }
+        ColumnLayout {
+            anchors.centerIn: parent
+            width: parent.width * 0.8
+            spacing: 12
 
-        TextField {
-            id: passwordField
-            placeholderText: "Password"
-            placeholderTextColor: "#f4a7b9"
-            color: "#f4a7b9"
-            font.family: customFont
-            echoMode: TextInput.Password
-            Layout.fillWidth: true
-            leftPadding: 15
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 120
+                
+                Label {
+                    text: "Register"
+                    font.family: theme.fontName
+                    font.pixelSize: 32
+                    color: theme.textMain
+                    anchors.centerIn: parent
+                }
 
-            background: Rectangle {
-                color: "#fdfdfd"
-                radius: 8
-            }
-        }
-
-        Button {
-            text: loading ? "Registering..." : "Register"
-            contentItem: Text {
-                text: parent.text
-                font.family: customFont
-                font.pixelSize: 18
-                color: "#b2bb7d"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-            }
-
-            background: Rectangle {
-                color: parent.pressed ? "black" : "#ede8b0"
-                radius: 5
-                border.color: "#f1e9bb"
-                border.width: 1
-            }
-
-            Layout.fillWidth: true
-
-            enabled: !loading
-
-            onClicked: {
-
-                root.loading = true
-                root.errorMessage = ""
-
-                // simulate request
-                Qt.createQmlObject("
-                    import QtQuick 2.0;
-                    Timer {
-                        interval: 2000;
-                        running: true;
-                        repeat: false;
-                        onTriggered: {
-                            root.loading = false;
-                            root.errorMessage = 'Invalid email or password';
-                        }
+                Image {
+                    id: catIcon
+                    source: "../resources/tricky_cat.png"
+                    fillMode: Image.PreserveAspectFit
+                    width: 120; height: 120
+                    anchors {
+                        right: parent.right
+                        bottom: parent.bottom
+                        bottomMargin: -25
                     }
-                ", root)
+                    z: 2 
+                }
             }
-        }
 
-        LoaderSpinner {
-            running: root.loading
-            visible: root.loading
-            Layout.alignment: Qt.AlignHCenter
-        }
+            TextField {
+                id: nameField
+                placeholderText: "First Name"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            } 
 
-        Label {
-            text: root.errorMessage
-            color: "#6c63ff"
-            font.family: customFont
-            visible: text.length > 0
-            wrapMode: Text.WordWrap
-            Layout.fillWidth: true
+            TextField {
+                id: surnameField
+                placeholderText: "Last Name"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            }
+
+            TextField {
+                id: emailField
+                placeholderText: "Email"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            }
+
+            TextField {
+                id: passwordField
+                placeholderText: "Password"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                echoMode: TextInput.Password
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            }
+
+            TextField {
+                id: confirmPasswordField
+                placeholderText: "Confirm Password"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                echoMode: TextInput.Password
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            }
+
+            CustomButton {
+                id: registerBtn
+                text: loading ? "Registering..." : "Register"
+                baseColor: theme.accentYellow
+                hoverColor: theme.accentPink
+                textColor: theme.textButton
+                Layout.fillWidth: true
+                enabled: !loading
+                
+                onClicked: {
+                    root.loading = true
+                    root.errorMessage = ""
+                    registerTimer.start()
+                }
+            }
+
+            LoaderSpinner {
+                running: root.loading
+                visible: root.loading
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            Label {
+                text: root.errorMessage
+                color: theme.textError
+                font.family: theme.fontName
+                visible: text.length > 0
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+                Layout.fillWidth: true
+            }
         }
     }
 }
