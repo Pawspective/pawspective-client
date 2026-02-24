@@ -7,7 +7,7 @@ Rectangle {
     property string text: "Button"
     property color baseColor: "#ede8b0"
     property color hoverColor: "#e0d990"
-    property color clickColor: "black" 
+    property color clickColor: "#fdfdfd" 
     property color textColor: "#b2bb7d"
     property int fontSize: 18
 

@@ -12,7 +12,7 @@ Rectangle {
         readonly property color pageBg: "#e8d8cb"
         readonly property color sidebarBg: "#e9bebb"
         readonly property color purple: "#b8abd7"
-        readonly property color fieldBg: "#e7ebf5"
+        readonly property color fieldBg: "#fdfdfd"
         readonly property color accentPink: "#f4a7b9"
         readonly property color textDark: "#8572af"
         readonly property color buttonText: "#e7ebf5"
