@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.15
 Rectangle {
     id: root
     anchors.fill: parent
-    color: "#d6dec1"
+    color: "#e8d8cb"
 
     signal registerRequested()
     signal loginSuccess()
