@@ -6,12 +6,16 @@ Rectangle {
     id: root
     anchors.fill: parent
 
-    readonly property color pageColor: "#e8d8cb"
-    readonly property color purpleColor: "#8572af"
-    readonly property color fieldColor: "#e7ebf5"
-    readonly property color buttonColor: "#b8abd7"
-    readonly property color hoverColor: "#f4a7b9"
-    readonly property color textColor: "#f4a7b9"
+    QtObject {
+        id: theme
+        readonly property string fontName: "Comic Sans MS"
+        readonly property color pageBg: "#e8d8cb"
+        readonly property color purple: "#b8abd7"
+        readonly property color fieldBg: "#fdfdfd"
+        readonly property color accentPink: "#f4a7b9"
+        readonly property color textDark: "#8572af"
+        readonly property color buttonText: "#e7ebf5"
+    }
 
     property string userEmail: "email@example.com"
     property string userFirstName: "Alice"
@@ -23,7 +27,7 @@ Rectangle {
     signal submit()
     signal discard()
 
-    color: pageColor
+    color: theme.pageBg
 
     RowLayout {
         anchors.fill: parent
@@ -32,138 +36,45 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: pageColor
+            color: theme.pageBg
 
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 40
                 spacing: 25
 
-                // Заголовок
-                Label {
+                Text {
                     text: "Edit Profile"
-                    font.family: "Comic Sans MS"
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    font.family: theme.fontName
                     font.pixelSize: 32
                     font.bold: true
-                    color: purpleColor
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.bottomMargin: 20
+                    color: theme.textDark
                 }
 
-                // Email
+                ProfileDataField { label: "Email"; value: userEmail }
+                ProfileDataField { label: "First Name"; value: userFirstName }
+                ProfileDataField { label: "Last Name"; value: userLastName }
+                
+                // Password field (special case)
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 8
 
                     Text {
-                        text: "Email"
-                        font.family: "Comic Sans MS"
+                        text: "Password (leave blank if don't want to change)"
+                        font.family: theme.fontName
                         font.pixelSize: 18
-                        color: purpleColor
-                    }
-
-                    TextField {
-                        id: emailField
-                        text: root.userEmail
-                        placeholderText: "Email"
-                        placeholderTextColor: textColor
-                        color: textColor
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        Layout.fillWidth: true
-                        leftPadding: 15
-                        selectByMouse: true
-                        enabled: !root.loading
-
-                        background: Rectangle {
-                            color: fieldColor
-                            radius: 10
-                        }
-                    }
-                }
-
-                // First Name
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Text {
-                        text: "First Name"
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        color: purpleColor
-                    }
-
-                    TextField {
-                        id: firstNameField
-                        text: root.userFirstName
-                        placeholderText: "First Name"
-                        placeholderTextColor: textColor
-                        color: textColor
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        Layout.fillWidth: true
-                        leftPadding: 15
-                        selectByMouse: true
-                        enabled: !root.loading
-
-                        background: Rectangle {
-                            color: fieldColor
-                            radius: 10
-                        }
-                    }
-                }
-
-                // Last Name
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Text {
-                        text: "Last Name"
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        color: purpleColor
-                    }
-
-                    TextField {
-                        id: lastNameField
-                        text: root.userLastName
-                        placeholderText: "Last Name"
-                        placeholderTextColor: textColor
-                        color: textColor
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        Layout.fillWidth: true
-                        leftPadding: 15
-                        selectByMouse: true
-                        enabled: !root.loading
-
-                        background: Rectangle {
-                            color: fieldColor
-                            radius: 10
-                        }
-                    }
-                }
-
-                // Password
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    Text {
-                        text: "Password"
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: 18
-                        color: purpleColor
+                        color: theme.textDark
                     }
 
                     TextField {
                         id: passwordField
                         placeholderText: "Enter new password"
-                        placeholderTextColor: textColor
-                        color: textColor
-                        font.family: "Comic Sans MS"
+                        placeholderTextColor: theme.accentPink
+                        color: theme.accentPink
+                        font.family: theme.fontName
                         font.pixelSize: 18
                         echoMode: TextInput.Password
                         Layout.fillWidth: true
@@ -171,7 +82,7 @@ Rectangle {
                         enabled: !root.loading
 
                         background: Rectangle {
-                            color: fieldColor
+                            color: theme.fieldBg
                             radius: 10
                         }
                     }
@@ -182,31 +93,19 @@ Rectangle {
                     spacing: 15
                     Layout.topMargin: 10
 
-                    Button {
+                    CustomButton {
                         text: loading ? "Saving..." : "Save Changes"
+                        baseColor: theme.purple
+                        hoverColor: theme.accentPink
+                        textColor: theme.buttonText
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 50
                         enabled: !root.loading
-
-                        contentItem: Text {
-                            text: parent.text
-                            font.family: "Comic Sans MS"
-                            font.pixelSize: 18
-                            color: "#e7ebf5"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-
-                        background: Rectangle {
-                            color: parent.pressed ? "black" : buttonColor
-                            radius: 8
-                        }
 
                         onClicked: {
                             root.loading = true
                             root.errorMessage = ""
 
-                            Qt.createQmlObject("
+                            var timer = Qt.createQmlObject('
                                 import QtQuick 2.0;
                                 Timer {
                                     interval: 2000;
@@ -214,33 +113,22 @@ Rectangle {
                                     repeat: false;
                                     onTriggered: {
                                         root.loading = false;
-                                        root.errorMessage = 'Failed to update profile';
+                                        root.errorMessage = "Failed to update profile";
                                         root.submit();
                                     }
                                 }
-                            ", root)
+                            ', root)
+                            timer.start()
                         }
                     }
 
-                    Button {
+                    CustomButton {
                         text: "Discard Changes"
+                        baseColor: theme.purple
+                        hoverColor: theme.accentPink
+                        textColor: theme.buttonText
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 50
                         enabled: !root.loading
-
-                        contentItem: Text {
-                            text: parent.text
-                            font.family: "Comic Sans MS"
-                            font.pixelSize: 18
-                            color: "#e7ebf5"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                        }
-
-                        background: Rectangle {
-                            color: parent.pressed ? "black" : hoverColor
-                            radius: 8
-                        }
 
                         onClicked: {
                             root.discard()
@@ -258,26 +146,59 @@ Rectangle {
                         anchors.centerIn: parent
                         running: root.loading
                         visible: root.loading
-                        
                         scale: 2.0
-                        
                     }
                 }
 
-                // Error message
                 Label {
                     text: root.errorMessage
                     color: "#6c63ff"
-                    font.family: "Comic Sans MS"
+                    font.family: theme.fontName
                     visible: text.length > 0
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                 }
 
-                Item {
-                    Layout.fillHeight: true
-                }
+                Item { Layout.fillHeight: true }
+            }
+        }
+    }
+
+    component ProfileDataField : ColumnLayout {
+        property string label: ""
+        property string value: ""
+        Layout.fillWidth: true
+        spacing: 8
+
+        Text {
+            text: parent.label
+            font.family: theme.fontName
+            font.pixelSize: 18
+            color: theme.textDark
+        }
+
+        TextField {
+            text: parent.value
+            placeholderText: parent.label
+            placeholderTextColor: theme.accentPink
+            color: theme.accentPink
+            font.family: theme.fontName
+            font.pixelSize: 18
+            Layout.fillWidth: true
+            leftPadding: 15
+            selectByMouse: true
+            enabled: !root.loading
+
+            background: Rectangle {
+                color: theme.fieldBg
+                radius: 10
+            }
+
+            onTextChanged: {
+                if (parent.label === "Email") root.userEmail = text
+                else if (parent.label === "First Name") root.userFirstName = text
+                else if (parent.label === "Last Name") root.userLastName = text
             }
         }
     }

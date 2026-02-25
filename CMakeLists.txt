@@ -14,12 +14,13 @@ set(CMAKE_AUTORCC ON)
 
 message($(CMAKE_PREFIX_PATH))
 if(NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QT_DIR})
-	set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}" CACHE PATH "" FORCE)
+ set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}" CACHE PATH "" FORCE)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
+	Network
     Widgets
     Qml
     Quick
@@ -28,7 +29,7 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
+ "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
 )
 
 add_executable(pawspective-client
@@ -38,6 +39,7 @@ add_executable(pawspective-client
 	src/models/user_dto.cpp
 	src/models/user_update_dto.cpp
 	src/models/user_register_dto.cpp
+	src/services/network_client.cpp
 	${PROJECT_HEADERS}
 )
 
@@ -46,11 +48,17 @@ qt_add_qml_module(pawspective-client
     VERSION 1.0
     QML_FILES
         qml/Main.qml
-        qml/LoginView.qml
+        qml/UserView.qml
+		resources/blue_cat.png
+		resources/lilac.png
+		qml/LoginView.qml
+        qml/RegisterView.qml
 		qml/LoaderSpinner.qml
+        qml/CustomButton.qml
         resources/loading_paw.png
         resources/tricky_cat.png
 		qml/UserUpdateView.qml
+        resources/reg_dog.png
 )
 
 target_include_directories(pawspective-client PRIVATE include)
@@ -58,6 +66,7 @@ target_include_directories(pawspective-client PRIVATE include)
 target_link_libraries(pawspective-client PRIVATE
     Qt6::Core
     Qt6::Gui
+	Qt6::Network
     Qt6::Widgets
     Qt6::Qml
     Qt6::Quick

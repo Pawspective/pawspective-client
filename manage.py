@@ -166,6 +166,7 @@ def cppcheck_lint():
         cmd = [
             "cppcheck",
             "--enable=all",
+            "--library=qt",
             "--error-exitcode=1",
             "--project=build-debug/compile_commands.json",
             "--file-filter=src/*",

@@ -7,35 +7,32 @@ Rectangle {
     anchors.fill: parent
     color: "#e8d8cb"
 
-    signal registerRequested()
-    signal loginSuccess()
-
     QtObject {
         id: theme
         readonly property string fontName: "Comic Sans MS"
-        
         readonly property color bgMain: "#b2bb7d"
         readonly property color bgInput: "#fdfdfd"
         readonly property color accentPink: "#f4a7b9"
         readonly property color accentYellow: "#ede8b0"
         readonly property color textMain: "#f1e9bb"
-        readonly property color textError: "#6c63ff" 
+        readonly property color textError: "#6c63ff"
         readonly property color textButton: "#b2bb7d"
     }
 
     property bool loading: false
     property string errorMessage: ""
 
+    signal backClicked()
+    signal registerSuccess()
+
     Timer {
-        id: loginTimer
+        id: registerTimer
         interval: 2000
         onTriggered: {
             root.loading = false
-            root.errorMessage = "Invalid email or password"
-            root.loginSuccess()
+            root.errorMessage = "Registration failed"
         }
     }
-
     Rectangle {
         id: loginCard
         width: 480
@@ -44,6 +41,26 @@ Rectangle {
         color: theme.bgMain
         anchors.centerIn: parent
 
+        Text {
+            text: "←"
+            font.pixelSize: 30
+            color: theme.textMain
+            anchors {
+                top: parent.top
+                left: parent.left
+                margins: 15
+            }
+            
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: parent.color = theme.accentPink
+                onExited: parent.color = theme.textMain
+                onClicked: root.backClicked()
+            }
+            
+            z: 10
+        }
 
         ColumnLayout {
             anchors.centerIn: parent
@@ -55,63 +72,87 @@ Rectangle {
                 Layout.preferredHeight: 120
                 
                 Label {
-                    text: "Login"
+                    text: "Register"
                     font.family: theme.fontName
-                    font.pixelSize: 36
+                    font.pixelSize: 32
                     color: theme.textMain
                     anchors.centerIn: parent
                 }
 
                 Image {
                     id: catIcon
-                    source: "../resources/tricky_cat.png"
+                    source: "../resources/reg_dog.png"
                     fillMode: Image.PreserveAspectFit
-                    width: 120
-                    height: 120
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: -25
-                    z: 10
+                    width: 115; height: 115
+                    anchors {
+                        left: parent.left
+                        bottom: parent.bottom
+                        bottomMargin: -23
+                    }
+                    z: 2 
                 }
             }
 
             TextField {
-                id: emailField
-                placeholderText: "Email"
-                font.pointSize : 13
+                id: nameField
+                placeholderText: "First Name"
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
                 Layout.fillWidth: true
                 leftPadding: 15
-                
-                background: Rectangle {
-                    color: theme.bgInput
-                    radius: 8
-                }
+                background: Rectangle { color: theme.bgInput; radius: 8 }
             } 
 
             TextField {
+                id: surnameField
+                placeholderText: "Last Name"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            }
+
+            TextField {
+                id: emailField
+                placeholderText: "Email"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            }
+
+            TextField {
                 id: passwordField
-                height: 60
                 placeholderText: "Password"
-                font.pointSize : 13
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
                 echoMode: TextInput.Password
                 Layout.fillWidth: true
                 leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
+            }
 
-                background: Rectangle {
-                    color: theme.bgInput
-                    radius: 8
-                }
+            TextField {
+                id: confirmPasswordField
+                placeholderText: "Confirm Password"
+                placeholderTextColor: theme.accentPink
+                color: theme.accentPink
+                font.family: theme.fontName
+                echoMode: TextInput.Password
+                Layout.fillWidth: true
+                leftPadding: 15
+                background: Rectangle { color: theme.bgInput; radius: 8 }
             }
 
             CustomButton {
-                id: loginButton 
-                text: loading ? "Logging in..." : "Login"
+                id: registerBtn
+                text: loading ? "Registering..." : "Register"
                 baseColor: theme.accentYellow
                 hoverColor: theme.accentPink
                 textColor: theme.textButton
@@ -121,19 +162,8 @@ Rectangle {
                 onClicked: {
                     root.loading = true
                     root.errorMessage = ""
-                    loginTimer.start()
-                } 
-            }
-
-            CustomButton {
-                id: registerButton
-                text: "Register"
-                baseColor: theme.accentYellow
-                hoverColor: theme.accentPink
-                textColor: theme.textButton
-                Layout.fillWidth: true
-                enabled: !loading
-                onClicked: root.registerRequested()
+                    registerTimer.start()
+                }
             }
 
             LoaderSpinner {
