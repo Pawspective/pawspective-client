@@ -35,8 +35,8 @@ Rectangle {
     }
     Rectangle {
         id: loginCard
-        width: 400
-        height: 500
+        width: 480
+        height: 600
         radius: 20
         color: theme.bgMain
         anchors.centerIn: parent
@@ -81,13 +81,13 @@ Rectangle {
 
                 Image {
                     id: catIcon
-                    source: "../resources/tricky_cat.png"
+                    source: "../resources/reg_dog.png"
                     fillMode: Image.PreserveAspectFit
-                    width: 120; height: 120
+                    width: 115; height: 115
                     anchors {
-                        right: parent.right
+                        left: parent.left
                         bottom: parent.bottom
-                        bottomMargin: -25
+                        bottomMargin: -23
                     }
                     z: 2 
                 }

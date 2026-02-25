@@ -38,8 +38,8 @@ Rectangle {
 
     Rectangle {
         id: loginCard
-        width: 400
-        height: 500
+        width: 480
+        height: 600
         radius: 20
         color: theme.bgMain
         anchors.centerIn: parent
@@ -57,7 +57,7 @@ Rectangle {
                 Label {
                     text: "Login"
                     font.family: theme.fontName
-                    font.pixelSize: 32
+                    font.pixelSize: 36
                     color: theme.textMain
                     anchors.centerIn: parent
                 }
@@ -78,6 +78,7 @@ Rectangle {
             TextField {
                 id: emailField
                 placeholderText: "Email"
+                font.pointSize : 13
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
@@ -92,7 +93,9 @@ Rectangle {
 
             TextField {
                 id: passwordField
+                height: 60
                 placeholderText: "Password"
+                font.pointSize : 13
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName

@@ -56,6 +56,7 @@ qt_add_qml_module(pawspective-client
         qml/CustomButton.qml
         resources/loading_paw.png
         resources/tricky_cat.png
+        resources/reg_dog.png
 )
 
 target_include_directories(pawspective-client PRIVATE include)
