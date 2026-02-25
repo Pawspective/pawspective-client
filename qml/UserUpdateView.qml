@@ -24,6 +24,22 @@ Rectangle {
     property bool loading: false
     property string errorMessage: ""
 
+    // Размеры в процентах
+    readonly property real fieldLabelFontSize: root.height * 0.022
+readonly property real fieldValueFontSize: root.height * 0.025
+readonly property real fieldHeight: root.height * 0.06
+readonly property real fieldSpacing: root.height * 0.008
+readonly property real fieldPasswordTopMargin: root.height * 0.01
+readonly property real buttonHeight: root.height * 0.07
+readonly property real buttonSpacing: root.height * 0.015
+readonly property real buttonFontSize: Math.min(root.height * 0.035, root.width * 0.04)
+readonly property real titleFontSize: root.height * 0.045
+readonly property real titleHeight: root.height * 0.07
+readonly property real contentMargins: root.height * 0.04
+readonly property real contentSpacing: root.height * 0.02
+readonly property real loaderSize: root.height * 0.18
+readonly property real loaderTopMargin: root.height * 0.02
+
     signal submit()
     signal discard()
 
@@ -40,33 +56,51 @@ Rectangle {
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 40
-                spacing: 25
+                anchors.margins: root.contentMargins
+                spacing: root.contentSpacing
 
+                // Заголовок
                 Text {
                     text: "Edit Profile"
                     Layout.fillWidth: true
+                    Layout.preferredHeight: root.titleHeight
                     horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
                     font.family: theme.fontName
-                    font.pixelSize: 32
+                    font.pixelSize: root.titleFontSize
                     font.bold: true
                     color: theme.textDark
                 }
 
-                ProfileDataField { label: "Email"; value: userEmail }
-                ProfileDataField { label: "First Name"; value: userFirstName }
-                ProfileDataField { label: "Last Name"; value: userLastName }
+                // Поля данных
+                ProfileDataField { 
+                    label: "Email"
+                    value: root.userEmail
+                }
+                
+                ProfileDataField { 
+                    label: "First Name"
+                    value: root.userFirstName
+                }
+                
+                ProfileDataField { 
+                    label: "Last Name"
+                    value: root.userLastName
+                }
                 
                 // Password field (special case)
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 8
+                    spacing: root.fieldSpacing
+                    Layout.topMargin: root.fieldPasswordTopMargin
 
                     Text {
                         text: "Password (leave blank if don't want to change)"
                         font.family: theme.fontName
-                        font.pixelSize: 18
+                        font.pixelSize: root.fieldLabelFontSize
                         color: theme.textDark
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
                     }
 
                     TextField {
@@ -75,10 +109,11 @@ Rectangle {
                         placeholderTextColor: theme.accentPink
                         color: theme.accentPink
                         font.family: theme.fontName
-                        font.pixelSize: 18
+                        font.pixelSize: root.fieldValueFontSize
                         echoMode: TextInput.Password
                         Layout.fillWidth: true
-                        leftPadding: 15
+                        Layout.preferredHeight: root.fieldHeight
+                        leftPadding: root.fieldLeftMargin
                         enabled: !root.loading
 
                         background: Rectangle {
@@ -88,17 +123,20 @@ Rectangle {
                     }
                 }
 
+                // Кнопки
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 15
-                    Layout.topMargin: 10
+                    spacing: root.buttonSpacing
+                    Layout.topMargin: root.contentSpacing
 
                     CustomButton {
-                        text: loading ? "Saving..." : "Save Changes"
+                        text: root.loading ? "Saving..." : "Save Changes"
                         baseColor: theme.purple
                         hoverColor: theme.accentPink
                         textColor: theme.buttonText
+                        fontSize: root.buttonFontSize
                         Layout.fillWidth: true
+                        Layout.preferredHeight: root.buttonHeight
                         enabled: !root.loading
 
                         onClicked: {
@@ -127,7 +165,9 @@ Rectangle {
                         baseColor: theme.purple
                         hoverColor: theme.accentPink
                         textColor: theme.buttonText
+                        fontSize: root.buttonFontSize
                         Layout.fillWidth: true
+                        Layout.preferredHeight: root.buttonHeight
                         enabled: !root.loading
 
                         onClicked: {
@@ -136,24 +176,25 @@ Rectangle {
                     }
                 }
 
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 100
-                    Layout.alignment: Qt.AlignHCenter
-                    visible: root.loading
+                // Лоадер
+                LoaderSpinner {
+    Layout.fillWidth: true
+    Layout.preferredHeight: root.loaderSize
+    Layout.maximumHeight: root.loaderSize
+    Layout.minimumHeight: root.loaderSize
+    Layout.alignment: Qt.AlignHCenter
+    Layout.topMargin: root.loaderTopMargin
+    Layout.bottomMargin: root.contentSpacing
+    running: root.loading
+    visible: root.loading
+}
 
-                    LoaderSpinner {
-                        anchors.centerIn: parent
-                        running: root.loading
-                        visible: root.loading
-                        scale: 2.0
-                    }
-                }
-
+                // Error message
                 Label {
                     text: root.errorMessage
                     color: "#6c63ff"
                     font.family: theme.fontName
+                    font.pixelSize: root.fieldLabelFontSize
                     visible: text.length > 0
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
@@ -169,12 +210,12 @@ Rectangle {
         property string label: ""
         property string value: ""
         Layout.fillWidth: true
-        spacing: 8
+        spacing: root.fieldSpacing
 
         Text {
             text: parent.label
             font.family: theme.fontName
-            font.pixelSize: 18
+            font.pixelSize: root.fieldLabelFontSize
             color: theme.textDark
         }
 
@@ -184,9 +225,10 @@ Rectangle {
             placeholderTextColor: theme.accentPink
             color: theme.accentPink
             font.family: theme.fontName
-            font.pixelSize: 18
+            font.pixelSize: root.fieldValueFontSize
             Layout.fillWidth: true
-            leftPadding: 15
+            Layout.preferredHeight: root.fieldHeight
+            leftPadding: root.fieldLeftMargin
             selectByMouse: true
             enabled: !root.loading
 

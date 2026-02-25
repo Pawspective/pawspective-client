@@ -10,6 +10,7 @@ Rectangle {
     property color clickColor: "#fdfdfd" 
     property color textColor: "#b2bb7d"
     property int fontSize: 18
+    property real fontSizeScale: 0.3
 
     signal clicked()
 

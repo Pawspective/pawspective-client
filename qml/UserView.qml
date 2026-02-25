@@ -123,6 +123,7 @@ Rectangle {
                             baseColor: theme.purple
                             hoverColor: theme.accentPink
                             textColor: theme.buttonText
+                            fontSize: Math.min(root.height * 0.035, root.width * 0.018)
                             Layout.preferredWidth: root.buttonWidth
                             Layout.preferredHeight: root.buttonHeight
                             onClicked: root.editProfileClicked()
@@ -133,6 +134,7 @@ Rectangle {
                             baseColor: theme.purple
                             hoverColor: theme.accentPink
                             textColor: theme.buttonText
+                            fontSize: Math.min(root.height * 0.035, root.width * 0.018)
                             Layout.preferredWidth: root.buttonWidth
                             Layout.preferredHeight: root.buttonHeight
                             onClicked: root.logoutClicked()
