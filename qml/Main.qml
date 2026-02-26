@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
-// import pawspective 1.0 // Оставь, если нужно для других компонентов
 
 ApplicationWindow {
     id: window
@@ -46,6 +45,23 @@ ApplicationWindow {
         UserView {
             // Сигнал выхода
             onLogoutClicked: stackView.replace(loginViewComponent)
+        onEditProfileClicked: stackView.push(userUpdateViewComponent, {
+                userEmail: userEmail,
+                userFirstName: userFirstName,
+                userLastName: userLastName
+            })
+        }
+    }
+
+    Component {
+        id: userUpdateViewComponent
+        UserUpdateView {
+            onDiscard: stackView.pop()
+            onSubmit: {
+                // Здесь можно добавить логику сохранения данных
+                console.log("Saving changes...")
+                stackView.pop()
+            }
         }
     }
 }

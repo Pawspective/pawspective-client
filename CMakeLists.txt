@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 if(MSVC)
     add_compile_options(/Zc:__cplusplus)
 endif()
-
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
@@ -58,6 +57,7 @@ qt_add_qml_module(pawspective-client
         qml/CustomButton.qml
         resources/loading_paw.png
         resources/tricky_cat.png
+		qml/UserUpdateView.qml
         resources/reg_dog.png
 )
 
