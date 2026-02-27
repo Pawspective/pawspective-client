@@ -9,4 +9,6 @@ void BaseViewModel::setIsBusy(bool value) {
     updateProperty(m_isBusy, value, [this]() { emit isBusyChanged(); });
 }
 
+void BaseViewModel::emitError(ErrorType type, const QString& message) { emit errorOccurred(type, message); }
+
 }  // namespace pawspective::viewmodels
