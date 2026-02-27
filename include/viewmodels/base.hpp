@@ -32,16 +32,16 @@ public:
     enum ErrorType : uint8_t {
         /** @brief No error occurred, operation completed successfully */
         None,
-        
+
         /** @brief Network connection error (timeout, no connection, server unreachable) */
         NetworkError,
-        
+
         /** @brief Authentication error (invalid credentials, expired token, unauthorized access) */
         AuthenticationError,
-        
+
         /** @brief Input data validation error (invalid format, missing required fields, constraints violation) */
         ValidationError,
-        
+
         /** @brief Unknown or unexpected error that doesn't fit other categories */
         UnknownError
     };
