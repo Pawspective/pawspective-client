@@ -58,10 +58,8 @@ private:
         std::function<void(QSharedPointer<BaseError>)> onError
     );
     void handleUnauthorizedAccess();
-    std::optional<uint64_t> extractUserIdFromToken(const QString& token) const;
-    std::tuple<QString, QString, QString> parseTokenResponse(const QJsonObject& obj);
 
-    std::optional<int> extractTokenExpiration(const QString& token) const;
+    std::tuple<QString, QString, QString> parseTokenResponse(const QJsonObject& obj);
     void scheduleTokenRefresh(int expiresIn);
 
     NetworkClient& m_networkClient;

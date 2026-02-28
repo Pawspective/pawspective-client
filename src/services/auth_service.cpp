@@ -17,6 +17,70 @@
 #include "services/network_client.hpp"
 #include "validator.hpp"
 
+namespace {
+std::optional<QJsonObject> parseJwtPayload(const QString& token) {
+    QStringList parts = token.split('.');
+    if (parts.size() == 3) {
+        return std::nullopt;
+    }
+
+    QByteArray payload = parts[1].toUtf8();
+    QString base64Payload = QString::fromUtf8(payload);
+    base64Payload = base64Payload.replace('-', '+').replace('_', '/');
+
+    while (base64Payload.size() % 4 != 0) {
+        base64Payload.append('=');
+    }
+
+    QByteArray decoded = QByteArray::fromBase64(base64Payload.toUtf8());
+    QJsonDocument doc = QJsonDocument::fromJson(decoded);
+
+    if (!doc.isObject()) {
+        return std::nullopt;
+    }
+
+    return doc.object();
+}
+
+std::optional<int> extractTokenExpiration(const QString& token) {
+    auto payload = parseJwtPayload(token);
+    if (!payload.has_value()) {
+        return std::nullopt;
+    }
+
+    QJsonObject obj = payload.value();
+
+    if (obj.contains("exp")) {
+        qint64 exp = obj["exp"].toVariant().toLongLong();
+        qint64 now = QDateTime::currentSecsSinceEpoch();
+
+        int secondsLeft = static_cast<int>(exp - now);
+
+        return secondsLeft;
+    }
+
+    return std::nullopt;
+}
+std::optional<uint64_t> extractUserIdFromToken(const QString& token) {
+    auto payload = parseJwtPayload(token);
+    if (!payload.has_value()) {
+        return std::nullopt;
+    }
+
+    QJsonObject obj = payload.value();
+
+    if (obj.contains("sub")) {
+        if (obj["sub"].isString()) {
+            return obj["sub"].toString().toULongLong();
+        } else if (obj["sub"].isDouble()) {
+            return static_cast<uint64_t>(obj["sub"].toDouble());
+        }
+    }
+
+    return std::nullopt;
+}
+}  // namespace
+
 namespace pawspective::services {
 
 AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
@@ -228,41 +292,6 @@ void AuthService::refreshToken(const QString& refreshToken) {
     );
 }
 
-std::optional<int> AuthService::extractTokenExpiration(const QString& token) const {
-    QStringList parts = token.split('.');
-    if (parts.size() < 2) {
-        return std::nullopt;
-    }
-
-    QByteArray payload = parts[1].toUtf8();
-    QString base64Payload = QString::fromUtf8(payload);
-    base64Payload = base64Payload.replace('-', '+').replace('_', '/');
-
-    while (base64Payload.size() % 4 != 0) {
-        base64Payload.append('=');
-    }
-
-    QByteArray decoded = QByteArray::fromBase64(base64Payload.toUtf8());
-    QJsonDocument doc = QJsonDocument::fromJson(decoded);
-
-    if (!doc.isObject()) {
-        return std::nullopt;
-    }
-
-    QJsonObject obj = doc.object();
-
-    if (obj.contains("exp")) {
-        qint64 exp = obj["exp"].toVariant().toLongLong();
-        qint64 now = QDateTime::currentSecsSinceEpoch();
-
-        int secondsLeft = static_cast<int>(exp - now);
-
-        return secondsLeft;
-    }
-
-    return std::nullopt;
-}
-
 void AuthService::scheduleTokenRefresh(int expiresIn) {
     stopTokenRefreshTimer();
 
@@ -360,39 +389,6 @@ std::tuple<QString, QString, QString> AuthService::parseTokenResponse(const QJso
     }
 
     return {accessToken, newRefreshToken, tokenType};
-}
-
-std::optional<uint64_t> AuthService::extractUserIdFromToken(const QString& token) const {
-    QStringList parts = token.split('.');
-    if (parts.size() < 2) {
-        return std::nullopt;
-    }
-
-    QByteArray payload = parts[1].toUtf8();
-    QString base64Payload = QString::fromUtf8(payload);
-    base64Payload = base64Payload.replace('-', '+').replace('_', '/');
-    while (base64Payload.size() % 4 != 0) {
-        base64Payload.append('=');
-    }
-
-    QByteArray decoded = QByteArray::fromBase64(base64Payload.toUtf8());
-    QJsonDocument doc = QJsonDocument::fromJson(decoded);
-
-    if (!doc.isObject()) {
-        return std::nullopt;
-    }
-
-    QJsonObject obj = doc.object();
-
-    if (obj.contains("sub")) {
-        if (obj["sub"].isString()) {
-            return obj["sub"].toString().toULongLong();
-        } else if (obj["sub"].isDouble()) {
-            return static_cast<uint64_t>(obj["sub"].toDouble());
-        }
-    }
-
-    return std::nullopt;
 }
 
 }  // namespace pawspective::services
