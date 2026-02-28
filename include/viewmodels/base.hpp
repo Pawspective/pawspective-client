@@ -101,7 +101,7 @@ protected:
      *
      */
     template <typename T>
-    bool updateProperty(T& property, const T& value, const std::function<void()> signal) {
+    bool updateProperty(T& property, const T& value, const std::function<void()>& signal) {
         if (property == value) {
             return false;
         }
