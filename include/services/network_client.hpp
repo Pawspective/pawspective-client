@@ -31,6 +31,7 @@ signals:
 
 public slots:
     void retryPendingRequests();
+    void clearPendingRequests();
 
 private:
     struct PendingRequest {

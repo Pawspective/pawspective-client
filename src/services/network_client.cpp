@@ -96,6 +96,11 @@ void NetworkClient::retryPendingRequests() {
     }
 }
 
+void NetworkClient::clearPendingRequests() {
+    m_isRefreshing = false;
+    m_pendingRequests.clear();
+}
+
 void NetworkClient::get(const QUrl& endpoint, CallbackHandler onSuccess, CallbackHandler onError) {
     sendRequest(HttpMethod::Get, endpoint, {}, std::move(onSuccess), std::move(onError));
 }

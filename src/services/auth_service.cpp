@@ -197,6 +197,7 @@ void AuthService::refreshToken(const QString& refreshToken) {
                     }
 
                     m_isRefreshing = false;
+                    m_networkClient.retryPendingRequests();
 
                     emit refreshSuccess(accessToken, refreshToken, tokenType);
                 },
@@ -208,6 +209,7 @@ void AuthService::refreshToken(const QString& refreshToken) {
                     m_userId = std::nullopt;
                     m_networkClient.setUserId(std::nullopt);
                     stopTokenRefreshTimer();
+                    m_networkClient.clearPendingRequests();
                 }
             );
         },
@@ -220,6 +222,7 @@ void AuthService::refreshToken(const QString& refreshToken) {
                 m_userId = std::nullopt;
                 m_networkClient.setUserId(std::nullopt);
                 stopTokenRefreshTimer();
+                m_networkClient.clearPendingRequests();
             });
         }
     );
