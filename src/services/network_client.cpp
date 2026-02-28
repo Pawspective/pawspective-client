@@ -146,8 +146,4 @@ QNetworkRequest NetworkClient::createRequest(const QUrl& endpoint) const {
 
 void NetworkClient::setTokenProvider(TokenProvider provider) { m_tokenProvider = std::move(provider); }
 
-void NetworkClient::setUserId(std::optional<uint64_t> userId) { m_userId = userId; }
-
-std::optional<uint64_t> NetworkClient::getUserId() const { return m_userId; }
-
 }  // namespace pawspective::services

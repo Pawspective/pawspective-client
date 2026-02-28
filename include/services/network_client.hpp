@@ -11,7 +11,7 @@ enum class HttpMethod : uint8_t { Get, Post, Put, Patch, Delete };
 class NetworkClient final : public QObject {
     Q_OBJECT
 public:
-    using CallbackHandler = std::function<void(QNetworkReply&)>;
+    using CallbackHandler = std::function<void(const QNetworkReply&)>;
     using TokenProvider = std::function<QString()>;
 
     explicit NetworkClient(QObject* parent = nullptr);
@@ -23,8 +23,6 @@ public:
     void deleteResource(const QUrl& endpoint, CallbackHandler onSuccess, CallbackHandler onError);
 
     void setTokenProvider(TokenProvider provider);
-    void setUserId(std::optional<uint64_t> userId);
-    std::optional<uint64_t> getUserId() const;
 
 signals:
     void unauthorizedAccess();
@@ -53,7 +51,6 @@ private:
     QNetworkAccessManager m_manager;
     int m_timeout = 5000;
     QList<PendingRequest> m_pendingRequests;
-    std::optional<uint64_t> m_userId;
     bool m_isRefreshing = false;
     TokenProvider m_tokenProvider;
 
