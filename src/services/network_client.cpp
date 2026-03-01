@@ -105,18 +105,30 @@ void NetworkClient::get(const QUrl& endpoint, CallbackHandler onSuccess, Callbac
     sendRequest(HttpMethod::Get, endpoint, {}, std::move(onSuccess), std::move(onError));
 }
 
-void NetworkClient::
-    post(const QUrl& endpoint, const QByteArray& data, CallbackHandler onSuccess, CallbackHandler onError) {
+void NetworkClient::post(
+    const QUrl& endpoint,
+    const QByteArray& data,
+    CallbackHandler onSuccess,
+    CallbackHandler onError
+) {
     sendRequest(HttpMethod::Post, endpoint, data, std::move(onSuccess), std::move(onError));
 }
 
-void NetworkClient::
-    put(const QUrl& endpoint, const QByteArray& data, CallbackHandler onSuccess, CallbackHandler onError) {
+void NetworkClient::put(
+    const QUrl& endpoint,
+    const QByteArray& data,
+    CallbackHandler onSuccess,
+    CallbackHandler onError
+) {
     sendRequest(HttpMethod::Put, endpoint, data, std::move(onSuccess), std::move(onError));
 }
 
-void NetworkClient::
-    patch(const QUrl& endpoint, const QByteArray& data, CallbackHandler onSuccess, CallbackHandler onError) {
+void NetworkClient::patch(
+    const QUrl& endpoint,
+    const QByteArray& data,
+    CallbackHandler onSuccess,
+    CallbackHandler onError
+) {
     sendRequest(HttpMethod::Patch, endpoint, data, std::move(onSuccess), std::move(onError));
 }
 
