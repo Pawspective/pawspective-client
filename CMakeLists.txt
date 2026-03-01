@@ -43,6 +43,8 @@ add_executable(pawspective-client
     src/services/auth_service.cpp
     src/services/errors.cpp
     src/viewmodels/base.cpp
+    src/viewmodels/user_viewmodel.cpp
+    src/viewmodels/user_update_viewmodel.cpp
 	${PROJECT_HEADERS}
 )
 
