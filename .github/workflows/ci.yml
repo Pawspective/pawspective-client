@@ -55,10 +55,13 @@ jobs:
           version: ${{ env.LLVM_VERSION }}
           platform: x64
 
-      - name: Setup Cppcheck
-        uses: jwlawson/actions-setup-cppcheck@v2
-        with:
-          version: ${{ env.CPPCHECK_VERSION }}
+      - name: Install CPPCheck
+        run: |
+          choco install cppcheck --version=${{ env.CPPCHECK_VERSION }} --no-progress
+          $cppcheckPath = (Get-Command cppcheck).Source
+          $cppcheckDir = Split-Path -Parent $cppcheckPath
+          $cfgDir = Join-Path $cppcheckDir "cfg"
+          echo "CPPCHECK_LIBRARY_PATH=$cfgDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Run linting
         run: |
