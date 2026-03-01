@@ -2,8 +2,8 @@
 #include <QDebug>
 #include <QDirIterator>
 #include <QQmlApplicationEngine>
-#include <QUrl>
 #include <QQmlContext>
+#include <QUrl>
 
 #include "mainwindow.hpp"
 #include "services/auth_service.hpp"
