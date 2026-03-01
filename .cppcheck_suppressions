@@ -9,3 +9,6 @@ unmatchedSuppression
 
 # Suppress checkersReport information message 
 checkersReport
+
+
+missingCfgError 
