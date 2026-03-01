@@ -171,7 +171,9 @@ def cppcheck_lint():
             "--project=build-debug/compile_commands.json",
             "--file-filter=src/*",
             "--file-filter=include/*",
-            "-I", "include"
+            "-I", "include",
+            "--suppress=normalCheckLevelMaxBranches",
+            "--suppress=checkersReport"
         ]
         
         if pathlib.Path(".cppcheck_suppressions").exists():
