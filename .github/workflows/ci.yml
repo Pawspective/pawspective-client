@@ -57,11 +57,13 @@ jobs:
 
       - name: Install CPPCheck
         run: |
-          choco install cppcheck --version=${{ env.CPPCHECK_VERSION }} --no-progress
-          $cppcheckPath = (Get-Command cppcheck).Source
-          $cppcheckDir = Split-Path -Parent $cppcheckPath
-          $cfgDir = Join-Path $cppcheckDir "cfg"
-          echo "CPPCHECK_LIBRARY_PATH=$cfgDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $url = "https://github.com/danmar/cppcheck/releases/download/${{ env.CPPCHECK_VERSION }}/cppcheck-${{ env.CPPCHECK_VERSION }}-x64-win64.zip"
+          Invoke-WebRequest -Uri $url -OutFile cppcheck.zip
+          
+          Expand-Archive -Path cppcheck.zip -DestinationPath C:\cppcheck
+          
+          echo "C:\cppcheck" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          echo "CPPCHECK_DATA_DIR=C:\cppcheck\cfg" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Run linting
         run: |
