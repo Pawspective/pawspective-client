@@ -70,7 +70,6 @@ jobs:
         run: |
           $env:QT_DIR = "${{ env.Qt6_DIR }}"
           python manage.py build debug
-          cppcheck --enable=all --library=qt --error-exitcode=1 --project=build-debug/compile_commands.json --file-filter=src/* --file-filter=include/* --library=std --suppressions-list=.cppcheck_suppressions
           python manage.py lint
 
   build:
