@@ -3,8 +3,11 @@
 #include <QDirIterator>
 #include <QQmlApplicationEngine>
 #include <QUrl>
+#include <QQmlContext>
 
 #include "mainwindow.hpp"
+#include "services/auth_service.hpp"
+#include "viewmodels/login_view_model.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
@@ -16,6 +19,12 @@ int main(int argc, char* argv[]) {
     while (it.hasNext()) {
         qDebug() << "Resource file:" << it.next();
     }
+
+    pawspective::services::NetworkClient networkClient(&app);
+    pawspective::services::AuthService authService(networkClient);
+    auto loginViewModel = new pawspective::viewmodels::LoginViewModel(authService, &app);
+
+    engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
 
     QObject::connect(
         &engine,
