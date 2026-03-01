@@ -208,7 +208,7 @@ def tidy_lint():
         cmd = [sys.executable, run_clang_tidy_path,
                "-p", str(pathlib.Path("build-debug").resolve()), 
                "-j", str(NPROCS),
-               f"-config-file={pathlib.Path(".clang-tidy").resolve()}",
+               f"-config-file={pathlib.Path('.clang-tidy').resolve()}",
                "-header-filter=/src/.*",
                "-extra-arg=-Wno-unknown-argument",
                '-extra-arg=-std=c++20',
