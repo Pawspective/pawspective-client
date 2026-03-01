@@ -41,6 +41,7 @@ add_executable(pawspective-client
 	src/models/user_register_dto.cpp
 	src/services/network_client.cpp
     src/services/auth_service.cpp
+    src/services/user_service.cpp
     src/services/errors.cpp
     src/viewmodels/base.cpp
 	${PROJECT_HEADERS}
