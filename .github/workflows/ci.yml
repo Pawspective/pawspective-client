@@ -35,6 +35,11 @@ jobs:
         with:
           version: ${{ env.NINJA_VERSION }}
 
+      - name: Install MinGW
+        run: |
+          choco install mingw --no-progress
+          echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -87,6 +92,11 @@ jobs:
         with:
           version: ${{ env.NINJA_VERSION }}
 
+      - name: Install MinGW
+        run: |
+          choco install mingw --no-progress
+          echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
@@ -100,7 +110,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build-${{ matrix.build_type }}
-          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ matrix.build_type }}-v2-${{ hashFiles('**/CMakeLists.txt') }}
 
       - name: Build
         run: |

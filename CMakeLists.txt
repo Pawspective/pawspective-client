@@ -50,6 +50,7 @@ add_executable(pawspective-client
 qt_add_qml_module(pawspective-client
     URI pawspective
     VERSION 1.0
+    NO_CACHEGEN
     QML_FILES
         qml/Main.qml
         qml/UserView.qml
@@ -76,3 +77,9 @@ target_link_libraries(pawspective-client PRIVATE
     Qt6::Quick
     Qt6::QuickControls2
 )
+
+if(MINGW)
+    set_target_properties(pawspective-client PROPERTIES
+        QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
+    )
+endif()
