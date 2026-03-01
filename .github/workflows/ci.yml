@@ -62,8 +62,8 @@ jobs:
       - name: Run linting
         run: |
           $env:QT_DIR = "${{ env.Qt6_DIR }}"
-          cppcheck --enable=all --library=qt --error-exitcode=1 --project=build-debug/compile_commands.json --file-filter=src/* --file-filter=include/* --suppressions-list=.cppcheck_suppressions
           python manage.py build debug
+          cppcheck --enable=all --library=qt --error-exitcode=1 --project=build-debug/compile_commands.json --file-filter=src/* --file-filter=include/* --suppressions-list=.cppcheck_suppressions
           python manage.py lint
 
   build:
