@@ -4,37 +4,65 @@ on:
   push:
   pull_request:
 
+env:
+  PYTHON_VERSION: "3.14"
+  QT_VERSION: 6.4.2
+  CMAKE_VERSION: 4.2.3
+  NINJA_VERSION: 1.13.2
+  GCC_VERSION: 13.2.0
+  LLVM_VERSION: 21.1.8
+  CPPCHECK_VERSION: 2.19.0
+
 jobs:
   # Job 1: Linting (Clang-Format, Tidy, Cppcheck)
   lint:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Qt6 and Linting Tools
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install CMake
+        uses: cmake-js/setup-cmake@v3
+        with:
+          cmake-version: ${{ env.CMAKE_VERSION }}
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: ${{ env.NINJA_VERSION }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_mingw_64
+          modules: "qtdeclarative qttools"
+          cache: true
+
+      - name: Install LLVM
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: ${{ env.LLVM_VERSION }}
+          platform: x64
+
+      - name: Install CPPCheck
         run: |
-          sudo apt update
-          sudo apt install -y \
-            cmake \
-            build-essential \
-            qt6-base-dev \
-            clang-18 \
-            clang-tidy-18 \
-            libc++-dev \
-            libc++abi-dev \
-            cppcheck \
-            g++-mingw-w64-x86-64 \
-            libxkbcommon-dev \
-            qt6-declarative-dev
+          choco install cppcheck --version=${{ env.CPPCHECK_VERSION }} --no-progress
 
       - name: Run linting
         run: |
-          python3 manage.py build debug
-          python3 manage.py lint
+          $env:QT_DIR = "${{ env.Qt6_DIR }}"
+          python manage.py build debug
+          python manage.py lint
 
-  # Job 2: Build and Test
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     strategy:
       matrix:
         build_type: [debug, release]
@@ -45,20 +73,38 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Qt & Build Essentials
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            build-essential \
-            cmake \
-            qt6-base-dev \
-            qt6-declarative-dev \
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install CMake
+        uses: cmake-js/setup-cmake@v3
+        with:
+          cmake-version: ${{ env.CMAKE_VERSION }}
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: ${{ env.NINJA_VERSION }}
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_mingw_64
+          modules: "qtdeclarative qttools"
+          cache: true
 
       - name: Cache Build
         uses: actions/cache@v4
         with:
           path: build-${{ matrix.build_type }}
-          key: ${{ runner.os }}-qt-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt') }}
 
       - name: Build
-        run: python3 manage.py build ${{ matrix.build_type }}
+        run: |
+          $env:QT_DIR = "${{ env.Qt6_DIR }}"
+          python manage.py build ${{ matrix.build_type }}
