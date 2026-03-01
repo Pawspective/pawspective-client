@@ -4,6 +4,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
+#include <QQmlContext>
 
 #include "mainwindow.hpp"
 #include "services/auth_service.hpp"
