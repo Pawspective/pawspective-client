@@ -6,3 +6,6 @@ missingIncludeSystem
 
 # Ignore unmatchedSupression warnings
 unmatchedSuppression
+
+# Suppress checkersReport information message 
+checkersReport
