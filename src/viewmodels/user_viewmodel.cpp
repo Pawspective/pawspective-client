@@ -3,18 +3,8 @@
 
 namespace pawspective::viewmodels {
 
-UserViewModel::UserViewModel(
-    services::AuthService& authService,
-    services::UserService& userService,
-    QObject* parent
-)
-    : BaseViewModel(parent),
-      m_authService(authService)
-      , m_userService(userService)
-      ,
-      m_isAuthenticated(false) {
-    qDebug() << "UserViewModel::UserViewModel() - создание ViewModel";
-
+UserViewModel::UserViewModel(services::AuthService& authService, services::UserService& userService, QObject* parent)
+    : BaseViewModel(parent), m_authService(authService), m_userService(userService), m_isAuthenticated(false) {
     // AuthService signals
     connect(&m_authService, &services::AuthService::loginSuccess, this, &UserViewModel::handleLoginSuccess);
     connect(&m_authService, &services::AuthService::loginFailed, this, &UserViewModel::handleLoginFailed);
@@ -32,12 +22,19 @@ UserViewModel::UserViewModel(
         this,
         &UserViewModel::handleGetCurrentUserFailed
     );
-        // UserService signals
-        connect(&m_userService, &services::UserService::registerUserSuccess,
-                this, &UserViewModel::handleRegisterSuccess);
-        connect(&m_userService, &services::UserService::updateUserProfileSuccess,
-                this, &UserViewModel::handleUpdateUserProfileSuccess);
+    // UserService signals
+    connect(&m_userService, &services::UserService::registerUserSuccess, this, &UserViewModel::handleRegisterSuccess);
+    connect(
+        &m_userService,
+        &services::UserService::updateUserProfileSuccess,
+        this,
+        &UserViewModel::handleUpdateUserProfileSuccess
+    );
+    connect(&m_authService, &services::AuthService::refreshFailed, this, &UserViewModel::handleTokenRefreshFailed);
 }
+
+const models::UserDTO& UserViewModel::getUserData() const { return m_userData; }
+bool UserViewModel::getIsAuthenticated() const { return m_isAuthenticated; }
 
 void UserViewModel::initialize() {
     if (m_authService.isAuthenticated()) {
@@ -95,7 +92,6 @@ void UserViewModel::handleLogoutFailed(QSharedPointer<services::BaseError> error
 }
 
 void UserViewModel::handleGetCurrentUserSuccess(const models::UserDTO& user) {
-    qDebug() << "UserViewModel::handleGetCurrentUserSuccess() - пользователь:" << user.email;
     setIsBusy(false);
     m_isAuthenticated = true;
     updateUserData(user);
@@ -118,8 +114,16 @@ void UserViewModel::handleRegisterSuccess(const models::UserDTO& user) {
     emit userDataLoaded();
 }
 
-void UserViewModel::handleUpdateUserProfileSuccess(const models::UserDTO& user) {
-    updateUserData(user);
+void UserViewModel::handleUpdateUserProfileSuccess(const models::UserDTO& user) { updateUserData(user); }
+
+void UserViewModel::handleTokenRefreshFailed(QSharedPointer<services::BaseError> error) {
+    m_isAuthenticated = false;
+    clearUserData();
+    emit authStateChanged();
+    if (error) {
+        emitError(error->getType(), error->getMessage());
+    }
+    emit sessionExpired();
 }
 
 void UserViewModel::updateUserData(const models::UserDTO& user) {
@@ -158,7 +162,7 @@ void UserViewModel::clearUserData() {
 
 QString UserViewModel::errorToString(QSharedPointer<services::BaseError> error) const {
     if (error.isNull()) {
-        return tr("Неизвестная ошибка");
+        return tr("Unknown error");
     }
     return error->getMessage();
 }
