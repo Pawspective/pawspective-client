@@ -78,8 +78,3 @@ target_link_libraries(pawspective-client PRIVATE
     Qt6::QuickControls2
 )
 
-if(MINGW)
-    set_target_properties(pawspective-client PROPERTIES
-        QT_QMLCACHEGEN_ARGUMENTS "--only-bytecode"
-    )
-endif()

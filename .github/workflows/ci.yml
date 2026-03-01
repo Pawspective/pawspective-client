@@ -37,7 +37,7 @@ jobs:
 
       - name: Install MinGW
         run: |
-          choco install mingw --no-progress
+          choco install mingw --version=13.2.0 --no-progress
           echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install Qt
@@ -94,7 +94,7 @@ jobs:
 
       - name: Install MinGW
         run: |
-          choco install mingw --no-progress
+          choco install mingw --version=13.2.0 --no-progress
           echo "C:\tools\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install Qt
