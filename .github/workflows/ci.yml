@@ -6,7 +6,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.14"
-  QT_VERSION: 6.5.0
+  QT_VERSION: 6.7.0
   CMAKE_VERSION: 4.2.3
   NINJA_VERSION: 1.13.2
   GCC_VERSION: 13.2.0
@@ -41,7 +41,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           host: windows
           target: desktop
-          arch: win64_mingw_64
+          arch: win64_mingw
           cache: true
 
       - name: Install LLVM
@@ -90,10 +90,10 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
-          version: 6.7.0
+          version: ${{ env.QT_VERSION }}
           host: windows
           target: desktop
-          arch: win64_mingw_64
+          arch: win64_mingw
           cache: true
 
       - name: Cache Build
