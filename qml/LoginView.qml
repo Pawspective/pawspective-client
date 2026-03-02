@@ -23,18 +23,20 @@ Rectangle {
         readonly property color textButton: "#b2bb7d"
     }
 
-    property bool loading: false
-    property string errorMessage: ""
-
-    Timer {
-        id: loginTimer
-        interval: 2000
-        onTriggered: {
-            root.loading = false
-            root.errorMessage = "Invalid email or password"
-            root.loginSuccess()
+    Connections {
+        target: loginViewModel
+        function onLoginFinished(success) {
+            if (success) {
+                root.loginSuccess()
+            }
+        }
+        function onErrorOccurred(type, message) {
+            errorMessageLabel.text = message
         }
     }
+
+    property bool loading: false
+    property string errorMessage: ""
 
     Rectangle {
         id: loginCard
@@ -78,13 +80,14 @@ Rectangle {
             TextField {
                 id: emailField
                 placeholderText: "Email"
+                text: loginViewModel.email
+                onTextChanged: loginViewModel.email = text
                 font.pointSize : 13
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
                 Layout.fillWidth: true
                 leftPadding: 15
-                
                 background: Rectangle {
                     color: theme.bgInput
                     radius: 8
@@ -95,6 +98,8 @@ Rectangle {
                 id: passwordField
                 height: 60
                 placeholderText: "Password"
+                text: loginViewModel.password
+                onTextChanged: loginViewModel.password = text
                 font.pointSize : 13
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
@@ -111,17 +116,16 @@ Rectangle {
 
             CustomButton {
                 id: loginButton 
-                text: loading ? "Logging in..." : "Login"
+                text: loginViewModel.isBusy ? "Logging in..." : "Login"
                 baseColor: theme.accentYellow
                 hoverColor: theme.accentPink
                 textColor: theme.textButton
                 Layout.fillWidth: true
-                enabled: !loading
+                enabled: !loginViewModel.isBusy
                 
                 onClicked: {
-                    root.loading = true
-                    root.errorMessage = ""
-                    loginTimer.start()
+                    errorMessageLabel.text = ""
+                    loginViewModel.login()
                 } 
             }
 
@@ -132,18 +136,19 @@ Rectangle {
                 hoverColor: theme.accentPink
                 textColor: theme.textButton
                 Layout.fillWidth: true
-                enabled: !loading
+                enabled: !loginViewModel.isBusy
                 onClicked: root.registerRequested()
             }
 
             LoaderSpinner {
-                running: root.loading
-                visible: root.loading
+                running: loginViewModel.isBusy
+                visible: loginViewModel.isBusy
                 Layout.alignment: Qt.AlignHCenter
             }
 
             Label {
-                text: root.errorMessage
+                id: errorMessageLabel
+                text: loginViewModel.errorMessage
                 color: theme.textError
                 font.family: theme.fontName
                 visible: text.length > 0
