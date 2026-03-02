@@ -41,6 +41,7 @@ add_executable(pawspective-client
 	src/models/user_register_dto.cpp
 	src/services/network_client.cpp
     src/services/auth_service.cpp
+    src/services/user_service.cpp
     src/services/errors.cpp
     src/viewmodels/base.cpp
 	${PROJECT_HEADERS}
@@ -49,6 +50,7 @@ add_executable(pawspective-client
 qt_add_qml_module(pawspective-client
     URI pawspective
     VERSION 1.0
+    NO_CACHEGEN
     QML_FILES
         qml/Main.qml
         qml/UserView.qml
@@ -75,3 +77,4 @@ target_link_libraries(pawspective-client PRIVATE
     Qt6::Quick
     Qt6::QuickControls2
 )
+
