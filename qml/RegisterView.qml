@@ -25,12 +25,16 @@ Rectangle {
     signal backClicked()
     signal registerSuccess()
 
-    Timer {
-        id: registerTimer
-        interval: 2000
-        onTriggered: {
+    Connections {
+        target: registerViewModel
+        function onRegisterFinished(success) {
+            if (success) {
+                root.registerSuccess()
+            }
+        }
+        function onErrorOccurred(type, message) {
             root.loading = false
-            root.errorMessage = "Registration failed"
+            errorMessageLabel.text = message
         }
     }
     Rectangle {
@@ -96,6 +100,8 @@ Rectangle {
             TextField {
                 id: nameField
                 placeholderText: "First Name"
+                text: registerViewModel.firstName
+                onTextChanged: registerViewModel.firstName = text
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
@@ -107,6 +113,8 @@ Rectangle {
             TextField {
                 id: surnameField
                 placeholderText: "Last Name"
+                text: registerViewModel.lastName
+                onTextChanged: registerViewModel.lastName = text
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
@@ -118,6 +126,8 @@ Rectangle {
             TextField {
                 id: emailField
                 placeholderText: "Email"
+                text: registerViewModel.email
+                onTextChanged: registerViewModel.email = text
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
@@ -129,6 +139,8 @@ Rectangle {
             TextField {
                 id: passwordField
                 placeholderText: "Password"
+                text: registerViewModel.password
+                onTextChanged: registerViewModel.password = text
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
@@ -141,6 +153,8 @@ Rectangle {
             TextField {
                 id: confirmPasswordField
                 placeholderText: "Confirm Password"
+                text: registerViewModel.confirmPassword
+                onTextChanged: registerViewModel.confirmPassword = text
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
@@ -161,8 +175,8 @@ Rectangle {
                 
                 onClicked: {
                     root.loading = true
-                    root.errorMessage = ""
-                    registerTimer.start()
+                    errorMessageLabel.text = ""
+                    registerViewModel.registerUser()
                 }
             }
 
@@ -173,7 +187,8 @@ Rectangle {
             }
 
             Label {
-                text: root.errorMessage
+                id: errorMessageLabel
+                text: registerViewModel.errorMessage
                 color: theme.textError
                 font.family: theme.fontName
                 visible: text.length > 0
