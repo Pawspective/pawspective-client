@@ -6,6 +6,8 @@ Rectangle {
     id: root
     anchors.fill: parent
 
+    property var viewModel: null
+
     QtObject {
         id: theme
         readonly property string fontName: "Comic Sans MS"
@@ -15,35 +17,59 @@ Rectangle {
         readonly property color accentPink: "#f4a7b9"
         readonly property color textDark: "#8572af"
         readonly property color buttonText: "#e7ebf5"
+        readonly property color errorColor: "#ff6b6b"
+        readonly property color successColor: "#51cf66"
     }
 
-    property string userEmail: "email@example.com"
-    property string userFirstName: "Alice"
-    property string userLastName: "Brown"
-
-    property bool loading: false
+    property string userEmail: viewModel ? viewModel.email : ""
+    property string userFirstName: viewModel ? viewModel.firstName : ""
+    property string userLastName: viewModel ? viewModel.lastName : ""
+    property bool loading: viewModel ? viewModel.isBusy : false
     property string errorMessage: ""
 
-    // Размеры в процентах
     readonly property real fieldLabelFontSize: root.height * 0.022
-readonly property real fieldValueFontSize: root.height * 0.025
-readonly property real fieldHeight: root.height * 0.06
-readonly property real fieldSpacing: root.height * 0.008
-readonly property real fieldPasswordTopMargin: root.height * 0.01
-readonly property real buttonHeight: root.height * 0.07
-readonly property real buttonSpacing: root.height * 0.015
-readonly property real buttonFontSize: Math.min(root.height * 0.035, root.width * 0.04)
-readonly property real titleFontSize: root.height * 0.045
-readonly property real titleHeight: root.height * 0.07
-readonly property real contentMargins: root.height * 0.04
-readonly property real contentSpacing: root.height * 0.02
-readonly property real loaderSize: root.height * 0.18
-readonly property real loaderTopMargin: root.height * 0.02
+    readonly property real fieldValueFontSize: root.height * 0.025
+    readonly property real fieldHeight: root.height * 0.06
+    readonly property real fieldSpacing: root.height * 0.008
+    readonly property real fieldPasswordTopMargin: root.height * 0.01
+    readonly property real buttonHeight: root.height * 0.07
+    readonly property real buttonSpacing: root.height * 0.015
+    readonly property real buttonFontSize: Math.min(root.height * 0.035, root.width * 0.04)
+    readonly property real titleFontSize: root.height * 0.045
+    readonly property real titleHeight: root.height * 0.07
+    readonly property real contentMargins: root.height * 0.04
+    readonly property real contentSpacing: root.height * 0.02
+    readonly property real loaderSize: root.height * 0.18
+    readonly property real loaderTopMargin: root.height * 0.02
+    readonly property real fieldLeftMargin: root.width * 0.01
 
     signal submit()
     signal discard()
 
     color: theme.pageBg
+
+    Connections {
+        target: viewModel
+        function onSaveFailed(message) {
+            errorMessage = message
+        }
+        function onSessionExpired() {
+            errorMessage = "Session expired. Please log in again."
+            closeTimer.start()
+        }
+    }
+
+    Timer {
+        id: closeTimer
+        interval: 2000
+        onTriggered: root.discard()
+    }
+
+    Component.onCompleted: {
+        if (viewModel) {
+            viewModel.initialize()
+        }
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -59,7 +85,6 @@ readonly property real loaderTopMargin: root.height * 0.02
                 anchors.margins: root.contentMargins
                 spacing: root.contentSpacing
 
-                // Заголовок
                 Text {
                     text: "Edit Profile"
                     Layout.fillWidth: true
@@ -72,30 +97,31 @@ readonly property real loaderTopMargin: root.height * 0.02
                     color: theme.textDark
                 }
 
-                // Поля данных
-                ProfileDataField { 
+                ProfileDataField {
                     label: "Email"
-                    value: root.userEmail
+                    value: viewModel ? viewModel.email : ""
+                    onValueChanged: if (viewModel) viewModel.email = value
                 }
-                
-                ProfileDataField { 
+
+                ProfileDataField {
                     label: "First Name"
-                    value: root.userFirstName
+                    value: viewModel ? viewModel.firstName : ""
+                    onValueChanged: if (viewModel) viewModel.firstName = value
                 }
-                
-                ProfileDataField { 
+
+                ProfileDataField {
                     label: "Last Name"
-                    value: root.userLastName
+                    value: viewModel ? viewModel.lastName : ""
+                    onValueChanged: if (viewModel) viewModel.lastName = value
                 }
-                
-                // Password field (special case)
+
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: root.fieldSpacing
                     Layout.topMargin: root.fieldPasswordTopMargin
 
                     Text {
-                        text: "Password (leave blank if don't want to change)"
+                        text: "New Password (leave blank if you don't want to change)"
                         font.family: theme.fontName
                         font.pixelSize: root.fieldLabelFontSize
                         color: theme.textDark
@@ -115,6 +141,8 @@ readonly property real loaderTopMargin: root.height * 0.02
                         Layout.preferredHeight: root.fieldHeight
                         leftPadding: root.fieldLeftMargin
                         enabled: !root.loading
+                        text: viewModel ? viewModel.newPassword : ""
+                        onTextChanged: if (viewModel) viewModel.newPassword = text
 
                         background: Rectangle {
                             color: theme.fieldBg
@@ -123,7 +151,6 @@ readonly property real loaderTopMargin: root.height * 0.02
                     }
                 }
 
-                // Кнопки
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: root.buttonSpacing
@@ -131,32 +158,16 @@ readonly property real loaderTopMargin: root.height * 0.02
 
                     CustomButton {
                         text: root.loading ? "Saving..." : "Save Changes"
-                        baseColor: theme.purple
-                        hoverColor: theme.accentPink
+                        baseColor: (viewModel && viewModel.isDirty) ? theme.purple : "#cccccc"
+                        hoverColor: (viewModel && viewModel.isDirty) ? theme.accentPink : "#cccccc"
                         textColor: theme.buttonText
                         fontSize: root.buttonFontSize
                         Layout.fillWidth: true
                         Layout.preferredHeight: root.buttonHeight
-                        enabled: !root.loading
+                        enabled: !root.loading && viewModel && viewModel.isDirty
 
                         onClicked: {
-                            root.loading = true
-                            root.errorMessage = ""
-
-                            var timer = Qt.createQmlObject('
-                                import QtQuick 2.0;
-                                Timer {
-                                    interval: 2000;
-                                    running: true;
-                                    repeat: false;
-                                    onTriggered: {
-                                        root.loading = false;
-                                        root.errorMessage = "Failed to update profile";
-                                        root.submit();
-                                    }
-                                }
-                            ', root)
-                            timer.start()
+                            if (viewModel) viewModel.saveChanges()
                         }
                     }
 
@@ -171,28 +182,27 @@ readonly property real loaderTopMargin: root.height * 0.02
                         enabled: !root.loading
 
                         onClicked: {
+                            if (viewModel) viewModel.discardChanges()
                             root.discard()
                         }
                     }
                 }
 
-                // Лоадер
                 LoaderSpinner {
-    Layout.fillWidth: true
-    Layout.preferredHeight: root.loaderSize
-    Layout.maximumHeight: root.loaderSize
-    Layout.minimumHeight: root.loaderSize
-    Layout.alignment: Qt.AlignHCenter
-    Layout.topMargin: root.loaderTopMargin
-    Layout.bottomMargin: root.contentSpacing
-    running: root.loading
-    visible: root.loading
-}
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.loaderSize
+                    Layout.maximumHeight: root.loaderSize
+                    Layout.minimumHeight: root.loaderSize
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: root.loaderTopMargin
+                    Layout.bottomMargin: root.contentSpacing
+                    running: root.loading
+                    visible: root.loading
+                }
 
-                // Error message
                 Label {
                     text: root.errorMessage
-                    color: "#6c63ff"
+                    color: theme.errorColor
                     font.family: theme.fontName
                     font.pixelSize: root.fieldLabelFontSize
                     visible: text.length > 0
@@ -209,6 +219,8 @@ readonly property real loaderTopMargin: root.height * 0.02
     component ProfileDataField : ColumnLayout {
         property string label: ""
         property string value: ""
+        signal valueChanged(string newValue)
+
         Layout.fillWidth: true
         spacing: root.fieldSpacing
 
@@ -238,9 +250,7 @@ readonly property real loaderTopMargin: root.height * 0.02
             }
 
             onTextChanged: {
-                if (parent.label === "Email") root.userEmail = text
-                else if (parent.label === "First Name") root.userFirstName = text
-                else if (parent.label === "Last Name") root.userLastName = text
+                parent.valueChanged(text)
             }
         }
     }

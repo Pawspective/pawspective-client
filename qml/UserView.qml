@@ -6,6 +6,8 @@ Rectangle {
     id: root
     anchors.fill: parent
 
+    property var viewModel: null
+
     QtObject {
         id: theme
         readonly property string fontName: "Comic Sans MS"
@@ -18,37 +20,22 @@ Rectangle {
         readonly property color buttonText: "#e7ebf5"
     }
 
-    property string userEmail: "email@example.com"
-    property string userFirstName: "Alice"
-    property string userLastName: "Brown"
-
-    // Размеры в процентах
     readonly property real leftPanelWidth: root.width * 0.7
     readonly property real rightPanelWidth: root.width * 0.3
     readonly property real contentMargins: root.height * 0.05
     readonly property real contentSpacing: root.height * 0.025
-    
-    // Заголовок
     readonly property real titleFontSize: root.height * 0.05
     readonly property real titleHeight: root.height * 0.08
-    
-    // Поля данных
     readonly property real fieldLabelFontSize: root.height * 0.025
     readonly property real fieldValueFontSize: root.height * 0.03
     readonly property real fieldHeight: root.height * 0.07
     readonly property real fieldLeftMargin: root.width * 0.01
     readonly property real fieldSpacing: root.height * 0.01
-    
-    // Кнопки
     readonly property real buttonWidth: root.width * 0.25
     readonly property real buttonHeight: root.height * 0.08
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real buttonRowSpacing: root.width * 0.02
-    
-    // Картинка с котиком
     readonly property real catSize: root.height * 0.35
-    
-    // Сайдбар
     readonly property real sidebarTopMargin: root.height * 0.08
     readonly property real sidebarSpacing: root.height * 0.02
     readonly property real sidebarItemHeight: root.height * 0.07
@@ -63,11 +50,17 @@ Rectangle {
 
     color: theme.pageBg
 
+    LoaderSpinner {
+        anchors.centerIn: parent
+        running: viewModel ? viewModel.isBusy : false
+        visible: viewModel ? viewModel.isBusy : false
+        z: 10
+    }
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
 
-        // Левая панель (основной контент) - 70%
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -79,7 +72,6 @@ Rectangle {
                 anchors.margins: root.contentMargins
                 spacing: root.contentSpacing
 
-                // Заголовок
                 Text {
                     text: "Profile"
                     Layout.fillWidth: true
@@ -92,28 +84,32 @@ Rectangle {
                     color: theme.textDark
                 }
 
-                // Поля данных
                 ProfileDataField { 
                     label: "Email"
-                    value: root.userEmail
+                    value: viewModel ? viewModel.userData.email : ""
                 }
                 
                 ProfileDataField { 
                     label: "First Name"
-                    value: root.userFirstName
+                    value: viewModel ? viewModel.userData.firstName : ""
                 }
                 
                 ProfileDataField { 
                     label: "Last Name"
-                    value: root.userLastName
+                    value: viewModel ? viewModel.userData.lastName : ""
                 }
 
-                // Блок с кнопками и картинкой
+                ProfileDataField { 
+                    label: "Organization ID"
+                    value: viewModel && viewModel.userData.organizationId ? 
+                           viewModel.userData.organizationId : "None"
+                    visible: viewModel && viewModel.userData.organizationId.has_value
+                }
+
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: root.buttonRowSpacing
 
-                    // Колонка с кнопками
                     ColumnLayout {
                         spacing: root.buttonSpacing
                         Layout.alignment: Qt.AlignLeft
@@ -143,7 +139,6 @@ Rectangle {
 
                     Item { Layout.fillWidth: true }
 
-                    // Картинка с котиком
                     Image {
                         Layout.preferredWidth: root.catSize
                         Layout.preferredHeight: root.catSize
@@ -158,7 +153,6 @@ Rectangle {
             }
         }
 
-        // Правая панель (сайдбар) - 30%
         Rectangle {
             Layout.fillHeight: true
             Layout.preferredWidth: root.rightPanelWidth
@@ -188,7 +182,6 @@ Rectangle {
         }
     }
 
-    // Компонент поля данных
     component ProfileDataField : ColumnLayout {
         property string label: ""
         property string value: ""
@@ -220,7 +213,6 @@ Rectangle {
         }
     }
 
-    // Компонент элемента сайдбара
     component SidebarItem : Rectangle {
         property string text: ""
         property bool active: false
