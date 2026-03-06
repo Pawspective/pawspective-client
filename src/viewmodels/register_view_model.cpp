@@ -25,7 +25,8 @@ RegisterViewModel::RegisterViewModel(services::UserService& userService, QObject
 
 void RegisterViewModel::registerUser() {
     if (m_firstName.isEmpty() || m_lastName.isEmpty() || m_email.isEmpty() || m_password.isEmpty() ||
-        m_confirmPassword.isEmpty()) {
+        m_confirmPassword.isEmpty())
+    {
         emitError(ErrorType::ValidationError, "All fields are required.");
         return;
     }
@@ -43,4 +44,4 @@ void RegisterViewModel::registerUser() {
 
     m_userService.registerUser(dto);
 }
-} // namespace pawspective::viewmodels
+}  // namespace pawspective::viewmodels

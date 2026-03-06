@@ -59,10 +59,10 @@ signals:
 
 private:
     services::UserService& m_userService;
-    QString m_firstName;       // NOLINT(misc-non-private-member-variables-in-classes)
-    QString m_lastName;        // NOLINT(misc-non-private-member-variables-in-classes)
-    QString m_email;           // NOLINT(misc-non-private-member-variables-in-classes)
-    QString m_password;        // NOLINT(misc-non-private-member-variables-in-classes)
-    QString m_confirmPassword; // NOLINT(misc-non-private-member-variables-in-classes)
+    QString m_firstName;        // NOLINT(misc-non-private-member-variables-in-classes)
+    QString m_lastName;         // NOLINT(misc-non-private-member-variables-in-classes)
+    QString m_email;            // NOLINT(misc-non-private-member-variables-in-classes)
+    QString m_password;         // NOLINT(misc-non-private-member-variables-in-classes)
+    QString m_confirmPassword;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
-} // namespace pawspective::viewmodels
+}  // namespace pawspective::viewmodels
