@@ -14,31 +14,31 @@ class RegisterViewModel : public BaseViewModel {
 public:
     explicit RegisterViewModel(services::UserService& userService, QObject* parent = nullptr);
 
-    QString firstName() const { return m_firstName; }
+    const QString& firstName() const { return m_firstName; }
 
     void setFirstName(const QString& value) {
         updateProperty(m_firstName, value, [this] { emit firstNameChanged(); });
     }
 
-    QString lastName() const { return m_lastName; }
+    const QString& lastName() const { return m_lastName; }
 
     void setLastName(const QString& value) {
         updateProperty(m_lastName, value, [this] { emit lastNameChanged(); });
     }
 
-    QString email() const { return m_email; }
+    const QString& email() const { return m_email; }
 
     void setEmail(const QString& value) {
         updateProperty(m_email, value, [this] { emit emailChanged(); });
     }
 
-    QString password() const { return m_password; }
+    const QString& password() const { return m_password; }
 
     void setPassword(const QString& value) {
         updateProperty(m_password, value, [this] { emit passwordChanged(); });
     }
 
-    QString confirmPassword() const { return m_confirmPassword; }
+    const QString& confirmPassword() const { return m_confirmPassword; }
 
     void setConfirmPassword(const QString& value) {
         updateProperty(m_confirmPassword, value, [this] { emit confirmPasswordChanged(); });

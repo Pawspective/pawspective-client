@@ -12,13 +12,13 @@ class LoginViewModel : public BaseViewModel {
 public:
     explicit LoginViewModel(services::AuthService& authService, QObject* parent = nullptr);
 
-    QString email() const { return m_email; }
+    const QString& email() const { return m_email; }
 
     void setEmail(const QString& value) {
         updateProperty(m_email, value, [this] { emit emailChanged(); });
     }
 
-    QString password() const { return m_password; }
+    const QString& password() const { return m_password; }
 
     void setPassword(const QString& value) {
         updateProperty(m_password, value, [this] { emit passwordChanged(); });
