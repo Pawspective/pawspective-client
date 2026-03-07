@@ -50,6 +50,15 @@ ApplicationWindow {
                 userFirstName: userFirstName,
                 userLastName: userLastName
             })
+            onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
+        }
+    }
+
+    Component {
+        id: registerOrganizationViewComponent
+        RegisterOrganizationView {
+            onBackClicked: stackView.pop()
+            onRegisterSuccess: stackView.pop()
         }
     }
 
