@@ -28,6 +28,16 @@ Rectangle {
     signal backClicked()
     signal registerSuccess()
 
+    Timer {
+        id: registerTimer
+        interval: 2000
+        onTriggered: {
+            root.loading = false
+            root.errorMessage = "Mocked registration error"
+            root.registerSuccess()
+        }
+    }
+
     Rectangle {
         id: card
         width: 520
@@ -55,7 +65,7 @@ Rectangle {
                 Layout.preferredHeight: 80
 
                 Label {
-                    text: "Register Organization"
+                    text: "Create Organization"
                     font.family: theme.fontName
                     font.pixelSize: 26
                     color: theme.textMain
@@ -217,6 +227,8 @@ Rectangle {
                 enabled: !root.loading
                 onClicked: {
                     root.errorMessage = ""
+                    root.loading = true
+                    registerTimer.start()
                     // TODO: connect to registerOrganizationViewModel
                 }
             }
