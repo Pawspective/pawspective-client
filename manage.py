@@ -84,8 +84,10 @@ def filter_compile_commands(preset="debug"):
                 'qrc_',
                 'ui_',
                 '_qmltyperegistrations',
-                'qmlcache',             
+                'qmlcache',
                 '.rcc',
+                '/tests/',
+                '\\tests\\',
             ])
         ]
         
@@ -107,7 +109,7 @@ def restore_compile_commands(preset="debug"):
 def test(preset="debug"):
     """Build and run tests."""
     build(preset)
-    run_command(["ctest", "--test-dir", f"build-{preset}", "--output-on-failure", "-V"])
+    run_command(["ctest", "--test-dir", f"build-{preset}", "--output-on-failure", "-V", "--timeout", "120"])
 
 def build(preset="debug"):
     """Configure and build the project."""
@@ -216,7 +218,6 @@ def tidy_lint():
                "-extra-arg=-Wno-unknown-argument",
                '-extra-arg=-std=c++20',
                "-extra-arg=--target=x86_64-w64-windows-gnu",
-               r".*[/\\](src|include)[/\\]",
                ]
         
         run_command(cmd)
