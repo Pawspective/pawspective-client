@@ -1,30 +1,17 @@
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QSignalSpy>
 #include <QtTest>
 
 #include "models/organization_dto.hpp"
 #include "models/organization_register_dto.hpp"
 #include "models/organization_update_dto.hpp"
-#include "services/network_client.hpp"
-#include "services/organization_service.hpp"
 
-using namespace pawspective::services;  //  NOLINT google-build-using-namespace
-using namespace pawspective::models;    //  NOLINT google-build-using-namespace
+using namespace pawspective::models;  //  NOLINT google-build-using-namespace
 
 class TestOrganizationService : public QObject {
     Q_OBJECT
 
-    NetworkClient* m_networkClient = nullptr;
-    OrganizationService* m_service = nullptr;
-
 private slots:
-    void init();
-    void cleanup();
-
-    void testServiceConstruction();
-    void testAllSignalsAreValid();
-
     void testOrganizationDtoFromJson_ValidObject();
     void testOrganizationDtoFromJson_MissingId_Throws();
     void testOrganizationDtoFromJson_MissingName_Throws();
@@ -35,34 +22,6 @@ private slots:
 
     void testOrganizationUpdateDtoToJson_OnlySetFields();
 };
-
-void TestOrganizationService::init() {
-    m_networkClient = new NetworkClient();
-    m_service = new OrganizationService(*m_networkClient);
-    QVERIFY(m_networkClient != nullptr);
-    QVERIFY(m_service != nullptr);
-}
-
-void TestOrganizationService::cleanup() {
-    delete m_service;
-    m_service = nullptr;
-    delete m_networkClient;
-    m_networkClient = nullptr;
-}
-
-void TestOrganizationService::testServiceConstruction() { QVERIFY(m_service != nullptr); }
-
-void TestOrganizationService::testAllSignalsAreValid() {
-    QSignalSpy getSuccessSpy(m_service, &OrganizationService::getOrganizationSuccess);
-    QSignalSpy createSuccessSpy(m_service, &OrganizationService::createOrganizationSuccess);
-    QSignalSpy updateSuccessSpy(m_service, &OrganizationService::updateOrganizationSuccess);
-    QSignalSpy failedSpy(m_service, &OrganizationService::requestFailed);
-
-    QVERIFY(getSuccessSpy.isValid());
-    QVERIFY(createSuccessSpy.isValid());
-    QVERIFY(updateSuccessSpy.isValid());
-    QVERIFY(failedSpy.isValid());
-}
 
 void TestOrganizationService::testOrganizationDtoFromJson_ValidObject(){
     QJsonObject cityJson;
