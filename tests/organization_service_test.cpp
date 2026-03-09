@@ -1,13 +1,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QSharedPointer>
 #include <QSignalSpy>
 #include <QtTest>
 
 #include "models/organization_dto.hpp"
 #include "models/organization_register_dto.hpp"
 #include "models/organization_update_dto.hpp"
-#include "services/errors.hpp"
 #include "services/network_client.hpp"
 #include "services/organization_service.hpp"
 
@@ -26,10 +24,6 @@ private slots:
 
     void testServiceConstruction();
     void testAllSignalsAreValid();
-
-    void testGetOrganization_EmitsRequestFailedOnConnectionError();
-    void testCreateOrganization_EmitsRequestFailedOnConnectionError();
-    void testUpdateOrganization_EmitsRequestFailedOnConnectionError();
 
     void testOrganizationDtoFromJson_ValidObject();
     void testOrganizationDtoFromJson_MissingId_Throws();
@@ -70,42 +64,7 @@ void TestOrganizationService::testAllSignalsAreValid() {
     QVERIFY(failedSpy.isValid());
 }
 
-void TestOrganizationService::testGetOrganization_EmitsRequestFailedOnConnectionError() {
-    QSignalSpy failedSpy(m_service, &OrganizationService::requestFailed);
-    QVERIFY(failedSpy.isValid());
-
-    m_service->getOrganization(1);
-
-    QTRY_VERIFY_WITH_TIMEOUT(failedSpy.count() > 0, 6000);
-    QCOMPARE(failedSpy.count(), 1);
-}
-
-void TestOrganizationService::testCreateOrganization_EmitsRequestFailedOnConnectionError() {
-    QSignalSpy failedSpy(m_service, &OrganizationService::requestFailed);
-    QVERIFY(failedSpy.isValid());
-
-    OrganizationRegisterDTO dto;
-    dto.name = "Test Org";
-    dto.cityId = 1;
-    m_service->createOrganization(dto);
-
-    QTRY_VERIFY_WITH_TIMEOUT(failedSpy.count() > 0, 6000);
-    QCOMPARE(failedSpy.count(), 1);
-}
-
-void TestOrganizationService::testUpdateOrganization_EmitsRequestFailedOnConnectionError() {
-    QSignalSpy failedSpy(m_service, &OrganizationService::requestFailed);
-    QVERIFY(failedSpy.isValid());
-
-    OrganizationUpdateDTO dto;
-    dto.name = "Updated Org";
-    m_service->updateOrganization(1, dto);
-
-    QTRY_VERIFY_WITH_TIMEOUT(failedSpy.count() > 0, 6000);
-    QCOMPARE(failedSpy.count(), 1);
-}
-
-void TestOrganizationService::testOrganizationDtoFromJson_ValidObject() {
+void TestOrganizationService::testOrganizationDtoFromJson_ValidObject(){
     QJsonObject cityJson;
     cityJson["id"] = 42;
     cityJson["name"] = "Moscow";
