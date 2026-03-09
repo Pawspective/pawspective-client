@@ -216,7 +216,8 @@ def tidy_lint():
                "-extra-arg=-Wno-unknown-argument",
                '-extra-arg=-std=c++20',
                "-extra-arg=--target=x86_64-w64-windows-gnu",
-               ] 
+               r".*[/\\](src|include)[/\\]",
+               ]
         
         run_command(cmd)
     finally:
