@@ -1,7 +1,7 @@
 
+#include "../include/models/organization_dto.hpp"
 #include <QString>
 #include <optional>
-#include "../include/models/organization_dto.hpp"
 
 namespace pawspective::models {
 
@@ -12,7 +12,7 @@ QJsonObject OrganizationDTO::toJson() const {
     json["name"] = name;
     if (description.has_value()) {
         json["description"] = description.value();
-    } 
+    }
     json["city"] = city.toJson();
 
     return json;

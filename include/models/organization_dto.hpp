@@ -10,7 +10,7 @@ namespace pawspective::models {
 struct OrganizationDTO {
     qint64 id = 0;
     QString name;
-    //std::optional<QString> avatarUrl;
+    // std::optional<QString> avatarUrl;
     std::optional<QString> description;
     CityDTO city;
 
