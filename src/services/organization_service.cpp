@@ -9,19 +9,20 @@
 
 #include "models/organization_dto.hpp"
 #include "services/errors.hpp"
+#include "services/i_network_client.hpp"
 
 namespace pawspective::services {
 
-OrganizationService::OrganizationService(NetworkClient& networkClient, QObject* parent)
+OrganizationService::OrganizationService(INetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient) {}
 
-void OrganizationService::handleError(QNetworkReply& reply) {
+void OrganizationService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
     QJsonParseError parseError;
     QByteArray data = reply.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (parseError.error != QJsonParseError::NoError) {
-        emit requestFailed(
+        onError(
             QSharedPointer<BaseError>(new ClientJsonParseError(
                 QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
             ))
@@ -31,20 +32,24 @@ void OrganizationService::handleError(QNetworkReply& reply) {
 
     if (doc.isObject()) {
         auto error = ErrorFactory::createError(doc.object());
-        emit requestFailed(QSharedPointer<BaseError>(std::move(error)));
+        onError(QSharedPointer<BaseError>(std::move(error)));
     } else {
-        emit requestFailed(QSharedPointer<BaseError>(new UnknownError("Unknown error occurred")));
+        onError(QSharedPointer<BaseError>(new UnknownError("Unknown error occurred")));
     }
 }
 
-void OrganizationService::handleSuccess(QNetworkReply& reply, std::function<void(const QJsonObject&)> onSuccess) {
+void OrganizationService::handleSuccess(
+    QNetworkReply& reply,
+    std::function<void(const QJsonObject&)> onSuccess,
+    std::function<void(QSharedPointer<BaseError>)> onError
+) {
     QJsonParseError parseError;
     QByteArray data = reply.readAll();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
         if (parseError.error != QJsonParseError::NoError) {
-            emit requestFailed(
+            onError(
                 QSharedPointer<BaseError>(new ClientJsonParseError(
                     QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
                 ))
@@ -54,7 +59,7 @@ void OrganizationService::handleSuccess(QNetworkReply& reply, std::function<void
 
         onSuccess(doc.object());
     } catch (const std::exception& e) {
-        emit requestFailed(QSharedPointer<BaseError>(new ClientJsonParseError(QString(e.what()))));
+        onError(QSharedPointer<BaseError>(new ClientJsonParseError(QString(e.what()))));
     }
 }
 
@@ -62,12 +67,18 @@ void OrganizationService::getOrganization(qint64 id) {
     m_networkClient.get(
         QUrl(QString("/orgs/%1").arg(id)),
         [this](QNetworkReply& reply) {
-            handleSuccess(reply, [this](const QJsonObject& obj) {
-                models::OrganizationDTO organization = models::OrganizationDTO::fromJson(obj);
-                emit getOrganizationSuccess(organization);
-            });
+            handleSuccess(
+                reply,
+                [this](const QJsonObject& obj) {
+                    models::OrganizationDTO organization = models::OrganizationDTO::fromJson(obj);
+                    emit getOrganizationSuccess(organization);
+                },
+                [this](QSharedPointer<BaseError> error) { emit getOrganizationFailed(error); }
+            );
         },
-        [this](QNetworkReply& reply) { handleError(reply); }
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit getOrganizationFailed(error); });
+        }
     );
 }
 
@@ -77,12 +88,18 @@ void OrganizationService::createOrganization(const models::OrganizationRegisterD
         QUrl("/orgs"),
         doc.toJson(QJsonDocument::Compact),
         [this](QNetworkReply& reply) {
-            handleSuccess(reply, [this](const QJsonObject& obj) {
-                models::OrganizationDTO organization = models::OrganizationDTO::fromJson(obj);
-                emit createOrganizationSuccess(organization);
-            });
+            handleSuccess(
+                reply,
+                [this](const QJsonObject& obj) {
+                    models::OrganizationDTO organization = models::OrganizationDTO::fromJson(obj);
+                    emit createOrganizationSuccess(organization);
+                },
+                [this](QSharedPointer<BaseError> error) { emit createOrganizationFailed(error); }
+            );
         },
-        [this](QNetworkReply& reply) { handleError(reply); }
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit createOrganizationFailed(error); });
+        }
     );
 }
 
@@ -92,12 +109,18 @@ void OrganizationService::updateOrganization(qint64 id, const models::Organizati
         QUrl(QString("/orgs/%1").arg(id)),
         doc.toJson(QJsonDocument::Compact),
         [this](QNetworkReply& reply) {
-            handleSuccess(reply, [this](const QJsonObject& obj) {
-                models::OrganizationDTO organization = models::OrganizationDTO::fromJson(obj);
-                emit updateOrganizationSuccess(organization);
-            });
+            handleSuccess(
+                reply,
+                [this](const QJsonObject& obj) {
+                    models::OrganizationDTO organization = models::OrganizationDTO::fromJson(obj);
+                    emit updateOrganizationSuccess(organization);
+                },
+                [this](QSharedPointer<BaseError> error) { emit updateOrganizationFailed(error); }
+            );
         },
-        [this](QNetworkReply& reply) { handleError(reply); }
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit updateOrganizationFailed(error); });
+        }
     );
 }
 

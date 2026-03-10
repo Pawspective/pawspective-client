@@ -91,16 +91,20 @@ enable_testing()
 
 add_executable(organization_service_test
     tests/organization_service_test.cpp
+    include/services/organization_service.hpp
     src/models/organization_dto.cpp
     src/models/organization_register_dto.cpp
     src/models/organization_update_dto.cpp
     src/models/city_dto.cpp
+    src/services/organization_service.cpp
+    src/services/errors.cpp
 )
 
 target_include_directories(organization_service_test PRIVATE include)
 
 target_link_libraries(organization_service_test PRIVATE
     Qt6::Core
+    Qt6::Network
     Qt6::Test
 )
 

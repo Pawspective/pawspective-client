@@ -8,14 +8,14 @@
 #include "models/organization_register_dto.hpp"
 #include "models/organization_update_dto.hpp"
 #include "services/errors.hpp"
-#include "services/network_client.hpp"
+#include "services/i_network_client.hpp"
 
 namespace pawspective::services {
 
 class OrganizationService : public QObject {
     Q_OBJECT
 public:
-    explicit OrganizationService(NetworkClient& networkClient, QObject* parent = nullptr);
+    explicit OrganizationService(INetworkClient& networkClient, QObject* parent = nullptr);
 
     void getOrganization(qint64 id);
     void createOrganization(const models::OrganizationRegisterDTO& dto);
@@ -25,13 +25,20 @@ signals:
     void getOrganizationSuccess(const models::OrganizationDTO& organization);
     void createOrganizationSuccess(const models::OrganizationDTO& organization);
     void updateOrganizationSuccess(const models::OrganizationDTO& organization);
-    void requestFailed(QSharedPointer<services::BaseError> error);
+
+    void getOrganizationFailed(QSharedPointer<services::BaseError> error);
+    void createOrganizationFailed(QSharedPointer<services::BaseError> error);
+    void updateOrganizationFailed(QSharedPointer<services::BaseError> error);
 
 private:
-    void handleError(QNetworkReply& reply);
-    void handleSuccess(QNetworkReply& reply, std::function<void(const QJsonObject&)> onSuccess);
+    void handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError);
+    void handleSuccess(
+        QNetworkReply& reply,
+        std::function<void(const QJsonObject&)> onSuccess,
+        std::function<void(QSharedPointer<BaseError>)> onError
+    );
 
-    NetworkClient& m_networkClient;
+    INetworkClient& m_networkClient;
 };
 
 }  // namespace pawspective::services
