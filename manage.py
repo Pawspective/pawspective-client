@@ -84,8 +84,10 @@ def filter_compile_commands(preset="debug"):
                 'qrc_',
                 'ui_',
                 '_qmltyperegistrations',
-                'qmlcache',             
+                'qmlcache',
                 '.rcc',
+                '/tests/',
+                '\\tests\\',
             ])
         ]
         
@@ -103,6 +105,11 @@ def restore_compile_commands(preset="debug"):
         shutil.copy(backup_path, compile_commands_path)
         backup_path.unlink()
         print("[OK] Restored compile_commands.json")
+
+def test(preset="debug"):
+    """Build and run tests."""
+    build(preset)
+    run_command(["ctest", "--test-dir", f"build-{preset}", "--output-on-failure", "-V", "--timeout", "120"])
 
 def build(preset="debug"):
     """Configure and build the project."""
@@ -211,7 +218,7 @@ def tidy_lint():
                "-extra-arg=-Wno-unknown-argument",
                '-extra-arg=-std=c++20',
                "-extra-arg=--target=x86_64-w64-windows-gnu",
-               ] 
+               ]
         
         run_command(cmd)
     finally:
@@ -240,6 +247,7 @@ def main():
             "  build [preset]           - Build project (debug/release, default: debug)\n"
             "  run [preset]             - Run application (default: debug)\n"
             "  clean                    - Clean build artifacts\n"
+            "  test [preset]            - Build and run tests (default: debug)\n"
             "  format                   - Format code with clang-format\n"
             "  format-check             - Check code formatting without changes\n"
             "  cppcheck                 - Run cppcheck static analysis\n"
@@ -258,6 +266,8 @@ def main():
         run(preset)
     elif cmd == "clean":
         clean()
+    elif cmd == "test":
+        test(preset)
     elif cmd == "format":
         format_code()
     elif cmd == "format-check":

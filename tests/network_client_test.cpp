@@ -1,14 +1,13 @@
+#include "services/network_client.hpp"
 #include <QtTest/qsignalspy.h>
 #include <QtTest/qtest.h>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include "services/network_client.hpp"
 
-using namespace pawspective::services; //  NOLINT google-build-using-namespace
+using namespace pawspective::services;  //  NOLINT google-build-using-namespace
 
 class TestNetworkClient : public QObject {
     Q_OBJECT
-
 
     NetworkClient* m_client = nullptr;
 
@@ -28,7 +27,6 @@ private slots:
 
     void testUnauthorizedAccessSignal();
     void testPendingRequestsRetry();
-
 };
 
 void TestNetworkClient::init() {
@@ -45,9 +43,7 @@ void TestNetworkClient::testGetRequest() {
     QVERIFY(m_client != nullptr);
 
     bool callbackExecuted = false;
-    auto onSuccess = [&callbackExecuted](const QNetworkReply&) {
-        callbackExecuted = true;
-    };
+    auto onSuccess = [&callbackExecuted](const QNetworkReply&) { callbackExecuted = true; };
     auto onError = [](const QNetworkReply&) {};
 
     QUrl endpoint("http://example.com/api/test");
@@ -60,9 +56,7 @@ void TestNetworkClient::testPostRequest() {
     QVERIFY(m_client != nullptr);
 
     bool callbackExecuted = false;
-    auto onSuccess = [&callbackExecuted](const QNetworkReply&) {
-        callbackExecuted = true;
-    };
+    auto onSuccess = [&callbackExecuted](const QNetworkReply&) { callbackExecuted = true; };
     auto onError = [](const QNetworkReply&) {};
 
     QUrl endpoint("http://example.com/api/users");
@@ -91,9 +85,7 @@ void TestNetworkClient::testPatchRequest() {
     QVERIFY(m_client != nullptr);
 
     auto onSuccess = [](const QNetworkReply&) {};
-    auto onError = [](const QNetworkReply&) {
-        QFAIL("Error callback should not be called for patch request");
-    };
+    auto onError = [](const QNetworkReply&) { QFAIL("Error callback should not be called for patch request"); };
 
     QUrl endpoint("http://example.com/api/users/1");
     QByteArray data = R"({"status": "active"})";
@@ -120,12 +112,8 @@ void TestNetworkClient::testNetworkError() {
     QVERIFY(m_client != nullptr);
 
     bool errorCallbackExecuted = false;
-    auto onSuccess = [](const QNetworkReply&) {
-        QFAIL("Success callback should not be called on error");
-    };
-    auto onError = [&errorCallbackExecuted](const QNetworkReply&) {
-        errorCallbackExecuted = true;
-    };
+    auto onSuccess = [](const QNetworkReply&) { QFAIL("Success callback should not be called on error"); };
+    auto onError = [&errorCallbackExecuted](const QNetworkReply&) { errorCallbackExecuted = true; };
 
     QUrl invalidEndpoint("http://invalid.endpoint.local.test/api/test");
     m_client->get(invalidEndpoint, onSuccess, onError);
@@ -157,9 +145,7 @@ void TestNetworkClient::testErrorCallback() {
     bool errorCallbackExecuted = false;
     int errorCallCount = 0;
 
-    auto onSuccess = [](const QNetworkReply&) {
-        QFAIL("Success callback should not be called on error");
-    };
+    auto onSuccess = [](const QNetworkReply&) { QFAIL("Success callback should not be called on error"); };
     auto onError = [&errorCallbackExecuted, &errorCallCount](const QNetworkReply&) {
         errorCallbackExecuted = true;
         errorCallCount++;
@@ -192,9 +178,7 @@ void TestNetworkClient::testPendingRequestsRetry() {
     QVERIFY(m_client != nullptr);
 
     int successCount = 0;
-    auto onSuccess = [&successCount](const QNetworkReply&) {
-        successCount++;
-    };
+    auto onSuccess = [&successCount](const QNetworkReply&) { successCount++; };
     auto onError = [](const QNetworkReply&) {};
 
     QUrl endpoint("http://example.com/api/test");
