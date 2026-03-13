@@ -77,7 +77,7 @@ void CityService::getCities() {
                 reply,
                 [this](const QJsonArray& array) {
                     QList<models::CityDTO> cities;
-                    for (const QJsonValue& value : array) {
+                    for (const auto& value : array) {
                         cities.append(models::CityDTO::fromJson(value.toObject()));
                     }
                     emit getCitiesSuccess(cities);
