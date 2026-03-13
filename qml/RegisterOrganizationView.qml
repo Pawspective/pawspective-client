@@ -20,21 +20,20 @@ Rectangle {
         readonly property color dropBorder: "#d4c8a8"
     }
 
-    property bool loading: false
-    property string errorMessage: ""
     property string photoUrl: ""
-    property int selectedCityId: -1
 
     signal backClicked()
     signal registerSuccess()
 
-    Timer {
-        id: registerTimer
-        interval: 2000
-        onTriggered: {
-            root.loading = false
-            root.errorMessage = "Mocked registration error"
-            root.registerSuccess()
+    Connections {
+        target: registerOrganizationViewModel
+        function onRegistrationFinished(success) {
+            if (success) {
+                root.registerSuccess()
+            }
+        }
+        function onErrorOccurred(type, message) {
+            errorMessageLabel.text = message
         }
     }
 
@@ -89,12 +88,14 @@ Rectangle {
             TextField {
                 id: nameField
                 placeholderText: "Name"
+                text: registerOrganizationViewModel.name
+                onTextChanged: registerOrganizationViewModel.name = text
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
                 font.family: theme.fontName
                 Layout.fillWidth: true
                 leftPadding: 15
-                enabled: !root.loading
+                enabled: !registerOrganizationViewModel.isBusy
                 background: Rectangle { color: theme.bgInput; radius: 8 }
             }
 
@@ -107,10 +108,11 @@ Rectangle {
             }
 
 
-            // Description (optional)
             TextArea {
                 id: descriptionField
                 placeholderText: "..."
+                text: registerOrganizationViewModel.description
+                onTextChanged: registerOrganizationViewModel.description = text
                 color: theme.accentPink
                 font.family: theme.fontName
                 wrapMode: TextArea.Wrap
@@ -118,7 +120,7 @@ Rectangle {
                 Layout.preferredHeight: 80
                 leftPadding: 15
                 topPadding: 10
-                enabled: !root.loading
+                enabled: !registerOrganizationViewModel.isBusy
                 background: Rectangle { color: theme.bgInput; radius: 8 }
 
                 Text {
@@ -132,7 +134,6 @@ Rectangle {
                 }
             }
 
-            // City (dropdown, data will come from API)
             Label {
                 text: "City (optional)"
                 font.family: theme.fontName
@@ -145,13 +146,14 @@ Rectangle {
                 id: cityCombo
                 Layout.fillWidth: true
                 Layout.preferredHeight: 42
-                enabled: !root.loading
+                enabled: !registerOrganizationViewModel.isBusy
                 // TODO: replace with cities model from ViewModel
                 model: []
                 displayText: currentIndex < 0 ? "Select city..." : currentText
 
                 onCurrentIndexChanged: {
-                    // TODO: root.selectedCityId = cityCombo.currentValue
+                    const value = Number(cityCombo.currentValue)
+                    registerOrganizationViewModel.cityId = Number.isFinite(value) ? value : 0
                 }
 
                 background: Rectangle {
@@ -219,21 +221,18 @@ Rectangle {
                 }
             }
 
-            // Buttons
             CustomButton {
                 id: submitBtn
-                text: root.loading ? "Creating..." : "Create organization"
+                text: registerOrganizationViewModel.isBusy ? "Creating..." : "Create organization"
                 baseColor: theme.accentYellow
                 hoverColor: theme.accentPink
                 textColor: theme.textButton
                 Layout.fillWidth: true
                 Layout.topMargin: 4
-                enabled: !root.loading
+                enabled: !registerOrganizationViewModel.isBusy
                 onClicked: {
-                    root.errorMessage = ""
-                    root.loading = true
-                    registerTimer.start()
-                    // TODO: connect to registerOrganizationViewModel
+                    errorMessageLabel.text = ""
+                    registerOrganizationViewModel.registerOrganization()
                 }
             }
 
@@ -244,19 +243,19 @@ Rectangle {
                 hoverColor: theme.accentPink
                 textColor: theme.textButton
                 Layout.fillWidth: true
-                enabled: !root.loading
+                enabled: !registerOrganizationViewModel.isBusy
                 onClicked: root.backClicked()
             }
 
             LoaderSpinner {
-                running: root.loading
-                visible: root.loading
+                running: registerOrganizationViewModel.isBusy
+                visible: registerOrganizationViewModel.isBusy
                 Layout.alignment: Qt.AlignHCenter
             }
 
             Label {
                 id: errorMessageLabel
-                text: root.errorMessage
+                text: registerOrganizationViewModel.errorMessage
                 color: theme.textError
                 font.family: theme.fontName
                 visible: text.length > 0
