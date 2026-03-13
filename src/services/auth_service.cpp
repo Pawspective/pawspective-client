@@ -86,10 +86,22 @@ namespace pawspective::services {
 AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient), m_userId(std::nullopt) {
     connect(&m_networkClient, &NetworkClient::unauthorizedAccess, this, &AuthService::handleUnauthorizedAccess);
+    connect(&m_networkClient, &NetworkClient::invalidTokenDetected, this, [this]() { clearSession(); });
     m_refreshTimer.setSingleShot(true);
     connect(&m_refreshTimer, &QTimer::timeout, this, &AuthService::onRefreshTimerTimeout);
     m_networkClient.setTokenProvider([this]() { return m_accessToken; });
     m_networkClient.setUserId(m_userId);
+}
+
+void AuthService::clearSession() {
+    m_isRefreshing = false;
+    m_accessToken.clear();
+    m_refreshToken.clear();
+    m_userId = std::nullopt;
+    m_networkClient.setUserId(std::nullopt);
+    stopTokenRefreshTimer();
+    m_networkClient.clearPendingRequests();
+    emit sessionEnded();
 }
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
@@ -200,14 +212,7 @@ void AuthService::logout() {
         [this](QNetworkReply& reply) {
             handleSuccess(
                 reply,
-                [this](const QJsonObject&) {
-                    m_accessToken.clear();
-                    m_refreshToken.clear();
-                    m_userId = std::nullopt;
-                    m_networkClient.setUserId(std::nullopt);
-                    stopTokenRefreshTimer();
-                    emit logoutSuccess();
-                },
+                [this](const QJsonObject&) { clearSession(); },
                 [this](QSharedPointer<BaseError> error) { emit logoutFailed(error); }
             );
         },
@@ -267,26 +272,14 @@ void AuthService::refreshToken(const QString& refreshToken) {
                 },
                 [this](QSharedPointer<BaseError> error) {
                     emit refreshFailed(error);
-                    m_isRefreshing = false;
-                    m_accessToken.clear();
-                    m_refreshToken.clear();
-                    m_userId = std::nullopt;
-                    m_networkClient.setUserId(std::nullopt);
-                    stopTokenRefreshTimer();
-                    m_networkClient.clearPendingRequests();
+                    clearSession();
                 }
             );
         },
         [this](QNetworkReply& reply) {
             handleError(reply, [this](QSharedPointer<BaseError> error) {
                 emit refreshFailed(error);
-                m_isRefreshing = false;
-                m_accessToken.clear();
-                m_refreshToken.clear();
-                m_userId = std::nullopt;
-                m_networkClient.setUserId(std::nullopt);
-                stopTokenRefreshTimer();
-                m_networkClient.clearPendingRequests();
+                clearSession();
             });
         }
     );

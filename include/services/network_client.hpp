@@ -40,6 +40,7 @@ public:
 
 signals:
     void unauthorizedAccess();
+    void invalidTokenDetected();
 
 public slots:
     void retryPendingRequests();
