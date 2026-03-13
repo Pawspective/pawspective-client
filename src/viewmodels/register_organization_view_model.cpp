@@ -1,4 +1,7 @@
 #include "viewmodels/register_organization_view_model.hpp"
+
+#include <QVariantMap>
+
 #include "models/organization_register_dto.hpp"
 #include "services/errors.hpp"
 
@@ -6,9 +9,10 @@ namespace pawspective::viewmodels {
 
 RegisterOrganizationViewModel::RegisterOrganizationViewModel(
     services::OrganizationService& organizationService,
+    services::CityService& cityService,
     QObject* parent
 )
-    : BaseViewModel(parent), m_organizationService(organizationService) {
+    : BaseViewModel(parent), m_organizationService(organizationService), m_cityService(cityService) {
     connect(
         &m_organizationService,
         &services::OrganizationService::createOrganizationSuccess,
@@ -29,6 +33,40 @@ RegisterOrganizationViewModel::RegisterOrganizationViewModel(
             emit registrationFinished(false);
         }
     );
+
+    connect(
+        &m_cityService,
+        &services::CityService::getCitiesSuccess,
+        this,
+        [this](const QList<models::CityDTO>& cities) {
+            QVariantList list;
+            for (const models::CityDTO& city : cities) {
+                QVariantMap entry;
+                entry["text"] = city.name;
+                entry["value"] = city.id;
+                list.append(entry);
+            }
+            updateProperty(m_cities, list, [this] { emit citiesChanged(); });
+            setIsBusy(false);
+        }
+    );
+
+    connect(
+        &m_cityService,
+        &services::CityService::getCitiesFailed,
+        this,
+        [this](QSharedPointer<services::BaseError> error) {
+            setIsBusy(false);
+            emitError(NetworkError, error->getMessage());
+        }
+    );
+}
+
+void RegisterOrganizationViewModel::initialize() { loadCities(); }
+
+void RegisterOrganizationViewModel::loadCities() {
+    setIsBusy(true);
+    m_cityService.getCities();
 }
 
 void RegisterOrganizationViewModel::registerOrganization() {

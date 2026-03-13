@@ -25,6 +25,8 @@ Rectangle {
     signal backClicked()
     signal registerSuccess()
 
+    Component.onCompleted: registerOrganizationViewModel.initialize()
+
     Connections {
         target: registerOrganizationViewModel
         function onRegistrationFinished(success) {
@@ -147,11 +149,12 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 42
                 enabled: !registerOrganizationViewModel.isBusy
-                // TODO: replace with cities model from ViewModel
-                model: []
+                model: registerOrganizationViewModel.cities
+                textRole: "text"
+                valueRole: "value"
                 displayText: currentIndex < 0 ? "Select city..." : currentText
 
-                onCurrentIndexChanged: {
+                onCurrentValueChanged: {
                     const value = Number(cityCombo.currentValue)
                     registerOrganizationViewModel.cityId = Number.isFinite(value) ? value : 0
                 }
