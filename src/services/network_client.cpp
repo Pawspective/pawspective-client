@@ -2,6 +2,7 @@
 
 #include <QNetworkCookieJar>
 #include <QNetworkReply>
+#include "services/errors.hpp"
 
 namespace pawspective::services {
 
@@ -54,14 +55,22 @@ void NetworkClient::sendRequest(
          onSuccess = std::move(onSuccess),
          onError = std::move(onError)]() {
             if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
-                m_pendingRequests.append({method, endpoint, data, onSuccess, onError});
+                QSharedPointer<BaseError> error = ErrorFactory::createError(reply->readAll());
+                if (error.dynamicCast<AccessTokenExpiredError>()) {
+                    m_pendingRequests.append({method, endpoint, data, onSuccess, onError});
 
-                if (!m_isRefreshing) {
-                    m_isRefreshing = true;
-                    emit unauthorizedAccess();
+                    if (!m_isRefreshing) {
+                        m_isRefreshing = true;
+                        emit unauthorizedAccess();
+                    }
+                    reply->deleteLater();
+                    return;
                 }
-                reply->deleteLater();
-                return;
+                if (error.dynamicCast<AccessTokenInvalidError>()) {
+                    emit invalidTokenDetected();
+                    reply->deleteLater();
+                    return;
+                }
             }
             try {
                 if (reply->error() == QNetworkReply::NoError) {

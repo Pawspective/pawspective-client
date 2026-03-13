@@ -37,7 +37,7 @@ signals:
         const QString& tokenType,
         uint64_t userId
     );
-    void logoutSuccess();
+    void sessionEnded();
     void refreshSuccess(const QString& accessToken, const QString& refreshToken, const QString& tokenType);
     void getCurrentUserSuccess(const models::UserDTO& user);
 
@@ -58,6 +58,7 @@ private:
         std::function<void(QSharedPointer<BaseError>)> onError
     );
     void handleUnauthorizedAccess();
+    void clearSession();
 
     std::tuple<QString, QString, QString> parseTokenResponse(const QJsonObject& obj);
     void scheduleTokenRefresh(int expiresIn);
