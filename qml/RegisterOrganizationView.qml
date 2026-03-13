@@ -63,24 +63,28 @@ Rectangle {
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 80
-
+                
                 Label {
-                    text: "Create Organization"
+                    text: "Create"
                     font.family: theme.fontName
-                    font.pixelSize: 26
+                    font.pixelSize: 32
                     color: theme.textMain
                     anchors.centerIn: parent
                 }
-            }
 
-            Label {
-                text: "Organization name"
-                font.family: theme.fontName
-                font.pixelSize: 13
-                color: theme.textMain
-                Layout.bottomMargin: -6
+                Image {
+                    id: catIcon
+                    source: "../resources/heart_dog.png"
+                    fillMode: Image.PreserveAspectFit
+                    width: 120; height: 120
+                    anchors {
+                        left: parent.left
+                        bottom: parent.bottom
+                        bottomMargin: -30
+                    }
+                    z: 2 
+                }
             }
-
 
             TextField {
                 id: nameField
@@ -218,7 +222,7 @@ Rectangle {
             // Buttons
             CustomButton {
                 id: submitBtn
-                text: root.loading ? "Registering..." : "Register"
+                text: root.loading ? "Creating..." : "Create organization"
                 baseColor: theme.accentYellow
                 hoverColor: theme.accentPink
                 textColor: theme.textButton

@@ -73,6 +73,7 @@ qt_add_qml_module(pawspective-client
 		qml/UserUpdateView.qml
         qml/RegisterOrganizationView.qml
         resources/reg_dog.png
+        resources/heart_dog.png
 )
 
 target_include_directories(pawspective-client PRIVATE include)
