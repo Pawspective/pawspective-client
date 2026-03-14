@@ -83,22 +83,21 @@ ApplicationWindow {
         id: userViewComponent
         UserView {
             viewModel: userViewModel
+            
             onLogoutClicked: stackView.replace(loginViewComponent)
+            
             onEditProfileClicked: {
-                userUpdateViewModel.initialize()
+                userUpdateViewModel.initialize() 
                 stackView.push(userUpdateViewComponent)
             }
-            Component.onCompleted: {
-            if (viewModel.isAuthenticated) {
-                viewModel.refreshUserData()
-            }
-        }
-        onEditProfileClicked: stackView.push(userUpdateViewComponent, {
-                userEmail: userEmail,
-                userFirstName: userFirstName,
-                userLastName: userLastName
-            })
+            
             onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
+
+            Component.onCompleted: {
+                if (viewModel && viewModel.isAuthenticated) {
+                    viewModel.refreshUserData()
+                }
+            }
         }
     }
 

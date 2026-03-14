@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    anchors.fill: parent
+    //anchors.fill: parent
     color: "#e8d8cb"
 
     QtObject {

@@ -99,20 +99,20 @@ Rectangle {
 
                 ProfileDataField {
                     label: "Email"
-                    value: viewModel ? viewModel.email : ""
-                    onValueChanged: if (viewModel) viewModel.email = value
+                    value: (viewModel && viewModel.email) ? viewModel.email : ""
+                    onInputFinished: if (viewModel) viewModel.email = newValue
                 }
 
                 ProfileDataField {
                     label: "First Name"
-                    value: viewModel ? viewModel.firstName : ""
-                    onValueChanged: if (viewModel) viewModel.firstName = value
+                    value: (viewModel && viewModel.firstName) ? viewModel.firstName : ""
+                    onInputFinished: if (viewModel) viewModel.firstName = newValue
                 }
 
                 ProfileDataField {
                     label: "Last Name"
-                    value: viewModel ? viewModel.lastName : ""
-                    onValueChanged: if (viewModel) viewModel.lastName = value
+                    value: (viewModel && viewModel.lastName) ? viewModel.lastName : ""
+                    onInputFinished: if (viewModel) viewModel.lastName = newValue
                 }
 
                 ColumnLayout {
@@ -219,6 +219,7 @@ Rectangle {
     component ProfileDataField : ColumnLayout {
         property string label: ""
         property string value: ""
+        signal inputFinished(string newValue)
 
         Layout.fillWidth: true
         spacing: root.fieldSpacing
@@ -249,9 +250,7 @@ Rectangle {
             }
 
             onTextChanged: {
-                if (parent.value !== text) {
-                    parent.value = text
-                }
+                parent.inputFinished(text)
             }
         }
     }
