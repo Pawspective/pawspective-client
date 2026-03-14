@@ -27,8 +27,18 @@ protected:
 
 class ValidationError : public BaseError {
 public:
-    static constexpr ErrorType code = ErrorType::ValidationErrorType;
-    explicit ValidationError(const QString& message);
+    struct FieldError {
+        std::string fieldName;
+        std::string errorMessage;
+    };
+
+    explicit ValidationError(const std::vector<FieldError>& errors, std::string msg = "Validation errror.");
+    explicit ValidationError(const QJsonObject& errorResponse);
+
+    const std::vector<FieldError>& getErrors() const;
+
+private:
+    std::vector<FieldError> m_errors;
 };
 
 class ClientJsonParseError : public BaseError {

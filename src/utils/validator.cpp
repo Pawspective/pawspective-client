@@ -4,34 +4,97 @@
 #include <algorithm>
 #include <string>
 
-namespace pawspective::utils::validation {
-bool validateEmail(const std::string& email) {
-    QString qEmail = QString::fromStdString(email);
-    static const QRegularExpression
-        EmailRegex(R"(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$)", QRegularExpression::CaseInsensitiveOption);
-    QRegularExpressionMatch match = EmailRegex.match(qEmail);
-    return match.hasMatch();
+namespace pawspective::utils {
+
+Validator& Validator::field(std::string name, std::string value) {
+    m_current_field = std::move(name);
+    m_current_value = std::move(value);
+    return *this;
 }
 
-bool validatePasswordStrength(const std::string& password) {
-    if (password.length() < 8) {
-        return false;
+Validator& Validator::notBlank() {
+    if (m_current_value.empty() ||
+        std::ranges::all_of(m_current_value, [](unsigned char c) { return std::isspace(c); }))
+    {
+        addError("must not be empty or whitespace-only");
+    }
+    return *this;
+}
+
+Validator& Validator::minLength(std::size_t min) {
+    if (m_current_value.length() < min) {
+        addError("must be at least " + std::to_string(min) + " characters long");
+    }
+    return *this;
+}
+
+Validator& Validator::maxLength(std::size_t max) {
+    if (m_current_value.length() > max) {
+        addError("must be at most " + std::to_string(max) + " characters long");
+    }
+    return *this;
+}
+
+Validator& Validator::matches(const QRegularExpression& re, const std::string& msg) {
+    if (re.match(QString::fromStdString(m_current_value)).hasMatch()) {
+        addError(std::move(msg));
+    }
+    return *this;
+}
+
+Validator& Validator::validateEmail() {
+    QString qEmail = QString::fromStdString(m_current_value);
+    static const QRegularExpression
+        EmailRegex(R"(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$)", QRegularExpression::CaseInsensitiveOption);
+    if (!EmailRegex.match(qEmail).hasMatch()) {
+        addError("must be a valid email address");
+    }
+    return *this;
+}
+
+Validator& Validator::validatePasswordStrength() {
+    if (m_current_value.length() < 8) {
+        addError("Password must be at least 8 characters long");
+        return *this;
     }
 
-    QString qPass = QString::fromStdString(password);
+    QString qPass = QString::fromStdString(m_current_value);
 
     static const QRegularExpression StrengthRegex(R"((?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*;,.?"'()\-_=+]))");
 
-    return StrengthRegex.match(qPass).hasMatch();
+    if (!StrengthRegex.match(qPass).hasMatch()) {
+        addError(
+            "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special "
+            "character"
+        );
+    }
+    return *this;
 }
 
-bool minLength(const std::string& value, size_t length) { return value.length() >= length; }
+Validator& Validator::isOneOf(const std::vector<std::string>& allowed) {
+    if (std::ranges::find(allowed, m_current_value) == allowed.end()) {
+        std::ostringstream oss;
+        oss << "must be one of: [";
+        for (size_t i = 0; i < allowed.size(); ++i) {
+            if (i > 0) {
+                oss << ", ";
+            }
+            oss << allowed[i];
+        }
+        oss << "]";
 
-bool maxLength(const std::string& value, size_t length) { return value.length() <= length; }
-
-bool isOneOf(const std::string& value, const std::vector<std::string>& options) {
-    return std::ranges::find(options, value) != options.end();
+        addError("must be one of: " + oss.str() + " allowed values");
+    }
+    return *this;
 }
 
-bool validateNotEmpty(const std::string& value) { return !value.empty(); }
-}  // namespace pawspective::utils::validation
+std::optional<services::ValidationError> Validator::getValidationError() const {
+    if (m_errors.empty()) {
+        return std::nullopt;
+    }
+    return services::ValidationError{m_errors};
+}
+
+void Validator::addError(std::string msg) { m_errors.push_back({m_current_field, std::move(msg)}); }
+
+}  // namespace pawspective::utils
