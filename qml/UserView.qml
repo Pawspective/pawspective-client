@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    anchors.fill: parent
+    //anchors.fill: parent
 
     property var viewModel: null
 
@@ -97,13 +97,6 @@ Rectangle {
                 ProfileDataField { 
                     label: "Last Name"
                     value: viewModel ? viewModel.userData.lastName : ""
-                }
-
-                ProfileDataField { 
-                    label: "Organization ID"
-                    value: viewModel && viewModel.userData.organizationId ? 
-                           viewModel.userData.organizationId : "None"
-                    visible: viewModel && viewModel.userData.organizationId.has_value
                 }
 
                 RowLayout {

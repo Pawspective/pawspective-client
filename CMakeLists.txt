@@ -41,16 +41,25 @@ add_executable(pawspective-client
 	src/models/user_register_dto.cpp
 	src/services/network_client.cpp
     src/services/auth_service.cpp
+    src/services/user_service.cpp
+    src/services/organization_service.cpp
     src/services/errors.cpp
     src/viewmodels/base.cpp
     src/viewmodels/user_viewmodel.cpp
     src/viewmodels/user_update_viewmodel.cpp
+    src/viewmodels/login_view_model.cpp
+    src/viewmodels/register_view_model.cpp
+    src/models/organization_dto.cpp
+	src/models/organization_update_dto.cpp
+	src/models/organization_register_dto.cpp
+    src/models/city_dto.cpp
 	${PROJECT_HEADERS}
 )
 
 qt_add_qml_module(pawspective-client
     URI pawspective
     VERSION 1.0
+    NO_CACHEGEN
     QML_FILES
         qml/Main.qml
         qml/UserView.qml
@@ -77,3 +86,29 @@ target_link_libraries(pawspective-client PRIVATE
     Qt6::Quick
     Qt6::QuickControls2
 )
+
+# Tests
+find_package(Qt6 REQUIRED COMPONENTS Test)
+enable_testing()
+
+add_executable(organization_service_test
+    tests/organization_service_test.cpp
+    include/services/organization_service.hpp
+    src/models/organization_dto.cpp
+    src/models/organization_register_dto.cpp
+    src/models/organization_update_dto.cpp
+    src/models/city_dto.cpp
+    src/services/organization_service.cpp
+    src/services/errors.cpp
+)
+
+target_include_directories(organization_service_test PRIVATE include)
+
+target_link_libraries(organization_service_test PRIVATE
+    Qt6::Core
+    Qt6::Network
+    Qt6::Test
+)
+
+add_test(NAME organization_service_test COMMAND organization_service_test)
+

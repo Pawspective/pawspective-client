@@ -12,10 +12,8 @@ namespace pawspective::viewmodels {
 
 class UserViewModel : public BaseViewModel {
     Q_OBJECT
-
-    Q_PROPERTY(models::UserDTO userData READ getUserData NOTIFY userDataChanged)
-
-    Q_PROPERTY(bool isAuthenticated READ getIsAuthenticated NOTIFY authStateChanged)
+    Q_PROPERTY(models::UserDTO userData READ userData NOTIFY userDataChanged)
+    Q_PROPERTY(bool isAuthenticated READ isAuthenticated NOTIFY authStateChanged)
 
 public:
     explicit UserViewModel(
@@ -23,15 +21,12 @@ public:
         services::UserService& userService,
         QObject* parent = nullptr
     );
-    ~UserViewModel() override = default;
 
-    const models::UserDTO& getUserData() const;
-    bool getIsAuthenticated() const;
+    const models::UserDTO& userData() const;
+    bool isAuthenticated() const;
 
     Q_INVOKABLE void initialize() override;
-
     Q_INVOKABLE void cleanup() override;
-
     Q_INVOKABLE void refreshUserData();
 
 signals:
@@ -43,7 +38,12 @@ signals:
     void sessionExpired();
 
 private slots:
-    void handleLoginSuccess(const QString& accessToken, const QString& refreshToken, const QString& tokenType);
+    void handleLoginSuccess(
+        const QString& accessToken,
+        const QString& refreshToken,
+        const QString& tokenType,
+        uint64_t userId
+    );
     void handleLoginFailed(QSharedPointer<services::BaseError> error);
     void handleLogoutSuccess();
     void handleLogoutFailed(QSharedPointer<services::BaseError> error);
@@ -64,7 +64,6 @@ private:
     void loadUserData();
     void updateUserData(const models::UserDTO& user);
     void clearUserData();
-    QString errorToString(QSharedPointer<services::BaseError> error) const;
 };
 
 }  // namespace pawspective::viewmodels

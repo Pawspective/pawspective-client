@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
-import Pawspective.ViewModels 1.0
 
 ApplicationWindow {
     id: window
@@ -11,21 +10,24 @@ ApplicationWindow {
     title: "User Profile App"
 
     // ViewModels
-    UserViewModel {
-        id: userViewModel
-        onSessionExpired: {
+    Connections {
+        target: userViewModel
+        function onSessionExpired() {
             sessionExpiredDialog.open()
         }
     }
 
-    UserUpdateViewModel {
-        id: userUpdateViewModel
-        onSessionExpired: {
+    Connections {
+        target: userUpdateViewModel
+        function onSaveCompleted() {
+        stackView.pop()
+    }
+        function onSessionExpired() {
             stackView.pop()
             sessionExpiredDialog.open()
         }
     }
-
+    
     StackView {
         id: stackView
         anchors.fill: parent
@@ -86,6 +88,11 @@ ApplicationWindow {
                 userUpdateViewModel.initialize()
                 stackView.push(userUpdateViewComponent)
             }
+            Component.onCompleted: {
+            if (viewModel.isAuthenticated) {
+                viewModel.refreshUserData()
+            }
+        }
         }
     }
 
@@ -98,7 +105,7 @@ ApplicationWindow {
                 stackView.pop()
             }
             onSubmit: {
-                // Wait for result
+                userUpdateViewModel.saveChanges()
             }
         }
     }

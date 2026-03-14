@@ -8,7 +8,7 @@ UserViewModel::UserViewModel(services::AuthService& authService, services::UserS
     // AuthService signals
     connect(&m_authService, &services::AuthService::loginSuccess, this, &UserViewModel::handleLoginSuccess);
     connect(&m_authService, &services::AuthService::loginFailed, this, &UserViewModel::handleLoginFailed);
-    connect(&m_authService, &services::AuthService::logoutSuccess, this, &UserViewModel::handleLogoutSuccess);
+    connect(&m_authService, &services::AuthService::sessionEnded, this, &UserViewModel::handleLogoutSuccess);
     connect(&m_authService, &services::AuthService::logoutFailed, this, &UserViewModel::handleLogoutFailed);
     connect(
         &m_authService,
@@ -33,27 +33,19 @@ UserViewModel::UserViewModel(services::AuthService& authService, services::UserS
     connect(&m_authService, &services::AuthService::refreshFailed, this, &UserViewModel::handleTokenRefreshFailed);
 }
 
-const models::UserDTO& UserViewModel::getUserData() const { return m_userData; }
-bool UserViewModel::getIsAuthenticated() const { return m_isAuthenticated; }
+const models::UserDTO& UserViewModel::userData() const { return m_userData; }
+bool UserViewModel::isAuthenticated() const { return m_isAuthenticated; }
 
 void UserViewModel::initialize() {
-    if (m_authService.isAuthenticated()) {
-        m_isAuthenticated = true;
-        emit authStateChanged();
-        loadUserData();
-    } else {
-        m_isAuthenticated = false;
-        emit authStateChanged();
-    }
-}
-
-void UserViewModel::cleanup() {}
-
-void UserViewModel::refreshUserData() {
-    if (m_isAuthenticated && !isBusy()) {
+    updateProperty(m_isAuthenticated, m_authService.isAuthenticated(), [this] { emit authStateChanged(); });
+    if (m_isAuthenticated) {
         loadUserData();
     }
 }
+
+void UserViewModel::cleanup() { clearUserData(); }
+
+void UserViewModel::refreshUserData() { loadUserData(); }
 
 void UserViewModel::loadUserData() {
     if (isBusy()) {
@@ -64,107 +56,65 @@ void UserViewModel::loadUserData() {
 }
 
 // AuthService handlers
-void UserViewModel::handleLoginSuccess(const QString&, const QString&, const QString&) {
-    m_isAuthenticated = true;
-    emit authStateChanged();
+void UserViewModel::handleLoginSuccess(const QString&, const QString&, const QString&, uint64_t /*userId*/) {
+    updateProperty(m_isAuthenticated, true, [this] { emit authStateChanged(); });
     loadUserData();
 }
 
 void UserViewModel::handleLoginFailed(QSharedPointer<services::BaseError> error) {
-    QString errorMsg = errorToString(error);
-    m_isAuthenticated = false;
-    emit authStateChanged();
-    emitError(ErrorType::AuthenticationError, errorMsg);
+    updateProperty(m_isAuthenticated, false, [this] { emit authStateChanged(); });
+    if (error) {
+        emitError(ErrorType::AuthenticationError, error->getMessage());
+    }
 }
 
 void UserViewModel::handleLogoutSuccess() {
-    m_isAuthenticated = false;
+    updateProperty(m_isAuthenticated, false, [this] { emit authStateChanged(); });
     clearUserData();
-    emit authStateChanged();
 }
 
 void UserViewModel::handleLogoutFailed(QSharedPointer<services::BaseError> error) {
-    QString errorMsg = errorToString(error);
-    m_isAuthenticated = false;
-    clearUserData();
-    emit authStateChanged();
-    emitError(ErrorType::NetworkError, errorMsg);
+    if (error) {
+        emitError(ErrorType::NetworkError, error->getMessage());
+    }
 }
 
 void UserViewModel::handleGetCurrentUserSuccess(const models::UserDTO& user) {
     setIsBusy(false);
-    m_isAuthenticated = true;
     updateUserData(user);
+    updateProperty(m_isAuthenticated, true, [this] { emit authStateChanged(); });
     emit userDataLoaded();
 }
 
 void UserViewModel::handleGetCurrentUserFailed(QSharedPointer<services::BaseError> error) {
     setIsBusy(false);
-    QString errorMsg = errorToString(error);
-    emitError(ErrorType::NetworkError, errorMsg);
-    emit userDataLoadFailed(errorMsg);
+    updateProperty(m_isAuthenticated, false, [this] { emit authStateChanged(); });
+    if (error) {
+        emit userDataLoadFailed(error->getMessage());
+        emitError(ErrorType::NetworkError, error->getMessage());
+    }
 }
 
 // UserService handlers
-void UserViewModel::handleRegisterSuccess(const models::UserDTO& user) {
-    m_isAuthenticated = true;
-    emit authStateChanged();
-
-    updateUserData(user);
-    emit userDataLoaded();
-}
+void UserViewModel::handleRegisterSuccess(const models::UserDTO& user) { updateUserData(user); }
 
 void UserViewModel::handleUpdateUserProfileSuccess(const models::UserDTO& user) { updateUserData(user); }
 
 void UserViewModel::handleTokenRefreshFailed(QSharedPointer<services::BaseError> error) {
-    m_isAuthenticated = false;
+    updateProperty(m_isAuthenticated, false, [this] { emit authStateChanged(); });
     clearUserData();
-    emit authStateChanged();
     if (error) {
-        emitError(error->getType(), error->getMessage());
+        emitError(ErrorType::AuthenticationError, error->getMessage());
     }
     emit sessionExpired();
 }
 
 void UserViewModel::updateUserData(const models::UserDTO& user) {
-    bool changed = false;
-
-    if (m_userData.id != user.id) {
-        m_userData.id = user.id;
-        changed = true;
-    }
-    if (m_userData.email != user.email) {
-        m_userData.email = user.email;
-        changed = true;
-    }
-    if (m_userData.firstName != user.firstName) {
-        m_userData.firstName = user.firstName;
-        changed = true;
-    }
-    if (m_userData.lastName != user.lastName) {
-        m_userData.lastName = user.lastName;
-        changed = true;
-    }
-    if (m_userData.organizationId != user.organizationId) {
-        m_userData.organizationId = user.organizationId;
-        changed = true;
-    }
-
-    if (changed) {
-        emit userDataChanged();
-    }
+    updateProperty(m_userData, user, [this] { emit userDataChanged(); });
 }
 
 void UserViewModel::clearUserData() {
-    m_userData = models::UserDTO();
-    emit userDataChanged();
-}
-
-QString UserViewModel::errorToString(QSharedPointer<services::BaseError> error) const {
-    if (error.isNull()) {
-        return tr("Unknown error");
-    }
-    return error->getMessage();
+    updateProperty(m_userData, models::UserDTO{}, [this] { emit userDataChanged(); });
 }
 
 }  // namespace pawspective::viewmodels

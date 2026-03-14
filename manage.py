@@ -84,15 +84,17 @@ def filter_compile_commands(preset="debug"):
                 'qrc_',
                 'ui_',
                 '_qmltyperegistrations',
-                'qmlcache',             
+                'qmlcache',
                 '.rcc',
+                '/tests/',
+                '\\tests\\',
             ])
         ]
         
         with open(compile_commands_path, 'w', encoding='utf-8') as f:
             json.dump(filtered, f, indent=2)
         
-        print(f"✓ Filtered compile_commands.json: {len(commands)} -> {len(filtered)} entries")
+        print(f"[OK] Filtered compile_commands.json: {len(commands)} -> {len(filtered)} entries")
 
 def restore_compile_commands(preset="debug"):
     """Restore the original compile_commands.json from the backup."""
@@ -102,7 +104,12 @@ def restore_compile_commands(preset="debug"):
     if backup_path.exists():
         shutil.copy(backup_path, compile_commands_path)
         backup_path.unlink()
-        print("✓ Restored compile_commands.json")
+        print("[OK] Restored compile_commands.json")
+
+def test(preset="debug"):
+    """Build and run tests."""
+    build(preset)
+    run_command(["ctest", "--test-dir", f"build-{preset}", "--output-on-failure", "-V", "--timeout", "120"])
 
 def build(preset="debug"):
     """Configure and build the project."""
@@ -171,9 +178,7 @@ def cppcheck_lint():
             "--project=build-debug/compile_commands.json",
             "--file-filter=src/*",
             "--file-filter=include/*",
-            "-I", "include",
-            "--suppress=normalCheckLevelMaxBranches",
-            "--suppress=checkersReport"
+            "--library=std",
         ]
         
         if pathlib.Path(".cppcheck_suppressions").exists():
@@ -208,12 +213,12 @@ def tidy_lint():
         cmd = [sys.executable, run_clang_tidy_path,
                "-p", str(pathlib.Path("build-debug").resolve()), 
                "-j", str(NPROCS),
-               f"-config-file={pathlib.Path(".clang-tidy").resolve()}",
+               f"-config-file={pathlib.Path('.clang-tidy').resolve()}",
                "-header-filter=/src/.*",
                "-extra-arg=-Wno-unknown-argument",
                '-extra-arg=-std=c++20',
                "-extra-arg=--target=x86_64-w64-windows-gnu",
-               ] 
+               ]
         
         run_command(cmd)
     finally:
@@ -232,7 +237,7 @@ def lint(steps="all"):
         elif step == "tidy":
             tidy_lint()
     
-    print("\n\033[92m✓ All lint checks passed!\033[0m")
+    print("\n\033[92m[OK] All lint checks passed!\033[0m")
 
 def main():
     if len(sys.argv) < 2:
@@ -242,6 +247,7 @@ def main():
             "  build [preset]           - Build project (debug/release, default: debug)\n"
             "  run [preset]             - Run application (default: debug)\n"
             "  clean                    - Clean build artifacts\n"
+            "  test [preset]            - Build and run tests (default: debug)\n"
             "  format                   - Format code with clang-format\n"
             "  format-check             - Check code formatting without changes\n"
             "  cppcheck                 - Run cppcheck static analysis\n"
@@ -260,6 +266,8 @@ def main():
         run(preset)
     elif cmd == "clean":
         clean()
+    elif cmd == "test":
+        test(preset)
     elif cmd == "format":
         format_code()
     elif cmd == "format-check":

@@ -3,33 +3,37 @@
 #include <QQmlContext>
 #include <QUrl>
 
+#include "mainwindow.hpp"
 #include "services/auth_service.hpp"
-#include "services/network_client.hpp"
 #include "services/user_service.hpp"
+#include "viewmodels/login_view_model.hpp"
+#include "viewmodels/register_view_model.hpp"
 #include "viewmodels/user_update_viewmodel.hpp"
 #include "viewmodels/user_viewmodel.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
 
-    auto networkClient = std::make_unique<pawspective::services::NetworkClient>();
-    auto authService = std::make_unique<pawspective::services::AuthService>(*networkClient);
-    auto userService = std::make_unique<pawspective::services::UserService>(*networkClient);
+    qRegisterMetaType<pawspective::models::UserDTO>("UserDTO");
+    qRegisterMetaType<pawspective::models::UserDTO>("pawspective::models::UserDTO");
 
-    auto userViewModel = std::make_unique<pawspective::viewmodels::UserViewModel>(*authService, *userService);
-    auto userUpdateViewModel = std::make_unique<
-        pawspective::viewmodels::UserUpdateViewModel>(*userService, *authService);
+    pawspective::services::NetworkClient networkClient(&app);
+    pawspective::services::AuthService authService(networkClient);
+    pawspective::services::UserService userService(networkClient);
+
+    auto userViewModel = new pawspective::viewmodels::UserViewModel(authService, userService, &app);
+    auto userUpdateViewModel = new pawspective::viewmodels::UserUpdateViewModel(userService, authService);
+    auto loginViewModel = new pawspective::viewmodels::LoginViewModel(authService, &app);
+    auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
 
     QQmlApplicationEngine engine;
 
-    qmlRegisterType<pawspective::viewmodels::UserViewModel>("Pawspective.ViewModels", 1, 0, "UserViewModel");
-    qmlRegisterType<
-        pawspective::viewmodels::UserUpdateViewModel>("Pawspective.ViewModels", 1, 0, "UserUpdateViewModel");
-
-    engine.rootContext()->setContextProperty("userViewModel", userViewModel.get());
-    engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel.get());
-
     const QUrl url(QStringLiteral("qrc:/pawspective/qml/Main.qml"));
+    engine.rootContext()->setContextProperty("userViewModel", userViewModel);
+    engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);
+
+    engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
+    engine.rootContext()->setContextProperty("registerViewModel", registerViewModel);
 
     QObject::connect(
         &engine,
@@ -45,5 +49,5 @@ int main(int argc, char* argv[]) {
 
     engine.load(url);
 
-    return app.exec();
+    return app.exec();  // NOLINT
 }

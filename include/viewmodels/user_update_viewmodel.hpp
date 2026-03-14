@@ -13,12 +13,11 @@ namespace pawspective::viewmodels {
 
 class UserUpdateViewModel : public BaseViewModel {
     Q_OBJECT
-
-    Q_PROPERTY(QString email READ getEmail WRITE setEmail NOTIFY emailChanged)
-    Q_PROPERTY(QString firstName READ getFirstName WRITE setFirstName NOTIFY firstNameChanged)
-    Q_PROPERTY(QString lastName READ getLastName WRITE setLastName NOTIFY lastNameChanged)
-    Q_PROPERTY(QString newPassword READ getNewPassword WRITE setNewPassword NOTIFY newPasswordChanged)
-    Q_PROPERTY(bool isDirty READ getIsDirty NOTIFY dirtyChanged)
+    Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)
+    Q_PROPERTY(QString firstName READ firstName WRITE setFirstName NOTIFY firstNameChanged)
+    Q_PROPERTY(QString lastName READ lastName WRITE setLastName NOTIFY lastNameChanged)
+    Q_PROPERTY(QString newPassword READ newPassword WRITE setNewPassword NOTIFY newPasswordChanged)
+    Q_PROPERTY(bool isDirty READ isDirty NOTIFY dirtyChanged)
 
 public:
     explicit UserUpdateViewModel(
@@ -26,17 +25,16 @@ public:
         services::AuthService& authService,
         QObject* parent = nullptr
     );
-    ~UserUpdateViewModel() override = default;
 
-    QString getEmail() const;
-    QString getFirstName() const;
-    QString getLastName() const;
-    QString getNewPassword() const;
-    bool getIsDirty() const;
+    QString email() const;
+    QString firstName() const;
+    QString lastName() const;
+    QString newPassword() const;
+    bool isDirty() const { return m_isDirty; }
 
-    void setEmail(const QString& email);
-    void setFirstName(const QString& firstName);
-    void setLastName(const QString& lastName);
+    void setEmail(const QString& value);
+    void setFirstName(const QString& value);
+    void setLastName(const QString& value);
     void setNewPassword(const QString& password);
 
     Q_INVOKABLE void initialize() override;
@@ -71,8 +69,8 @@ private:
 
     bool m_isDirty;
 
-    void updateDirtyState();
-    QString errorToString(QSharedPointer<services::BaseError> error) const;
+    void setDirty(bool dirty);
+    void notifyAllChanged();
 };
 
 }  // namespace pawspective::viewmodels

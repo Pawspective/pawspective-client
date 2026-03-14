@@ -4,7 +4,7 @@ import QtQuick.Layouts 2.15
 
 Rectangle {
     id: root
-    anchors.fill: parent
+    //anchors.fill: parent
 
     property var viewModel: null
 
@@ -219,7 +219,6 @@ Rectangle {
     component ProfileDataField : ColumnLayout {
         property string label: ""
         property string value: ""
-        signal valueChanged(string newValue)
 
         Layout.fillWidth: true
         spacing: root.fieldSpacing
@@ -250,7 +249,9 @@ Rectangle {
             }
 
             onTextChanged: {
-                parent.valueChanged(text)
+                if (parent.value !== text) {
+                    parent.value = text
+                }
             }
         }
     }

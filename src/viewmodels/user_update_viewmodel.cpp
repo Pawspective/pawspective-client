@@ -1,5 +1,4 @@
 #include "viewmodels/user_update_viewmodel.hpp"
-#include <QDebug>
 
 namespace pawspective::viewmodels {
 
@@ -43,69 +42,67 @@ void UserUpdateViewModel::cleanup() {
 }
 
 // Геттеры
-QString UserUpdateViewModel::getEmail() const {
+QString UserUpdateViewModel::email() const {
     if (m_changes.email.has_value()) {
         return m_changes.email.value();
     }
     return m_originalData.email;
 }
 
-QString UserUpdateViewModel::getFirstName() const {
+QString UserUpdateViewModel::firstName() const {
     if (m_changes.firstName.has_value()) {
         return m_changes.firstName.value();
     }
     return m_originalData.firstName;
 }
 
-QString UserUpdateViewModel::getLastName() const {
+QString UserUpdateViewModel::lastName() const {
     if (m_changes.lastName.has_value()) {
         return m_changes.lastName.value();
     }
     return m_originalData.lastName;
 }
 
-QString UserUpdateViewModel::getNewPassword() const {
+QString UserUpdateViewModel::newPassword() const {
     if (m_changes.password.has_value()) {
         return m_changes.password.value();
     }
     return QString();
 }
 
-bool UserUpdateViewModel::getIsDirty() const { return m_isDirty; }
-
 // Сеттеры
-void UserUpdateViewModel::setEmail(const QString& email) {
-    if (getEmail() == email) {
+void UserUpdateViewModel::setEmail(const QString& value) {
+    if (email() == value) {
         return;
     }
 
-    m_changes.email = email;
+    m_changes.email = value;
     emit emailChanged();
-    updateDirtyState();
+    setDirty(true);
 }
 
-void UserUpdateViewModel::setFirstName(const QString& firstName) {
-    if (getFirstName() == firstName) {
+void UserUpdateViewModel::setFirstName(const QString& value) {
+    if (firstName() == value) {
         return;
     }
 
-    m_changes.firstName = firstName;
+    m_changes.firstName = value;
     emit firstNameChanged();
-    updateDirtyState();
+    setDirty(true);
 }
 
-void UserUpdateViewModel::setLastName(const QString& lastName) {
-    if (getLastName() == lastName) {
+void UserUpdateViewModel::setLastName(const QString& value) {
+    if (lastName() == value) {
         return;
     }
 
-    m_changes.lastName = lastName;
+    m_changes.lastName = value;
     emit lastNameChanged();
-    updateDirtyState();
+    setDirty(true);
 }
 
 void UserUpdateViewModel::setNewPassword(const QString& password) {
-    if (getNewPassword() == password) {
+    if (newPassword() == password) {
         return;
     }
 
@@ -115,11 +112,11 @@ void UserUpdateViewModel::setNewPassword(const QString& password) {
         m_changes.password = password;
     }
     emit newPasswordChanged();
-    updateDirtyState();
+    setDirty(true);
 }
 
 void UserUpdateViewModel::saveChanges() {
-    if (isBusy()) {
+    if (!m_isDirty || isBusy()) {
         return;
     }
 
@@ -130,25 +127,12 @@ void UserUpdateViewModel::saveChanges() {
 
 void UserUpdateViewModel::discardChanges() {
     m_changes = models::UserUpdateDTO();
-
-    emit emailChanged();
-    emit firstNameChanged();
-    emit lastNameChanged();
-    emit newPasswordChanged();
-
-    m_isDirty = false;
-    emit dirtyChanged();
+    setDirty(false);
+    notifyAllChanged();
 }
 
-void UserUpdateViewModel::updateDirtyState() {
-    bool dirty =
-        m_changes.email.has_value() || m_changes.firstName.has_value() || m_changes.lastName.has_value() ||
-        m_changes.password.has_value();
-
-    if (m_isDirty != dirty) {
-        m_isDirty = dirty;
-        emit dirtyChanged();
-    }
+void UserUpdateViewModel::setDirty(bool dirty) {
+    updateProperty(m_isDirty, dirty, [this] { emit dirtyChanged(); });
 }
 
 void UserUpdateViewModel::handleGetCurrentUserSuccess(const models::UserDTO& user) {
@@ -156,13 +140,8 @@ void UserUpdateViewModel::handleGetCurrentUserSuccess(const models::UserDTO& use
     m_originalData = user;
     m_changes = models::UserUpdateDTO();
 
-    emit emailChanged();
-    emit firstNameChanged();
-    emit lastNameChanged();
-    emit newPasswordChanged();
-
-    m_isDirty = false;
-    emit dirtyChanged();
+    setDirty(false);
+    notifyAllChanged();
 }
 
 void UserUpdateViewModel::handleUpdateSuccess(const models::UserDTO& user) {
@@ -171,13 +150,8 @@ void UserUpdateViewModel::handleUpdateSuccess(const models::UserDTO& user) {
     m_originalData = user;
     m_changes = models::UserUpdateDTO();
 
-    emit emailChanged();
-    emit firstNameChanged();
-    emit lastNameChanged();
-    emit newPasswordChanged();
-
-    m_isDirty = false;
-    emit dirtyChanged();
+    setDirty(false);
+    notifyAllChanged();
 
     emit saveCompleted(user);
 }
@@ -185,7 +159,8 @@ void UserUpdateViewModel::handleUpdateSuccess(const models::UserDTO& user) {
 void UserUpdateViewModel::handleRequestFailed(QSharedPointer<services::BaseError> error) {
     setIsBusy(false);
 
-    QString errorMessage = errorToString(error);
+    QString errorMessage = error ? error->getMessage() : "Unknown error";
+    ;
     emit saveFailed(errorMessage);
     emitError(ErrorType::NetworkError, errorMessage);
 }
@@ -194,13 +169,16 @@ void UserUpdateViewModel::handleTokenRefreshFailed(QSharedPointer<services::Base
     setIsBusy(false);
     if (error) {
         emit saveFailed(error->getMessage());
-        emitError(error->getType(), error->getMessage());
+        emitError(ErrorType::AuthenticationError, error->getMessage());
     }
     emit sessionExpired();
 }
 
-QString UserUpdateViewModel::errorToString(QSharedPointer<services::BaseError> error) const {
-    return error.isNull() ? tr("Unknown error") : error->getMessage();
+void UserUpdateViewModel::notifyAllChanged() {
+    emit emailChanged();
+    emit firstNameChanged();
+    emit lastNameChanged();
+    emit newPasswordChanged();
 }
 
 }  // namespace pawspective::viewmodels
