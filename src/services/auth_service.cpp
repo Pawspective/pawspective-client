@@ -86,10 +86,22 @@ namespace pawspective::services {
 AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient), m_userId(std::nullopt) {
     connect(&m_networkClient, &NetworkClient::unauthorizedAccess, this, &AuthService::handleUnauthorizedAccess);
+    connect(&m_networkClient, &NetworkClient::invalidTokenDetected, this, [this]() { clearSession(); });
     m_refreshTimer.setSingleShot(true);
     connect(&m_refreshTimer, &QTimer::timeout, this, &AuthService::onRefreshTimerTimeout);
     m_networkClient.setTokenProvider([this]() { return m_accessToken; });
     m_networkClient.setUserId(m_userId);
+}
+
+void AuthService::clearSession() {
+    m_isRefreshing = false;
+    m_accessToken.clear();
+    m_refreshToken.clear();
+    m_userId = std::nullopt;
+    m_networkClient.setUserId(std::nullopt);
+    stopTokenRefreshTimer();
+    m_networkClient.clearPendingRequests();
+    emit sessionEnded();
 }
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
@@ -137,15 +149,12 @@ void AuthService::handleSuccess(
 }
 
 void AuthService::login(const QString& email, const QString& password) {
-    if (!pawspective::utils::validation::validateEmail(email.toStdString())) {
-        auto error = QSharedPointer<BaseError>(new ValidationError("Invalid email format"));
-        emit loginFailed(error);
-        return;
-    }
+    pawspective::utils::Validator validator;
+    validator.field("email", email.toStdString()).validateEmail();
+    validator.field("password", password.toStdString()).notBlank();
 
-    if (!pawspective::utils::validation::validateNotEmpty(password.toStdString())) {
-        auto error = QSharedPointer<BaseError>(new ValidationError("Password cannot be empty"));
-        emit loginFailed(error);
+    if (auto validationError = validator.getValidationError()) {
+        emit loginFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*validationError))));
         return;
     }
 
@@ -200,14 +209,7 @@ void AuthService::logout() {
         [this](QNetworkReply& reply) {
             handleSuccess(
                 reply,
-                [this](const QJsonObject&) {
-                    m_accessToken.clear();
-                    m_refreshToken.clear();
-                    m_userId = std::nullopt;
-                    m_networkClient.setUserId(std::nullopt);
-                    stopTokenRefreshTimer();
-                    emit logoutSuccess();
-                },
+                [this](const QJsonObject&) { clearSession(); },
                 [this](QSharedPointer<BaseError> error) { emit logoutFailed(error); }
             );
         },
@@ -224,9 +226,11 @@ void AuthService::refreshToken(const QString& refreshToken) {
 
     m_isRefreshing = true;
 
-    if (!pawspective::utils::validation::validateNotEmpty(refreshToken.toStdString())) {
-        auto error = QSharedPointer<BaseError>(new ValidationError("Refresh token cannot be empty"));
-        emit refreshFailed(error);
+    pawspective::utils::Validator validator;
+    validator.field("refresh_token", refreshToken.toStdString()).notBlank();
+
+    if (auto validationError = validator.getValidationError()) {
+        emit refreshFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*validationError))));
         m_isRefreshing = false;
         return;
     }
@@ -267,26 +271,14 @@ void AuthService::refreshToken(const QString& refreshToken) {
                 },
                 [this](QSharedPointer<BaseError> error) {
                     emit refreshFailed(error);
-                    m_isRefreshing = false;
-                    m_accessToken.clear();
-                    m_refreshToken.clear();
-                    m_userId = std::nullopt;
-                    m_networkClient.setUserId(std::nullopt);
-                    stopTokenRefreshTimer();
-                    m_networkClient.clearPendingRequests();
+                    clearSession();
                 }
             );
         },
         [this](QNetworkReply& reply) {
             handleError(reply, [this](QSharedPointer<BaseError> error) {
                 emit refreshFailed(error);
-                m_isRefreshing = false;
-                m_accessToken.clear();
-                m_refreshToken.clear();
-                m_userId = std::nullopt;
-                m_networkClient.setUserId(std::nullopt);
-                stopTokenRefreshTimer();
-                m_networkClient.clearPendingRequests();
+                clearSession();
             });
         }
     );
