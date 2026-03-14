@@ -43,12 +43,14 @@ add_executable(pawspective-client
     src/services/auth_service.cpp
     src/services/user_service.cpp
     src/services/organization_service.cpp
+    src/services/city_service.cpp
     src/services/errors.cpp
     src/viewmodels/base.cpp
     src/viewmodels/user_viewmodel.cpp
     src/viewmodels/user_update_viewmodel.cpp
     src/viewmodels/login_view_model.cpp
     src/viewmodels/register_view_model.cpp
+    src/viewmodels/register_organization_view_model.cpp
     src/models/organization_dto.cpp
 	src/models/organization_update_dto.cpp
 	src/models/organization_register_dto.cpp
@@ -72,7 +74,9 @@ qt_add_qml_module(pawspective-client
         resources/loading_paw.png
         resources/tricky_cat.png
 		qml/UserUpdateView.qml
+        qml/RegisterOrganizationView.qml
         resources/reg_dog.png
+        resources/heart_dog.png
 )
 
 target_include_directories(pawspective-client PRIVATE include)
@@ -94,6 +98,7 @@ enable_testing()
 add_executable(organization_service_test
     tests/organization_service_test.cpp
     include/services/organization_service.hpp
+    src/utils/validator.cpp
     src/models/organization_dto.cpp
     src/models/organization_register_dto.cpp
     src/models/organization_update_dto.cpp

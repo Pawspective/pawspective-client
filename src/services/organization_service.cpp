@@ -10,6 +10,7 @@
 #include "models/organization_dto.hpp"
 #include "services/errors.hpp"
 #include "services/i_network_client.hpp"
+#include "validator.hpp"
 
 namespace pawspective::services {
 
@@ -84,6 +85,14 @@ void OrganizationService::getOrganization(qint64 id) {
 
 void OrganizationService::createOrganization(const models::OrganizationRegisterDTO& dto) {
     const QJsonDocument doc(dto.toJson());
+
+    utils::Validator validator;
+    validator.field("name", dto.name.toStdString()).notBlank();
+    if (auto error = validator.getValidationError()) {
+        emit createOrganizationFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
     m_networkClient.post(
         QUrl("/orgs"),
         doc.toJson(QJsonDocument::Compact),
@@ -105,6 +114,14 @@ void OrganizationService::createOrganization(const models::OrganizationRegisterD
 
 void OrganizationService::updateOrganization(qint64 id, const models::OrganizationUpdateDTO& dto) {
     const QJsonDocument doc(dto.toJson());
+    utils::Validator validator;
+    if (dto.name) {
+        validator.field("name", dto.name->toStdString()).notBlank();
+    }
+    if (auto error = validator.getValidationError()) {
+        emit updateOrganizationFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
     m_networkClient.put(
         QUrl(QString("/orgs/%1").arg(id)),
         doc.toJson(QJsonDocument::Compact),

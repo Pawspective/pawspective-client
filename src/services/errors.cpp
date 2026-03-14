@@ -1,5 +1,6 @@
 #include "services/errors.hpp"
 #include <qjsondocument.h>
+#include <QJsonArray>
 
 namespace pawspective::services {
 
@@ -26,7 +27,29 @@ BaseError::BaseError(const QString& message) : m_message(message) {}
 
 QString BaseError::getMessage() const { return m_message; }
 
-ValidationError::ValidationError(const QString& message) : BaseError(message) {}
+ValidationError::ValidationError(const std::vector<FieldError>& errors, std::string msg)
+    : BaseError(QString::fromStdString(std::move(msg))), m_errors(errors) {}
+
+ValidationError::ValidationError(const QJsonObject& errorResponse)
+    : BaseError(extractMessage(errorResponse, "Validation error")) {
+    if (errorResponse.contains("details") && errorResponse["details"].isArray()) {
+        QJsonArray errorsArray = errorResponse["details"].toArray();
+        for (const auto& errorVal : errorsArray) {
+            if (errorVal.isObject()) {
+                QJsonObject errorObj = errorVal.toObject();
+                if (errorObj.contains("field") && errorObj["field"].isString() && errorObj.contains("message") &&
+                    errorObj["message"].isString())
+                {
+                    m_errors.push_back(
+                        {errorObj["field"].toString().toStdString(), errorObj["message"].toString().toStdString()}
+                    );
+                }
+            }
+        }
+    }
+}
+
+const std::vector<ValidationError::FieldError>& ValidationError::getErrors() const { return m_errors; }
 
 ClientJsonParseError::ClientJsonParseError(const QString& message) : BaseError(message) {}
 

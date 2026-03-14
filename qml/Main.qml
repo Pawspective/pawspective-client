@@ -93,6 +93,20 @@ ApplicationWindow {
                 viewModel.refreshUserData()
             }
         }
+        onEditProfileClicked: stackView.push(userUpdateViewComponent, {
+                userEmail: userEmail,
+                userFirstName: userFirstName,
+                userLastName: userLastName
+            })
+            onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
+        }
+    }
+
+    Component {
+        id: registerOrganizationViewComponent
+        RegisterOrganizationView {
+            onBackClicked: stackView.pop()
+            onRegisterSuccess: stackView.pop()
         }
     }
 

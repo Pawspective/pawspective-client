@@ -1,7 +1,6 @@
 #include "viewmodels/register_view_model.hpp"
 #include "models/user_register_dto.hpp"
 #include "services/errors.hpp"
-#include "validator.hpp"
 
 namespace pawspective::viewmodels {
 RegisterViewModel::RegisterViewModel(services::UserService& userService, QObject* parent)
@@ -17,7 +16,16 @@ RegisterViewModel::RegisterViewModel(services::UserService& userService, QObject
         this,
         [this](QSharedPointer<services::BaseError> error) {
             setIsBusy(false);
-            emitError(ValidationError, error->getMessage());
+            if (const auto& validationError = error.dynamicCast<services::ValidationError>()) {
+                emitError(
+                    ValidationError,
+                    validationError->getErrors().empty()
+                        ? validationError->getMessage()
+                        : QString::fromStdString(validationError->getErrors()[0].errorMessage)
+                );
+            } else {
+                emitError(AuthenticationError, error->getMessage());
+            }
             emit registrationFinished(false);
         }
     );
@@ -28,15 +36,6 @@ void RegisterViewModel::registerUser() {
         m_confirmPassword.isEmpty())
     {
         emitError(ErrorType::ValidationError, "All fields are required.");
-        return;
-    }
-
-    if (m_password != m_confirmPassword) {
-        emitError(ErrorType::ValidationError, "Passwords do not match.");
-        return;
-    }
-    if (!pawspective::utils::validation::validateEmail(m_email.toStdString())) {
-        emitError(ErrorType::ValidationError, "Invalid email format.");
         return;
     }
     pawspective::models::UserRegisterDTO dto{m_email, m_password, m_firstName, m_lastName};

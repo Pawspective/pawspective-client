@@ -47,6 +47,7 @@ Rectangle {
 
     signal logoutClicked()
     signal editProfileClicked()
+    signal registerOrganizationClicked()
 
     color: theme.pageBg
 
@@ -158,7 +159,7 @@ Rectangle {
 
                 SidebarItem { text: "Profile"; active: true }
                 SidebarItem { text: "Search" }
-                SidebarItem { text: "Organization" }
+                SidebarItem { text: "Organization"; onClicked: root.registerOrganizationClicked() }
 
                 Image {
                     Layout.alignment: Qt.AlignHCenter
@@ -214,6 +215,8 @@ Rectangle {
         radius: 8
         color: active ? theme.purple : "transparent"
 
+        signal clicked()
+
         Text {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -230,6 +233,7 @@ Rectangle {
             hoverEnabled: true
             onEntered: if (!parent.active) parent.color = theme.accentPink
             onExited: if (!parent.active) parent.color = "transparent"
+            onClicked: parent.clicked()
         }
     }
 }
