@@ -1,4 +1,6 @@
-#include <QGuiApplication>
+#include <QApplication>
+#include <QDebug>
+#include <QDirIterator>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
@@ -19,7 +21,7 @@ int main(int argc, char* argv[]) {
 
     qRegisterMetaType<pawspective::models::UserDTO>("UserDTO");
     qRegisterMetaType<pawspective::models::UserDTO>("pawspective::models::UserDTO");
-  
+
     QQmlApplicationEngine engine;
 
     const QUrl url(QStringLiteral("qrc:/pawspective/qml/Main.qml"));
@@ -39,13 +41,12 @@ int main(int argc, char* argv[]) {
         new pawspective::viewmodels::RegisterOrganizationViewModel(organizationService, cityService, &app);
     auto userViewModel = new pawspective::viewmodels::UserViewModel(authService, userService, &app);
     auto userUpdateViewModel = new pawspective::viewmodels::UserUpdateViewModel(userService, authService);
-    
+
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("registerViewModel", registerViewModel);
     engine.rootContext()->setContextProperty("registerOrganizationViewModel", registerOrganizationViewModel);
     engine.rootContext()->setContextProperty("userViewModel", userViewModel);
     engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);
-
 
     QObject::connect(
         &engine,

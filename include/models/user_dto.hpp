@@ -7,7 +7,7 @@
 namespace pawspective::models {
 
 struct UserDTO {
-    Q_GADGET 
+    Q_GADGET
 
     Q_PROPERTY(QString email MEMBER email)
     Q_PROPERTY(QString firstName MEMBER firstName)
