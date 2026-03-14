@@ -9,6 +9,7 @@
 
 #include "models/user_dto.hpp"
 #include "services/errors.hpp"
+#include "validator.hpp"
 
 namespace pawspective::services {
 
@@ -59,9 +60,29 @@ void UserService::handleSuccess(QNetworkReply& reply, std::function<void(const Q
 }
 
 void UserService::updateUserProfile(const models::UserUpdateDTO& dto) {
-    const QJsonDocument data(dto.toJson());
     if (!m_networkClient.getUserId()) {
-        emit requestFailed(QSharedPointer<BaseError>(new ValidationError("User ID is not set")));
+        qWarning() << "User ID is not set in NetworkClient.";
+        emit requestFailed(QSharedPointer<BaseError>(new UnknownError("User ID is not set")));
+        return;
+    }
+
+    const QJsonDocument data(dto.toJson());
+
+    utils::Validator validator;
+    if (dto.email) {
+        validator.field("email", dto.email->toStdString()).notBlank().validateEmail();
+    }
+    if (dto.firstName) {
+        validator.field("first_name", dto.firstName->toStdString()).notBlank();
+    }
+    if (dto.lastName) {
+        validator.field("last_name", dto.lastName->toStdString()).notBlank();
+    }
+    if (dto.password) {
+        validator.field("password", dto.password->toStdString()).notBlank().validatePasswordStrength();
+    }
+    if (auto error = validator.getValidationError()) {
+        emit requestFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
         return;
     }
     m_networkClient.put(
@@ -79,6 +100,15 @@ void UserService::updateUserProfile(const models::UserUpdateDTO& dto) {
 
 void UserService::registerUser(const models::UserRegisterDTO& dto) {
     const QJsonDocument doc(dto.toJson());
+    utils::Validator validator;
+    validator.field("email", dto.email.toStdString()).notBlank().validateEmail();
+    validator.field("password", dto.password.toStdString()).notBlank().validatePasswordStrength();
+    validator.field("first_name", dto.firstName.toStdString()).notBlank();
+    validator.field("last_name", dto.lastName.toStdString()).notBlank();
+    if (auto error = validator.getValidationError()) {
+        emit requestFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
     m_networkClient.post(
         QUrl("/user/register"),
         doc.toJson(QJsonDocument::Compact),

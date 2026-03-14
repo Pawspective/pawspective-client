@@ -1,13 +1,39 @@
 #pragma once
 
+#include <qregularexpression.h>
 #include <string>
 #include <vector>
+#include "services/errors.hpp"
 
-namespace pawspective::utils::validation {
-bool validateEmail(const std::string& email);
-bool validatePasswordStrength(const std::string& password);
-bool validateNotEmpty(const std::string& value);
-bool minLength(const std::string& value, size_t length);
-bool maxLength(const std::string& value, size_t length);
-bool isOneOf(const std::string& value, const std::vector<std::string>& options);
-}  // namespace pawspective::utils::validation
+namespace pawspective::utils {
+class Validator {
+public:
+    explicit Validator() = default;
+
+    Validator& field(std::string name, std::string value);
+
+    Validator& notBlank();
+
+    Validator& minLength(std::size_t min);
+
+    Validator& maxLength(std::size_t max);
+
+    Validator& validateEmail();
+
+    Validator& validatePasswordStrength();
+
+    Validator& matches(const QRegularExpression& re, const std::string& msg);
+
+    Validator& isOneOf(const std::vector<std::string>& allowed);
+
+    std::optional<services::ValidationError> getValidationError() const;
+
+private:
+    void addError(std::string msg);
+
+    std::string m_current_field;
+    std::string m_current_value;
+    std::vector<services::ValidationError::FieldError> m_errors = {};
+};
+
+}  // namespace pawspective::utils

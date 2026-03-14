@@ -149,15 +149,12 @@ void AuthService::handleSuccess(
 }
 
 void AuthService::login(const QString& email, const QString& password) {
-    if (!pawspective::utils::validation::validateEmail(email.toStdString())) {
-        auto error = QSharedPointer<BaseError>(new ValidationError("Invalid email format"));
-        emit loginFailed(error);
-        return;
-    }
+    pawspective::utils::Validator validator;
+    validator.field("email", email.toStdString()).validateEmail();
+    validator.field("password", password.toStdString()).notBlank();
 
-    if (!pawspective::utils::validation::validateNotEmpty(password.toStdString())) {
-        auto error = QSharedPointer<BaseError>(new ValidationError("Password cannot be empty"));
-        emit loginFailed(error);
+    if (auto validationError = validator.getValidationError()) {
+        emit loginFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*validationError))));
         return;
     }
 
@@ -229,9 +226,11 @@ void AuthService::refreshToken(const QString& refreshToken) {
 
     m_isRefreshing = true;
 
-    if (!pawspective::utils::validation::validateNotEmpty(refreshToken.toStdString())) {
-        auto error = QSharedPointer<BaseError>(new ValidationError("Refresh token cannot be empty"));
-        emit refreshFailed(error);
+    pawspective::utils::Validator validator;
+    validator.field("refresh_token", refreshToken.toStdString()).notBlank();
+
+    if (auto validationError = validator.getValidationError()) {
+        emit refreshFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*validationError))));
         m_isRefreshing = false;
         return;
     }
