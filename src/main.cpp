@@ -13,9 +13,14 @@
 #include "viewmodels/login_view_model.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
 #include "viewmodels/register_view_model.hpp"
+#include "viewmodels/user_update_viewmodel.hpp"
+#include "viewmodels/user_viewmodel.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
+
+    qRegisterMetaType<pawspective::models::UserDTO>("UserDTO");
+    qRegisterMetaType<pawspective::models::UserDTO>("pawspective::models::UserDTO");
 
     QQmlApplicationEngine engine;
 
@@ -34,9 +39,14 @@ int main(int argc, char* argv[]) {
     auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
     auto registerOrganizationViewModel =
         new pawspective::viewmodels::RegisterOrganizationViewModel(organizationService, cityService, &app);
+    auto userViewModel = new pawspective::viewmodels::UserViewModel(authService, userService, &app);
+    auto userUpdateViewModel = new pawspective::viewmodels::UserUpdateViewModel(userService, authService);
+
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("registerViewModel", registerViewModel);
     engine.rootContext()->setContextProperty("registerOrganizationViewModel", registerOrganizationViewModel);
+    engine.rootContext()->setContextProperty("userViewModel", userViewModel);
+    engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);
 
     QObject::connect(
         &engine,

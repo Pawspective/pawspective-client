@@ -46,6 +46,8 @@ add_executable(pawspective-client
     src/services/city_service.cpp
     src/services/errors.cpp
     src/viewmodels/base.cpp
+    src/viewmodels/user_viewmodel.cpp
+    src/viewmodels/user_update_viewmodel.cpp
     src/viewmodels/login_view_model.cpp
     src/viewmodels/register_view_model.cpp
     src/viewmodels/register_organization_view_model.cpp

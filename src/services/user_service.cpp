@@ -86,7 +86,7 @@ void UserService::updateUserProfile(const models::UserUpdateDTO& dto) {
         return;
     }
     m_networkClient.put(
-        QUrl(QString("/update/%1").arg(*m_networkClient.getUserId())),
+        QUrl(QString("/user/%1").arg(*m_networkClient.getUserId())),
         data.toJson(QJsonDocument::Compact),
         [this](QNetworkReply& reply) {
             handleSuccess(reply, [this](const QJsonObject& obj) {

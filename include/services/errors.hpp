@@ -32,7 +32,7 @@ public:
         std::string errorMessage;
     };
 
-    explicit ValidationError(const std::vector<FieldError>& errors, std::string msg = "Validation errror.");
+    explicit ValidationError(const std::vector<FieldError>& errors, std::string msg = "Validation error.");
     explicit ValidationError(const QJsonObject& errorResponse);
 
     const std::vector<FieldError>& getErrors() const;
