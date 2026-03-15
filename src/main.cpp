@@ -11,6 +11,7 @@
 #include "services/organization_service.hpp"
 #include "services/user_service.hpp"
 #include "viewmodels/login_view_model.hpp"
+#include "viewmodels/organization_view_model.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
 #include "viewmodels/register_view_model.hpp"
 #include "viewmodels/update_organization_viewmodel.hpp"
@@ -40,14 +41,18 @@ int main(int argc, char* argv[]) {
     auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
     auto registerOrganizationViewModel =
         new pawspective::viewmodels::RegisterOrganizationViewModel(organizationService, cityService, &app);
+    auto organizationViewModel =
+        new pawspective::viewmodels::OrganizationViewModel(authService, organizationService, &app);
     auto userViewModel = new pawspective::viewmodels::UserViewModel(authService, userService, &app);
     auto userUpdateViewModel = new pawspective::viewmodels::UserUpdateViewModel(userService, authService);
     auto updateOrganizationViewModel =
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
+    engine.rootContext()->setContextProperty("authService", &authService);
     engine.rootContext()->setContextProperty("registerViewModel", registerViewModel);
     engine.rootContext()->setContextProperty("registerOrganizationViewModel", registerOrganizationViewModel);
+    engine.rootContext()->setContextProperty("organizationViewModel", organizationViewModel);
     engine.rootContext()->setContextProperty("userViewModel", userViewModel);
     engine.rootContext()->setContextProperty("updateOrganizationViewModel", updateOrganizationViewModel);
     engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);

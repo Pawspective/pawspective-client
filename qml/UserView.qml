@@ -47,7 +47,8 @@ Rectangle {
 
     signal logoutClicked()
     signal editProfileClicked()
-    signal organizationClicked()
+    signal registerOrganizationClicked()
+    signal organizationClicked(var organizationId)
 
     color: theme.pageBg
 
@@ -159,7 +160,13 @@ Rectangle {
 
                 SidebarItem { text: "Profile"; active: true }
                 SidebarItem { text: "Search" }
-                SidebarItem { text: "Organization"; onClicked: root.organizationClicked() }
+                SidebarItem {
+                    text: "Organization"
+                    onClicked: {
+                        const rawOrganizationId = viewModel ? viewModel.userData.organizationId : null
+                        root.organizationClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
+                    }
+                }
 
                 Image {
                     Layout.alignment: Qt.AlignHCenter

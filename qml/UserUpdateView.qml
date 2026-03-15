@@ -53,7 +53,11 @@ Rectangle {
         function onSaveFailed(message) {
             errorMessage = message
         }
-        function onSessionExpired() {
+    }
+
+    Connections {
+        target: authService
+        function onSessionEnded() {
             errorMessage = "Session expired. Please log in again."
             closeTimer.start()
         }

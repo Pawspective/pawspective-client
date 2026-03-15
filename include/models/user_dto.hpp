@@ -2,6 +2,7 @@
 
 #include <QJsonObject>
 #include <QString>
+#include <QVariant>
 #include <optional>
 
 namespace pawspective::models {
@@ -12,6 +13,7 @@ struct UserDTO {
     Q_PROPERTY(QString email MEMBER email)
     Q_PROPERTY(QString firstName MEMBER firstName)
     Q_PROPERTY(QString lastName MEMBER lastName)
+    Q_PROPERTY(QVariant organizationId READ organizationIdForQml)
 
 public:
     qint64 id = 0;
@@ -19,6 +21,10 @@ public:
     QString firstName;
     QString lastName;
     std::optional<qint64> organizationId;
+
+    QVariant organizationIdForQml() const {
+        return organizationId.has_value() ? QVariant::fromValue(organizationId.value()) : QVariant();
+    }
 
     bool operator==(const UserDTO& other) const {
         return id == other.id && email == other.email && firstName == other.firstName && lastName == other.lastName;

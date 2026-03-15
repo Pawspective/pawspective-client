@@ -12,10 +12,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-message($(CMAKE_PREFIX_PATH))
 if(NOT CMAKE_PREFIX_PATH AND DEFINED ENV{QT_DIR})
  set(CMAKE_PREFIX_PATH "$ENV{QT_DIR}" CACHE PATH "" FORCE)
 endif()
+
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core
@@ -24,6 +24,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     Qml
     Quick
+    QuickLayouts
     QuickControls2
 )
 
@@ -56,6 +57,7 @@ add_executable(pawspective-client
 	src/models/organization_update_dto.cpp
 	src/models/organization_register_dto.cpp
     src/models/city_dto.cpp
+    src/viewmodels/organization_view_model.cpp
 	${PROJECT_HEADERS}
 )
 
@@ -77,6 +79,8 @@ qt_add_qml_module(pawspective-client
 		qml/UserUpdateView.qml
         qml/RegisterOrganizationView.qml
         qml/UpdateOrganizationView.qml
+        qml/OrganizationView.qml
+        resources/sad_cat.png
         resources/reg_dog.png
         resources/heart_dog.png
 )
@@ -90,6 +94,7 @@ target_link_libraries(pawspective-client PRIVATE
     Qt6::Widgets
     Qt6::Qml
     Qt6::Quick
+    Qt6::QuickLayouts
     Qt6::QuickControls2
 )
 
