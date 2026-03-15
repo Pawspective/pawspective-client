@@ -8,12 +8,7 @@ OrganizationViewModel::OrganizationViewModel(
     QObject* parent
 )
     : BaseViewModel(parent), m_authService(authService), m_organizationService(organizationService) {
-    connect(
-        &m_authService,
-        &services::AuthService::refreshFailed,
-        this,
-        &OrganizationViewModel::handleRefreshFailed
-    );
+    connect(&m_authService, &services::AuthService::refreshFailed, this, &OrganizationViewModel::handleRefreshFailed);
     connect(&m_authService, &services::AuthService::loginSuccess, this, &OrganizationViewModel::handleLoginSuccess);
     connect(&m_authService, &services::AuthService::sessionEnded, this, &OrganizationViewModel::handleSessionEnded);
 
@@ -59,9 +54,9 @@ bool OrganizationViewModel::hasOrganization() const { return m_hasOrganization; 
 
 bool OrganizationViewModel::canUpdateOrganization() const { return m_canUpdateOrganization; }
 
-QString OrganizationViewModel::organizationName() const { return m_organizationData.name; }
+const QString& OrganizationViewModel::organizationName() const { return m_organizationData.name; }
 
-QString OrganizationViewModel::organizationCity() const { return m_organizationData.city.name; }
+const QString& OrganizationViewModel::organizationCity() const { return m_organizationData.city.name; }
 
 QString OrganizationViewModel::organizationDescription() const {
     return m_organizationData.description.has_value() ? m_organizationData.description.value() : QString();
@@ -188,11 +183,11 @@ void OrganizationViewModel::handleRefreshFailed(QSharedPointer<services::BaseErr
     emit sessionExpired();
 }
 
-void OrganizationViewModel::handleSessionEnded() {
-    handleRefreshFailed(nullptr);
-}
+void OrganizationViewModel::handleSessionEnded() { handleRefreshFailed(nullptr); }
 
-void OrganizationViewModel::handleLoginSuccess(const QString&, const QString&, const QString&, uint64_t) { initialize(); }
+void OrganizationViewModel::handleLoginSuccess(const QString&, const QString&, const QString&, uint64_t) {
+    initialize();
+}
 
 bool OrganizationViewModel::tryLoadCurrentOrganization() {
     if (m_currentOrganizationId <= 0) {
@@ -220,7 +215,9 @@ void OrganizationViewModel::applyOrganizationLoaded(
     updateProperty(m_currentOrganizationId, organization.id, [this] { emit currentOrganizationIdChanged(); });
     updateProperty(m_hasOrganization, hasOrganizationValue, [this] { emit hasOrganizationChanged(); });
     if (canUpdateOrganizationValue.has_value()) {
-        updateProperty(m_canUpdateOrganization, canUpdateOrganizationValue.value(), [this] { emit canUpdateOrganizationChanged(); });
+        updateProperty(m_canUpdateOrganization, canUpdateOrganizationValue.value(), [this] {
+            emit canUpdateOrganizationChanged();
+        });
     }
     emit organizationLoaded();
 }

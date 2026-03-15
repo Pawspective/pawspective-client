@@ -34,8 +34,8 @@ public:
 
     bool hasOrganization() const;
     bool canUpdateOrganization() const;
-    QString organizationName() const;
-    QString organizationCity() const;
+    const QString& organizationName() const;
+    const QString& organizationCity() const;
     QString organizationDescription() const;
     bool showDescription() const;
     int currentTab() const;
@@ -78,7 +78,12 @@ private slots:
     void handleUpdateOrganizationFailed(QSharedPointer<services::BaseError> error);
     void handleRefreshFailed(QSharedPointer<services::BaseError> error);
     void handleSessionEnded();
-    void handleLoginSuccess(const QString& accessToken, const QString& refreshToken, const QString& tokenType, uint64_t userId);
+    void handleLoginSuccess(
+        const QString& accessToken,
+        const QString& refreshToken,
+        const QString& tokenType,
+        uint64_t userId
+    );
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private:
