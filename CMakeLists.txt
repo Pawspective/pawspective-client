@@ -75,6 +75,7 @@ qt_add_qml_module(pawspective-client
         resources/tricky_cat.png
 		qml/UserUpdateView.qml
         qml/RegisterOrganizationView.qml
+        qml/UpdateOrganizationView.qml
         resources/reg_dog.png
         resources/heart_dog.png
 )
