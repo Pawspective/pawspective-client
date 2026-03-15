@@ -47,7 +47,7 @@ Rectangle {
 
     signal logoutClicked()
     signal editProfileClicked()
-    signal registerOrganizationClicked()
+    signal organizationClicked()
 
     color: theme.pageBg
 
@@ -159,7 +159,7 @@ Rectangle {
 
                 SidebarItem { text: "Profile"; active: true }
                 SidebarItem { text: "Search" }
-                SidebarItem { text: "Organization"; onClicked: root.registerOrganizationClicked() }
+                SidebarItem { text: "Organization"; onClicked: root.organizationClicked() }
 
                 Image {
                     Layout.alignment: Qt.AlignHCenter

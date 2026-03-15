@@ -27,6 +27,14 @@ ApplicationWindow {
             sessionExpiredDialog.open()
         }
     }
+
+    Connections {
+        target: updateOrganizationViewModel
+        function onSaveCompleted() {
+            stackView.pop()
+        }
+    }
+
     
     StackView {
         id: stackView
@@ -91,7 +99,9 @@ ApplicationWindow {
                 stackView.push(userUpdateViewComponent)
             }
             
-            onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
+            onOrganizationClicked: {
+            stackView.push(updateOrganizationViewComponent)
+        }
 
             Component.onCompleted: {
                 if (viewModel && viewModel.isAuthenticated) {
@@ -120,6 +130,14 @@ ApplicationWindow {
             onSubmit: {
                 userUpdateViewModel.saveChanges()
             }
+        }
+    }
+
+    Component {
+        id: updateOrganizationViewComponent
+        UpdateOrganizationView {
+            onDiscard: stackView.pop()
+            onSaveCompleted: stackView.pop()
         }
     }
 }
