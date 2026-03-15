@@ -9,10 +9,13 @@ ApplicationWindow {
     visible: true
     title: "User Profile App"
 
-    // ViewModels
+    // Session end handling
     Connections {
-        target: userViewModel
-        function onSessionExpired() {
+        target: authService
+        function onSessionEnded() {
+            if (stackView.depth > 1) {
+                stackView.pop()
+            }
             sessionExpiredDialog.open()
         }
     }
@@ -22,10 +25,6 @@ ApplicationWindow {
         function onSaveCompleted() {
         stackView.pop()
     }
-        function onSessionExpired() {
-            stackView.pop()
-            sessionExpiredDialog.open()
-        }
     }
 
     Connections {
@@ -35,7 +34,21 @@ ApplicationWindow {
         }
     }
 
-    
+
+    function openOrganizationView(organizationId) {
+        let resolvedOrganizationId = null
+        if (organizationId !== null && organizationId !== undefined) {
+            const normalizedOrganizationId = Number(organizationId)
+            resolvedOrganizationId = Number.isFinite(normalizedOrganizationId) && normalizedOrganizationId > 0
+                                   ? normalizedOrganizationId
+                                   : null
+        }
+
+        stackView.push(organizationViewComponent, {
+            organizationId: resolvedOrganizationId
+        })
+    }
+
     StackView {
         id: stackView
         anchors.fill: parent
@@ -99,9 +112,10 @@ ApplicationWindow {
                 stackView.push(userUpdateViewComponent)
             }
             
-            onOrganizationClicked: {
-            stackView.push(updateOrganizationViewComponent)
-        }
+            onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
+            onOrganizationClicked: function(organizationId) {
+                window.openOrganizationView(organizationId)
+            }
 
             Component.onCompleted: {
                 if (viewModel && viewModel.isAuthenticated) {
@@ -116,6 +130,16 @@ ApplicationWindow {
         RegisterOrganizationView {
             onBackClicked: stackView.pop()
             onRegisterSuccess: stackView.pop()
+        }
+    }
+
+    Component {
+        id: organizationViewComponent
+        OrganizationView {
+            onProfileRequested: stackView.pop()
+            onSearchRequested: console.log("Search view is not implemented yet")
+            onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
+            onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
         }
     }
 
