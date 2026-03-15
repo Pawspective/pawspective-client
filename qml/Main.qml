@@ -136,8 +136,14 @@ ApplicationWindow {
     Component {
         id: updateOrganizationViewComponent
         UpdateOrganizationView {
-            onDiscard: stackView.pop()
-            onSaveCompleted: stackView.pop()
+            viewModel: updateOrganizationViewModel 
+        onDiscard: {
+            updateOrganizationViewModel.cleanup() 
+            stackView.pop()
+        }
+        Component.onCompleted: {
+            updateOrganizationViewModel.initialize()
+        }
         }
     }
 }

@@ -6,50 +6,11 @@ Rectangle {
     id: root
     color: "#e8d8cb"
 
+    property var viewModel: updateOrganizationViewModel
+    property string errorMessage: ""
+
     signal saveCompleted()
     signal discard()
-    QtObject {
-        id: internalState
-        property bool isBusy: false
-        property string errorMessage: ""
-        property string name: "Happy Paws"
-        property string description: "Animal shelter description..."
-        property int cityId: 1
-        property string _origName: "Happy Paws"
-        property string _origDesc: "Animal shelter description..."
-        property int _origCityId: 1
-
-        property bool isDirty: name !== _origName || description !== _origDesc || cityId !== _origCityId
-
-        property var cities: [
-            { "text": "Moscow", "value": 1 },
-            { "text": "St. Petersburg", "value": 2 },
-            { "text": "Novosibirsk", "value": 3 }
-        ]
-
-        function saveChanges() {
-            isBusy = true
-            saveTimer.start()
-        }
-
-        function discardChanges() {
-            name = _origName
-            description = _origDesc
-            cityId = _origCityId
-        }
-    }
-
-    Timer {
-        id: saveTimer
-        interval: 1500
-        onTriggered: {
-            internalState.isBusy = false
-            internalState._origName = internalState.name
-            internalState._origDesc = internalState.description
-            internalState._origCityId = internalState.cityId
-            root.saveCompleted()
-        }
-    }
 
     QtObject {
         id: theme
@@ -76,6 +37,23 @@ Rectangle {
     readonly property real loaderSize: root.height * 0.1
     readonly property real loaderTopMargin: 10
 
+    Connections {
+        target: viewModel
+        function onSaveFailed(message) {
+            root.errorMessage = message
+        }
+        function onSaveCompleted() {
+            root.errorMessage = ""
+            stackView.pop()
+        }
+    }
+
+    Component.onCompleted: {
+        if (viewModel) {
+            viewModel.initialize();
+        }
+    }
+
     ScrollView {
         anchors.fill: parent
         contentWidth: parent.width
@@ -101,8 +79,8 @@ Rectangle {
 
             ProfileDataField {
                 label: "Organization Name"
-                value: internalState.name
-                onInputFinished: (val) => internalState.name = val
+                value: viewModel.name
+                onInputFinished: (val) => viewModel.name = val
             }
 
             ColumnLayout {
@@ -121,16 +99,10 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.fieldHeight
                     textRole: "text"
-                    model: internalState.cities
-                    
-                    currentIndex: {
-                        for (var i = 0; i < model.length; i++) {
-                            if (model[i].value === internalState.cityId) return i;
-                        }
-                        return 0;
-                    }
+                    model: viewModel.cities
+                    currentIndex: viewModel.currentCityIndex
 
-                    onActivated: (index) => internalState.cityId = model[index].value
+                    onActivated: (index) => viewModel.cityId = model[index].value
 
                     indicator: Canvas {
                         x: cityCombo.width - width - 15
@@ -165,13 +137,13 @@ Rectangle {
                         hoverEnabled: true
                         contentItem: Text {
                             text: modelData.text
-                            color: parent.hovered || parent.highlighted ? "white" : theme.textDark
+                            color: (parent.hovered || parent.highlighted) ? "white" : theme.textDark
                             font.family: theme.fontName
                             font.pixelSize: root.fieldValueFontSize
                             verticalAlignment: Text.AlignVCenter
                         }
                         background: Rectangle {
-                            color: parent.hovered || parent.highlighted ? theme.purple : "transparent"
+                            color: (parent.hovered || parent.highlighted) ? theme.purple : "transparent"
                         }
                     }
 
@@ -193,6 +165,7 @@ Rectangle {
                     }
                 }
             }
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
@@ -214,15 +187,15 @@ Rectangle {
                         anchors.fill: parent
                         TextArea {
                             id: descInput
-                            text: internalState.description
+                            text: viewModel.description
                             font.family: theme.fontName
                             font.pixelSize: root.fieldValueFontSize
                             color: theme.accentPink
                             wrapMode: TextArea.Wrap
                             leftPadding: root.fieldLeftMargin
                             topPadding: 10
-                            enabled: !internalState.isBusy
-                            onTextChanged: if(focus) internalState.description = text
+                            enabled: !viewModel.isBusy
+                            onTextChanged: if(focus) viewModel.description = text
                             background: null
                         }
                     }
@@ -235,15 +208,15 @@ Rectangle {
                 Layout.topMargin: root.contentSpacing
 
                 CustomButton {
-                    text: internalState.isBusy ? "Saving..." : "Save Changes"
-                    baseColor: internalState.isDirty ? theme.purple : "#cccccc"
-                    hoverColor: internalState.isDirty ? theme.accentPink : "#cccccc"
+                    text: viewModel.isBusy ? "Saving..." : "Save Changes"
+                    baseColor: viewModel.isDirty ? theme.purple : "#cccccc"
+                    hoverColor: viewModel.isDirty ? theme.accentPink : "#cccccc"
                     textColor: theme.buttonText
                     fontSize: root.buttonFontSize
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.buttonHeight
-                    enabled: !internalState.isBusy && internalState.isDirty
-                    onClicked: internalState.saveChanges()
+                    enabled: !viewModel.isBusy && viewModel.isDirty
+                    onClicked: viewModel.saveChanges()
                 }
 
                 CustomButton {
@@ -254,10 +227,10 @@ Rectangle {
                     fontSize: root.buttonFontSize
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.buttonHeight
-                    enabled: !internalState.isBusy
+                    enabled: !viewModel.isBusy
                     onClicked: {
-                        internalState.discardChanges()
-                        root.discard()
+                        viewModel.discardChanges();
+                        root.discard();
                     }
                 }
             }
@@ -270,12 +243,12 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: root.loaderTopMargin
                 Layout.bottomMargin: root.contentSpacing
-                running: internalState.isBusy
-                visible: internalState.isBusy
+                running: viewModel.isBusy
+                visible: viewModel.isBusy
             }
 
             Label {
-                text: internalState.errorMessage
+                text: root.errorMessage 
                 color: theme.errorColor
                 font.family: theme.fontName
                 font.pixelSize: root.fieldLabelFontSize
@@ -309,7 +282,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: root.fieldHeight
             leftPadding: root.fieldLeftMargin
-            enabled: !internalState.isBusy
+            enabled: !viewModel.isBusy
             background: Rectangle { color: theme.fieldBg; radius: 10 }
             onTextChanged: if(focus) parent.inputFinished(text)
         }
