@@ -8,26 +8,19 @@ Rectangle {
 
     signal saveCompleted()
     signal discard()
-
-    // ВНУТРЕННЕЕ СОСТОЯНИЕ (Вместо внешней ViewModel)
     QtObject {
         id: internalState
         property bool isBusy: false
         property string errorMessage: ""
-        
-        // Данные организации
         property string name: "Happy Paws"
         property string description: "Animal shelter description..."
         property int cityId: 1
-
-        // Оригинальные данные для сброса и проверки изменений (isDirty)
         property string _origName: "Happy Paws"
         property string _origDesc: "Animal shelter description..."
         property int _origCityId: 1
 
         property bool isDirty: name !== _origName || description !== _origDesc || cityId !== _origCityId
 
-        // Имитация списка городов (как в Register)
         property var cities: [
             { "text": "Moscow", "value": 1 },
             { "text": "St. Petersburg", "value": 2 },
@@ -36,7 +29,6 @@ Rectangle {
 
         function saveChanges() {
             isBusy = true
-            // Имитация сетевой задержки
             saveTimer.start()
         }
 
@@ -71,7 +63,6 @@ Rectangle {
         readonly property color dropBorder: "#d4c8a8"
     }
 
-    // Размеры из UserUpdateView
     readonly property real fieldLabelFontSize: root.height * 0.022
     readonly property real fieldValueFontSize: root.height * 0.025
     readonly property real fieldHeight: root.height * 0.06
@@ -108,14 +99,12 @@ Rectangle {
                 Layout.bottomMargin: 10
             }
 
-            // Поле: Название
             ProfileDataField {
                 label: "Organization Name"
                 value: internalState.name
                 onInputFinished: (val) => internalState.name = val
             }
 
-            // Поле: Город (ComboBox со стрелочкой и наведением)
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
@@ -204,8 +193,6 @@ Rectangle {
                     }
                 }
             }
-
-            // Поле: Описание (Высокое, с прокруткой)
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
@@ -242,7 +229,6 @@ Rectangle {
                 }
             }
 
-            // Блок кнопок (КОПИЯ СТРУКТУРЫ ИЗ USER UPDATE)
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.buttonSpacing
@@ -276,7 +262,6 @@ Rectangle {
                 }
             }
 
-            // Лапа строго под кнопками
             LoaderSpinner {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.loaderSize
