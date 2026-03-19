@@ -27,7 +27,8 @@ Rectangle {
 
     Connections {
         target: registerViewModel
-        function onRegisterFinished(success) {
+        function onRegistrationFinished(success) {
+            root.loading = false
             if (success) {
                 root.registerSuccess()
             }
