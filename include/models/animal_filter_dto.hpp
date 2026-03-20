@@ -1,8 +1,8 @@
 #pragma once
 
-#include <optional>
 #include <QJsonObject>
 #include <QVector>
+#include <optional>
 
 #include "animal_enums.hpp"
 
@@ -18,7 +18,6 @@ struct AnimalFilterDTO {
     std::optional<QVector<GoodWith>> goodWiths;
     std::optional<int> ageLte;
     std::optional<int> ageGte;
-
 
     QJsonObject toJson() const;
     static AnimalFilterDTO fromJson(const QJsonObject& json);

@@ -29,7 +29,11 @@ std::optional<EnumType> getOptionalEnum(const QJsonObject& json, std::string_vie
 }
 
 template <typename EnumType, typename FromApiFunc>
-std::optional<QVector<EnumType>> getOptionalEnumArray(const QJsonObject& json, std::string_view key, FromApiFunc fromApi) {
+std::optional<QVector<EnumType>> getOptionalEnumArray(
+    const QJsonObject& json,
+    std::string_view key,
+    FromApiFunc fromApi
+) {
     QString qkey = QString::fromUtf8(key.data(), key.size());
     if (!json.contains(qkey)) {
         return std::nullopt;

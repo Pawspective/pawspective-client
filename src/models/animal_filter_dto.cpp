@@ -81,7 +81,7 @@ AnimalFilterDTO AnimalFilterDTO::fromJson(const QJsonObject& json) {
         }
         dto.breeds = breedsVec;
     }
-    
+
     dto.animalTypes = utils::json::getOptionalEnumArray<AnimalType>(json, "animal_types", animalTypeFromApi);
     dto.sizes = utils::json::getOptionalEnumArray<AnimalSize>(json, "sizes", animalSizeFromApi);
     dto.genders = utils::json::getOptionalEnumArray<AnimalGender>(json, "genders", animalGenderFromApi);
@@ -94,4 +94,4 @@ AnimalFilterDTO AnimalFilterDTO::fromJson(const QJsonObject& json) {
     return dto;
 }
 
-} // namespace pawspective::models
+}  // namespace pawspective::models
