@@ -1,11 +1,14 @@
 #include "services/organization_service.hpp"
 
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonParseError>
+#include <QList>
 #include <QNetworkReply>
 #include <QSharedPointer>
 #include <QUrl>
+#include <QUrlQuery>
 
 #include "models/organization_dto.hpp"
 #include "services/errors.hpp"
@@ -108,6 +111,70 @@ void OrganizationService::createOrganization(const models::OrganizationRegisterD
         },
         [this](QNetworkReply& reply) {
             handleError(reply, [this](QSharedPointer<BaseError> error) { emit createOrganizationFailed(error); });
+        }
+    );
+}
+
+void OrganizationService::handleSuccessArray(
+    QNetworkReply& reply,
+    std::function<void(const QJsonArray&)> onSuccess,
+    std::function<void(QSharedPointer<BaseError>)> onError
+) {
+    QJsonParseError parseError;
+    QByteArray data = reply.readAll();
+    try {
+        QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+
+        if (parseError.error != QJsonParseError::NoError) {
+            onError(
+                QSharedPointer<BaseError>(new ClientJsonParseError(
+                    QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
+                ))
+            );
+            return;
+        }
+
+        if (!doc.isArray()) {
+            onError(QSharedPointer<BaseError>(new UnknownError("Expected JSON array in response")));
+            return;
+        }
+
+        onSuccess(doc.array());
+    } catch (const std::exception& e) {
+        onError(QSharedPointer<BaseError>(new ClientJsonParseError(QString(e.what()))));
+    }
+}
+
+void OrganizationService::findByNameContaining(const QString& name) {
+    utils::Validator validator;
+    validator.field("name", name.toStdString()).notBlank();
+    if (auto error = validator.getValidationError()) {
+        emit findByNameContainingFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
+    QUrl url("/orgs");
+    QUrlQuery query;
+    query.addQueryItem("name", name);
+    url.setQuery(query);
+
+    m_networkClient.get(
+        url,
+        [this](QNetworkReply& reply) {
+            handleSuccessArray(
+                reply,
+                [this](const QJsonArray& arr) {
+                    QList<models::OrganizationDTO> organizations;
+                    for (const auto& item : arr) {
+                        organizations.append(models::OrganizationDTO::fromJson(item.toObject()));
+                    }
+                    emit findByNameContainingSuccess(organizations);
+                },
+                [this](QSharedPointer<BaseError> error) { emit findByNameContainingFailed(error); }
+            );
+        },
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit findByNameContainingFailed(error); });
         }
     );
 }

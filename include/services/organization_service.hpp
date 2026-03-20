@@ -1,6 +1,8 @@
 #pragma once
 
+#include <QJsonArray>
 #include <QJsonObject>
+#include <QList>
 #include <QObject>
 #include <QString>
 
@@ -20,21 +22,29 @@ public:
     void getOrganization(qint64 id);
     void createOrganization(const models::OrganizationRegisterDTO& dto);
     void updateOrganization(qint64 id, const models::OrganizationUpdateDTO& dto);
+    void findByNameContaining(const QString& name);
 
 signals:
     void getOrganizationSuccess(const models::OrganizationDTO& organization);
     void createOrganizationSuccess(const models::OrganizationDTO& organization);
     void updateOrganizationSuccess(const models::OrganizationDTO& organization);
+    void findByNameContainingSuccess(const QList<models::OrganizationDTO>& organizations);
 
     void getOrganizationFailed(QSharedPointer<services::BaseError> error);
     void createOrganizationFailed(QSharedPointer<services::BaseError> error);
     void updateOrganizationFailed(QSharedPointer<services::BaseError> error);
+    void findByNameContainingFailed(QSharedPointer<services::BaseError> error);
 
 private:
     void handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError);
     void handleSuccess(
         QNetworkReply& reply,
         std::function<void(const QJsonObject&)> onSuccess,
+        std::function<void(QSharedPointer<BaseError>)> onError
+    );
+    void handleSuccessArray(
+        QNetworkReply& reply,
+        std::function<void(const QJsonArray&)> onSuccess,
         std::function<void(QSharedPointer<BaseError>)> onError
     );
 
