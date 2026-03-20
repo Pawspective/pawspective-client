@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
 #include <string_view>
@@ -25,6 +26,27 @@ std::optional<EnumType> getOptionalEnum(const QJsonObject& json, std::string_vie
         return fromApi(json[qkey].toString());
     }
     throw std::invalid_argument(std::format("Invalid {} field", key));
+}
+
+template <typename EnumType, typename FromApiFunc>
+std::optional<QVector<EnumType>> getOptionalEnumArray(const QJsonObject& json, std::string_view key, FromApiFunc fromApi) {
+    QString qkey = QString::fromUtf8(key.data(), key.size());
+    if (!json.contains(qkey)) {
+        return std::nullopt;
+    }
+    if (!json[qkey].isArray()) {
+        throw std::invalid_argument(std::format("Invalid {} field: expected array", key));
+    }
+    QJsonArray array = json[qkey].toArray();
+    QVector<EnumType> result;
+    for (const auto& item : array) {
+        if (item.isString()) {
+            result.append(fromApi(item.toString()));
+        } else {
+            throw std::invalid_argument("Invalid value in enum array");
+        }
+    }
+    return result;
 }
 
 }  // namespace pawspective::utils::json
