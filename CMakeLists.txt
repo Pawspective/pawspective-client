@@ -57,6 +57,7 @@ add_executable(pawspective-client
 	src/models/organization_update_dto.cpp
 	src/models/organization_register_dto.cpp
     src/models/city_dto.cpp
+    src/models/animal_dto.cpp
     strc/utils/json.cpp
     src/viewmodels/organization_view_model.cpp
 	${PROJECT_HEADERS}
