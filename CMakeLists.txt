@@ -45,6 +45,7 @@ add_executable(pawspective-client
     src/services/user_service.cpp
     src/services/organization_service.cpp
     src/services/city_service.cpp
+    src/services/animal_service.cpp
     src/services/errors.cpp
     src/viewmodels/base.cpp
     src/viewmodels/user_viewmodel.cpp
@@ -130,4 +131,28 @@ target_link_libraries(organization_service_test PRIVATE
 )
 
 add_test(NAME organization_service_test COMMAND organization_service_test)
+
+add_executable(animal_service_test
+    tests/animal_service_test.cpp
+    include/services/animal_service.hpp
+    src/models/animal_dto.cpp
+    src/models/animal_enums.cpp
+    src/models/animal_filter_dto.cpp
+    src/models/animal_register_dto.cpp
+    src/models/animal_update_dto.cpp
+    src/models/breed_dto.cpp
+    src/services/animal_service.cpp
+    src/services/errors.cpp
+    src/utils/json.cpp
+)
+
+target_include_directories(animal_service_test PRIVATE include)
+
+target_link_libraries(animal_service_test PRIVATE
+    Qt6::Core
+    Qt6::Network
+    Qt6::Test
+)
+
+add_test(NAME animal_service_test COMMAND animal_service_test)
 
