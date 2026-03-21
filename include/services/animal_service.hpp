@@ -24,6 +24,7 @@ public:
     void createAnimal(const models::AnimalRegisterDTO& dto);
     void updateAnimal(qint64 id, const models::AnimalUpdateDTO& dto);
     void getAnimalFilters();
+    void getAnimalsByOrganization(qint64 organizationId);
 
 signals:
     void getAnimalsSuccess(const QList<models::AnimalDTO>& animals);
@@ -31,12 +32,14 @@ signals:
     void createAnimalSuccess(const models::AnimalDTO& animal);
     void updateAnimalSuccess(const models::AnimalDTO& animal);
     void getAnimalFiltersSuccess(const models::AnimalFilterDTO& filters);
+    void getAnimalsByOrganizationSuccess(const QList<models::AnimalDTO>& animals);
 
     void getAnimalsFailed(QSharedPointer<services::BaseError> error);
     void getAnimalFailed(QSharedPointer<services::BaseError> error);
     void createAnimalFailed(QSharedPointer<services::BaseError> error);
     void updateAnimalFailed(QSharedPointer<services::BaseError> error);
     void getAnimalFiltersFailed(QSharedPointer<services::BaseError> error);
+    void getAnimalsByOrganizationFailed(QSharedPointer<services::BaseError> error);
 
 private:
     void handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError);

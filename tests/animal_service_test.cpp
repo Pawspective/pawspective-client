@@ -212,6 +212,13 @@ private slots:
     void testGetAnimalFilters_NetworkError_EmitsGetAnimalFiltersFailed();
     void testGetAnimalFilters_InvalidJson_EmitsGetAnimalFiltersFailed();
     void testGetAnimalFilters_ServerError_DoesNotEmitOtherSignals();
+
+    // getAnimalsByOrganization signal tests
+    void testGetAnimalsByOrganization_Success_EmitsGetAnimalsByOrganizationSuccess();
+    void testGetAnimalsByOrganization_NetworkError_EmitsGetAnimalsByOrganizationFailed();
+    void testGetAnimalsByOrganization_InvalidJson_EmitsGetAnimalsByOrganizationFailed();
+    void testGetAnimalsByOrganization_ServerError_DoesNotEmitOtherSignals();
+    void testGetAnimalsByOrganization_UsesCorrectEndpoint();
 };
 
 // ---------------------------------------------------------------------------
@@ -820,6 +827,84 @@ void TestAnimalService::testGetAnimalFilters_ServerError_DoesNotEmitOtherSignals
     QCOMPARE(filtersFailed.count(), 1);
     QCOMPARE(getAnimalsFailed.count(), 0);
     QCOMPARE(createFailed.count(), 0);
+}
+
+// ---------------------------------------------------------------------------
+// getAnimalsByOrganization signal tests
+
+void TestAnimalService::testGetAnimalsByOrganization_Success_EmitsGetAnimalsByOrganizationSuccess() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy successSpy(&service, &AnimalService::getAnimalsByOrganizationSuccess);
+    QSignalSpy failedSpy(&service, &AnimalService::getAnimalsByOrganizationFailed);
+
+    service.getAnimalsByOrganization(10);
+    QCOMPARE(mock.getCalls.size(), 1);
+
+    mock.triggerSuccess(mock.getCalls, validAnimalArrayJson());
+
+    QCOMPARE(successSpy.count(), 1);
+    QCOMPARE(failedSpy.count(), 0);
+
+    auto animals = qvariant_cast<QList<AnimalDTO>>(successSpy.at(0).at(0));
+    QCOMPARE(animals.size(), 2);
+    QCOMPARE(animals[0].name, QString("Buddy"));
+    QCOMPARE(animals[1].name, QString("Whiskers"));
+}
+
+void TestAnimalService::testGetAnimalsByOrganization_NetworkError_EmitsGetAnimalsByOrganizationFailed() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy successSpy(&service, &AnimalService::getAnimalsByOrganizationSuccess);
+    QSignalSpy failedSpy(&service, &AnimalService::getAnimalsByOrganizationFailed);
+
+    service.getAnimalsByOrganization(10);
+    mock.triggerError(mock.getCalls, serverErrorJson("Not found"));
+
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestAnimalService::testGetAnimalsByOrganization_InvalidJson_EmitsGetAnimalsByOrganizationFailed() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy successSpy(&service, &AnimalService::getAnimalsByOrganizationSuccess);
+    QSignalSpy failedSpy(&service, &AnimalService::getAnimalsByOrganizationFailed);
+
+    service.getAnimalsByOrganization(10);
+    mock.triggerSuccess(mock.getCalls, QByteArray("not valid json {{{}"));
+
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestAnimalService::testGetAnimalsByOrganization_ServerError_DoesNotEmitOtherSignals() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy getAnimalsFailed(&service, &AnimalService::getAnimalsFailed);
+    QSignalSpy getAnimalFailed(&service, &AnimalService::getAnimalFailed);
+    QSignalSpy orgAnimalsFailed(&service, &AnimalService::getAnimalsByOrganizationFailed);
+
+    service.getAnimalsByOrganization(10);
+    mock.triggerError(mock.getCalls, serverErrorJson());
+
+    QCOMPARE(orgAnimalsFailed.count(), 1);
+    QCOMPARE(getAnimalsFailed.count(), 0);
+    QCOMPARE(getAnimalFailed.count(), 0);
+}
+
+void TestAnimalService::testGetAnimalsByOrganization_UsesCorrectEndpoint() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    service.getAnimalsByOrganization(42);
+
+    QCOMPARE(mock.getCalls.size(), 1);
+    QVERIFY(mock.getCalls[0].endpoint.path().contains("/org/42/animals"));
 }
 
 QTEST_MAIN(TestAnimalService)

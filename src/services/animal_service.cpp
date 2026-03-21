@@ -251,4 +251,26 @@ void AnimalService::getAnimalFilters() {
     );
 }
 
+void AnimalService::getAnimalsByOrganization(qint64 organizationId) {
+    m_networkClient.get(
+        QUrl(QString("/org/%1/animals").arg(organizationId)),
+        [this](QNetworkReply& reply) {
+            handleSuccessArray(
+                reply,
+                [this](const QJsonArray& arr) {
+                    QList<models::AnimalDTO> animals;
+                    for (const auto& item : arr) {
+                        animals.append(models::AnimalDTO::fromJson(item.toObject()));
+                    }
+                    emit getAnimalsByOrganizationSuccess(animals);
+                },
+                [this](QSharedPointer<BaseError> error) { emit getAnimalsByOrganizationFailed(error); }
+            );
+        },
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit getAnimalsByOrganizationFailed(error); });
+        }
+    );
+}
+
 }  // namespace pawspective::services
