@@ -35,6 +35,7 @@ Rectangle {
     signal searchRequested()
     signal createOrganizationClicked()
     signal updateOrganizationClicked()
+    signal createAnimalRequested()
 
     readonly property real leftPanelWidth: root.width * 0.7
     readonly property real rightPanelWidth: root.width * 0.3
@@ -361,12 +362,40 @@ Rectangle {
     // Animal tab
     Component {
         id: animalsContent
+        Item {
+        anchors.fill: parent
+        
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 10
+
+        /*******************************/ //only for demonstration of tab content layout with action button, should be replaced with actual animals list
+        CustomButton {
+            text: "+ Create Animal"
+            baseColor: theme.purple
+            hoverColor: theme.accentPink
+            textColor: theme.buttonText
+            fontSize: root.height * 0.025
+            Layout.alignment: Qt.AlignRight
+            Layout.preferredWidth: root.width * 0.15
+            Layout.preferredHeight: root.height * 0.06
+            Layout.rightMargin: root.height * 0.02
+            Layout.topMargin: root.height * 0.02
+            onClicked: root.createAnimalRequested()
+        }
+        /*******************************/
 
         Text {
             text: "Animals list placeholder"
             font.family: theme.fontName
             font.pixelSize: root.height * 0.03
             color: theme.textDark
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+        }
         }
     }
 

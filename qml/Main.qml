@@ -140,6 +140,7 @@ ApplicationWindow {
             onSearchRequested: console.log("Search view is not implemented yet")
             onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
+            onCreateAnimalRequested: stackView.push(animalCreateViewComponent)
         }
     }
 
@@ -168,6 +169,14 @@ ApplicationWindow {
         Component.onCompleted: {
             updateOrganizationViewModel.initialize()
         }
+        }
+    }
+
+    Component {
+        id: animalCreateViewComponent
+        AnimalCreateView {
+            onBackClicked: stackView.pop()
+            onCreateSuccess: stackView.pop()
         }
     }
 }

@@ -91,6 +91,7 @@ qt_add_qml_module(pawspective-client
         resources/sad_cat.png
         resources/reg_dog.png
         resources/heart_dog.png
+        qml/AnimalCreateView.qml
 )
 
 target_include_directories(pawspective-client PRIVATE include)
