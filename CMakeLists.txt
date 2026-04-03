@@ -165,6 +165,7 @@ add_executable(breed_service_test
     src/models/breed_dto.cpp
     src/services/breed_service.cpp
     src/services/errors.cpp
+    src/utils/json.cpp
     src/utils/validator.cpp
 )
 
