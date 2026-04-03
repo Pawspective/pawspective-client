@@ -15,6 +15,7 @@
 #include "models/animal_filter_dto.hpp"
 #include "services/errors.hpp"
 #include "services/i_network_client.hpp"
+#include "validator.hpp"
 
 namespace pawspective::services {
 
@@ -170,6 +171,13 @@ void AnimalService::getAnimals(const models::AnimalFilterDTO& filter) {
 }
 
 void AnimalService::getAnimal(qint64 id) {
+    utils::Validator validator;
+    validator.field("id", std::to_string(id)).matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
+    if (auto error = validator.getValidationError()) {
+        emit getAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
     m_networkClient.get(
         QUrl(QString("/animals/%1").arg(id)),
         [this](QNetworkReply& reply) {
@@ -189,6 +197,18 @@ void AnimalService::getAnimal(qint64 id) {
 }
 
 void AnimalService::createAnimal(const models::AnimalRegisterDTO& dto) {
+    utils::Validator validator;
+    validator.field("name", dto.name.toStdString()).notBlank().maxLength(255);
+    validator.field("organization_id", std::to_string(dto.organizationId))
+        .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
+    validator.field("breed_id", std::to_string(dto.breedId))
+        .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
+    validator.field("age", std::to_string(dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
+    if (auto error = validator.getValidationError()) {
+        emit createAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
     const QJsonDocument doc(dto.toJson());
 
     m_networkClient.post(
@@ -211,6 +231,23 @@ void AnimalService::createAnimal(const models::AnimalRegisterDTO& dto) {
 }
 
 void AnimalService::updateAnimal(qint64 id, const models::AnimalUpdateDTO& dto) {
+    utils::Validator validator;
+    validator.field("id", std::to_string(id)).matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
+    if (dto.name) {
+        validator.field("name", dto.name->toStdString()).notBlank().maxLength(255);
+    }
+    if (dto.breedId) {
+        validator.field("breed_id", std::to_string(*dto.breedId))
+            .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
+    }
+    if (dto.age) {
+        validator.field("age", std::to_string(*dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
+    }
+    if (auto error = validator.getValidationError()) {
+        emit updateAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
     const QJsonDocument doc(dto.toJson());
 
     m_networkClient.put(
@@ -252,6 +289,14 @@ void AnimalService::getAnimalFilters() {
 }
 
 void AnimalService::getAnimalsByOrganization(qint64 organizationId) {
+    utils::Validator validator;
+    validator.field("organization_id", std::to_string(organizationId))
+        .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
+    if (auto error = validator.getValidationError()) {
+        emit getAnimalsByOrganizationFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
     m_networkClient.get(
         QUrl(QString("/org/%1/animals").arg(organizationId)),
         [this](QNetworkReply& reply) {
