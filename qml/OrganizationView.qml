@@ -373,7 +373,7 @@ Rectangle {
             anchors.fill: parent
             spacing: 10
 
-        /*******************************/ //only for demonstration of tab content layout with action button, should be replaced with actual animals list
+        // Only for demonstration of tab content layout with action button; should be replaced with actual animals list.
         CustomButton {
     text: "+ Create Animal"
     baseColor: theme.purple
