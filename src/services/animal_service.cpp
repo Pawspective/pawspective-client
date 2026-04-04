@@ -232,10 +232,6 @@ void AnimalService::updateAnimal(qint64 id, const models::AnimalUpdateDTO& dto) 
     if (dto.name) {
         validator.field("name", dto.name->toStdString()).notBlank().maxLength(255);
     }
-    if (dto.breedId) {
-        validator.field("breed_id", std::to_string(*dto.breedId))
-            .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
-    }
     if (dto.age) {
         validator.field("age", std::to_string(*dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
     }
