@@ -172,13 +172,26 @@ Rectangle {
             }
 
             ProfileDataField {
-                label: "Age"
+                label: "Age *"
                 value: viewModel && viewModel.age >= 0 ? String(viewModel.age) : ""
                 inputMethodHints: Qt.ImhDigitsOnly
-                onInputFinished: (val) => { 
+                onInputFinished: (val) => {
                     if (viewModel) {
-                        var ageVal = parseInt(val)
-                        viewModel.age = (val === "" || isNaN(ageVal)) ? -1 : ageVal
+                        var trimmedVal = val.trim()
+                        var ageVal = parseInt(trimmedVal, 10)
+
+                        if (trimmedVal === "") {
+                            errorMessage = "Age is required."
+                            return
+                        }
+
+                        if (isNaN(ageVal) || ageVal < 0 || ageVal > 100) {
+                            errorMessage = "Age must be a number between 0 and 100."
+                            return
+                        }
+
+                        errorMessage = ""
+                        viewModel.age = ageVal
                     }
                 }
                 Layout.leftMargin: root.width * 0.05
