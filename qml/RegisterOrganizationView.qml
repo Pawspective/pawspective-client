@@ -102,7 +102,7 @@ Rectangle {
             }
 
             Label {
-                text: "Description"
+                text: "Description (optional)"
                 font.family: theme.fontName
                 font.pixelSize: 13
                 color: theme.textMain
@@ -137,7 +137,7 @@ Rectangle {
             }
 
             Label {
-                text: "City (optional)"
+                text: "City"
                 font.family: theme.fontName
                 font.pixelSize: 13
                 color: theme.textMain
@@ -210,7 +210,7 @@ Rectangle {
                 delegate: ItemDelegate {
                     width: cityCombo.width
                     contentItem: Text {
-                        text: modelData
+                        text: modelData.text
                         font.family: theme.fontName
                         font.pixelSize: 14
                         color: theme.accentPink

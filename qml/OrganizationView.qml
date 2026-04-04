@@ -52,10 +52,14 @@ Rectangle {
                                          && requestedOrganizationId > 0
                                          && requestedOrganizationId === currentUserOrganizationId
 
-            organizationViewModel.setCanUpdateOrganization(canUpdateFromRequest)
             if (root.organizationId !== null) {
+                organizationViewModel.setCanUpdateOrganization(canUpdateFromRequest)
                 organizationViewModel.initializeForOrganization(root.organizationId)
+            } else if (currentUserOrganizationId > 0) {
+                organizationViewModel.setCanUpdateOrganization(true)
+                organizationViewModel.initializeForOrganization(currentUserOrganizationId)
             } else {
+                organizationViewModel.setCanUpdateOrganization(false)
                 organizationViewModel.initializeForCreateOrganization()
             }
         }

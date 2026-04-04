@@ -15,6 +15,7 @@
 #include "models/animal_filter_dto.hpp"
 #include "services/errors.hpp"
 #include "services/i_network_client.hpp"
+#include "validator.hpp"
 
 namespace pawspective::services {
 
@@ -189,6 +190,14 @@ void AnimalService::getAnimal(qint64 id) {
 }
 
 void AnimalService::createAnimal(const models::AnimalRegisterDTO& dto) {
+    utils::Validator validator;
+    validator.field("name", dto.name.toStdString()).notBlank().maxLength(255);
+    validator.field("age", std::to_string(dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
+    if (auto error = validator.getValidationError()) {
+        emit createAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
     const QJsonDocument doc(dto.toJson());
 
     m_networkClient.post(
@@ -211,6 +220,18 @@ void AnimalService::createAnimal(const models::AnimalRegisterDTO& dto) {
 }
 
 void AnimalService::updateAnimal(qint64 id, const models::AnimalUpdateDTO& dto) {
+    utils::Validator validator;
+    if (dto.name) {
+        validator.field("name", dto.name->toStdString()).notBlank().maxLength(255);
+    }
+    if (dto.age) {
+        validator.field("age", std::to_string(*dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
+    }
+    if (auto error = validator.getValidationError()) {
+        emit updateAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
+        return;
+    }
+
     const QJsonDocument doc(dto.toJson());
 
     m_networkClient.put(
