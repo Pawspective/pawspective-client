@@ -140,6 +140,14 @@ ApplicationWindow {
             onSearchRequested: console.log("Search view is not implemented yet")
             onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
+            onCreateAnimalRequested: {
+            var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
+            console.log("Creating animal for organization ID:", orgId)
+            if (orgId > 0) {
+                createAnimalViewModel.setOrganizationId(orgId)
+            }
+            stackView.push(animalCreateViewComponent)
+        }
         }
     }
 
@@ -167,6 +175,27 @@ ApplicationWindow {
         }
         Component.onCompleted: {
             updateOrganizationViewModel.initialize()
+        }
+        }
+    }
+
+    Component {
+        id: animalCreateViewComponent
+        AnimalCreateView {
+            viewModel: createAnimalViewModel
+            
+            onBackClicked: {
+            console.log("AnimalCreateView back clicked")
+            stackView.pop()
+        }
+        
+        onCreateSuccess: {
+            console.log("Animal created successfully")
+            stackView.pop()
+        }
+        
+        Component.onCompleted: {
+            console.log("AnimalCreateView component completed")
         }
         }
     }

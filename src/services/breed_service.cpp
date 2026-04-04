@@ -80,7 +80,7 @@ void BreedService::getBreedsByType(models::AnimalType type) {
         return;
     }
 
-    QUrl url("/breed");
+    QUrl url("/breeds");
     QUrlQuery query;
     query.addQueryItem("type", models::toApiString(type));
     url.setQuery(query);
