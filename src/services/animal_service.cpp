@@ -199,16 +199,6 @@ void AnimalService::getAnimal(qint64 id) {
 void AnimalService::createAnimal(const models::AnimalRegisterDTO& dto) {
     utils::Validator validator;
     validator.field("name", dto.name.toStdString()).notBlank().maxLength(255);
-    validator.field("organization_id", std::to_string(dto.organizationId))
-        .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
-    validator.field("breed_id", std::to_string(dto.breedId))
-        .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
-    validator.field("size", models::toApiString(dto.size).toStdString()).notBlank();
-    validator.field("gender", models::toApiString(dto.gender).toStdString()).notBlank();
-    validator.field("care_level", models::toApiString(dto.careLevel).toStdString()).notBlank();
-    validator.field("color", models::toApiString(dto.color).toStdString()).notBlank();
-    validator.field("good_with", models::toApiString(dto.goodWith).toStdString()).notBlank();
-    validator.field("status", models::toApiString(dto.status).toStdString()).notBlank();
     validator.field("age", std::to_string(dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
     if (auto error = validator.getValidationError()) {
         emit createAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
