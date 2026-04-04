@@ -171,13 +171,6 @@ void AnimalService::getAnimals(const models::AnimalFilterDTO& filter) {
 }
 
 void AnimalService::getAnimal(qint64 id) {
-    utils::Validator validator;
-    validator.field("id", std::to_string(id)).matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
-    if (auto error = validator.getValidationError()) {
-        emit getAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
-        return;
-    }
-
     m_networkClient.get(
         QUrl(QString("/animals/%1").arg(id)),
         [this](QNetworkReply& reply) {
@@ -228,7 +221,6 @@ void AnimalService::createAnimal(const models::AnimalRegisterDTO& dto) {
 
 void AnimalService::updateAnimal(qint64 id, const models::AnimalUpdateDTO& dto) {
     utils::Validator validator;
-    validator.field("id", std::to_string(id)).matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
     if (dto.name) {
         validator.field("name", dto.name->toStdString()).notBlank().maxLength(255);
     }
@@ -281,14 +273,6 @@ void AnimalService::getAnimalFilters() {
 }
 
 void AnimalService::getAnimalsByOrganization(qint64 organizationId) {
-    utils::Validator validator;
-    validator.field("organization_id", std::to_string(organizationId))
-        .matches(QRegularExpression("[1-9][0-9]*"), "must be a positive number");
-    if (auto error = validator.getValidationError()) {
-        emit getAnimalsByOrganizationFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
-        return;
-    }
-
     m_networkClient.get(
         QUrl(QString("/org/%1/animals").arg(organizationId)),
         [this](QNetworkReply& reply) {
