@@ -200,6 +200,10 @@ private slots:
     void testCreateAnimal_NetworkError_EmitsCreateAnimalFailed();
     void testCreateAnimal_InvalidJson_EmitsCreateAnimalFailed();
     void testCreateAnimal_ServerError_DoesNotEmitOtherSignals();
+    void testCreateAnimal_EmptyName_EmitsCreateAnimalFailed_NoNetworkCall();
+    void testCreateAnimal_ZeroOrganizationId_EmitsCreateAnimalFailed_NoNetworkCall();
+    void testCreateAnimal_ZeroBreedId_EmitsCreateAnimalFailed_NoNetworkCall();
+    void testCreateAnimal_ValidationError_ContainsFieldName();
 
     // updateAnimal signal tests
     void testUpdateAnimal_Success_EmitsUpdateAnimalSuccess();
@@ -905,6 +909,94 @@ void TestAnimalService::testGetAnimalsByOrganization_UsesCorrectEndpoint() {
 
     QCOMPARE(mock.getCalls.size(), 1);
     QVERIFY(mock.getCalls[0].endpoint.path().contains("/org/42/animals"));
+}
+
+// ---------------------------------------------------------------------------
+// createAnimal validation tests
+
+static AnimalRegisterDTO validCreateDTO() {
+    AnimalRegisterDTO dto;
+    dto.organizationId = 1;
+    dto.name = "Buddy";
+    dto.breedId = 3;
+    dto.size = AnimalSize::Medium;
+    dto.gender = AnimalGender::Male;
+    dto.careLevel = CareLevel::Easy;
+    dto.color = AnimalColor::Black;
+    dto.goodWith = GoodWith::Dogs;
+    dto.age = 2;
+    dto.status = AnimalStatus::Available;
+    return dto;
+}
+
+void TestAnimalService::testCreateAnimal_EmptyName_EmitsCreateAnimalFailed_NoNetworkCall() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy successSpy(&service, &AnimalService::createAnimalSuccess);
+    QSignalSpy failedSpy(&service, &AnimalService::createAnimalFailed);
+
+    AnimalRegisterDTO dto = validCreateDTO();
+    dto.name = "";
+
+    service.createAnimal(dto);
+
+    QCOMPARE(mock.postCalls.size(), 0);
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestAnimalService::testCreateAnimal_ZeroOrganizationId_EmitsCreateAnimalFailed_NoNetworkCall() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy successSpy(&service, &AnimalService::createAnimalSuccess);
+    QSignalSpy failedSpy(&service, &AnimalService::createAnimalFailed);
+
+    AnimalRegisterDTO dto = validCreateDTO();
+    dto.organizationId = 0;
+
+    service.createAnimal(dto);
+
+    QCOMPARE(mock.postCalls.size(), 0);
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestAnimalService::testCreateAnimal_ZeroBreedId_EmitsCreateAnimalFailed_NoNetworkCall() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy successSpy(&service, &AnimalService::createAnimalSuccess);
+    QSignalSpy failedSpy(&service, &AnimalService::createAnimalFailed);
+
+    AnimalRegisterDTO dto = validCreateDTO();
+    dto.breedId = 0;
+
+    service.createAnimal(dto);
+
+    QCOMPARE(mock.postCalls.size(), 0);
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestAnimalService::testCreateAnimal_ValidationError_ContainsFieldName() {
+    MockNetworkClient mock;
+    AnimalService service(mock);
+
+    QSignalSpy failedSpy(&service, &AnimalService::createAnimalFailed);
+
+    AnimalRegisterDTO dto = validCreateDTO();
+    dto.name = "   ";
+
+    service.createAnimal(dto);
+
+    QCOMPARE(failedSpy.count(), 1);
+    auto error = qvariant_cast<QSharedPointer<BaseError>>(failedSpy.at(0).at(0));
+    auto validationError = error.dynamicCast<ValidationError>();
+    QVERIFY(!validationError.isNull());
+    QVERIFY(!validationError->getErrors().empty());
+    QCOMPARE(QString::fromStdString(validationError->getErrors()[0].fieldName), QString("name"));
 }
 
 QTEST_MAIN(TestAnimalService)
