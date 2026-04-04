@@ -375,18 +375,24 @@ Rectangle {
 
         /*******************************/ //only for demonstration of tab content layout with action button, should be replaced with actual animals list
         CustomButton {
-            text: "+ Create Animal"
-            baseColor: theme.purple
-            hoverColor: theme.accentPink
-            textColor: theme.buttonText
-            fontSize: root.height * 0.025
-            Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: root.width * 0.15
-            Layout.preferredHeight: root.height * 0.06
-            Layout.rightMargin: root.height * 0.02
-            Layout.topMargin: root.height * 0.02
-            onClicked: root.createAnimalRequested()
+    text: "+ Create Animal"
+    baseColor: theme.purple
+    hoverColor: theme.accentPink
+    textColor: theme.buttonText
+    fontSize: root.height * 0.025
+    Layout.alignment: Qt.AlignRight
+    Layout.preferredWidth: root.width * 0.15
+    Layout.preferredHeight: root.height * 0.06
+    Layout.rightMargin: root.height * 0.02
+    Layout.topMargin: root.height * 0.02
+    onClicked: {
+        if (createAnimalViewModel && organizationViewModel) {
+            var orgId = organizationViewModel.currentOrganizationId
+            createAnimalViewModel.setOrganizationId(orgId)
         }
+        root.createAnimalRequested()
+    }
+}
         /*******************************/
 
         Text {

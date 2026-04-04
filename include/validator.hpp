@@ -26,6 +26,8 @@ public:
 
     Validator& isOneOf(const std::vector<std::string>& allowed);
 
+    Validator& inRange(int min, int max);
+
     std::optional<services::ValidationError> getValidationError() const;
 
 private:

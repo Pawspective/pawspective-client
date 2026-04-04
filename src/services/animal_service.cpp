@@ -192,7 +192,7 @@ void AnimalService::getAnimal(qint64 id) {
 void AnimalService::createAnimal(const models::AnimalRegisterDTO& dto) {
     utils::Validator validator;
     validator.field("name", dto.name.toStdString()).notBlank().maxLength(255);
-    validator.field("age", std::to_string(dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
+    validator.field("age", std::to_string(dto.age)).inRange(0, 100);
     if (auto error = validator.getValidationError()) {
         emit createAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));
         return;
@@ -225,7 +225,7 @@ void AnimalService::updateAnimal(qint64 id, const models::AnimalUpdateDTO& dto) 
         validator.field("name", dto.name->toStdString()).notBlank().maxLength(255);
     }
     if (dto.age) {
-        validator.field("age", std::to_string(*dto.age)).matches(QRegularExpression("\\d+"), "must be non-negative");
+        validator.field("age", std::to_string(*dto.age)).inRange(0, 100);
     }
     if (auto error = validator.getValidationError()) {
         emit updateAnimalFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*error))));

@@ -4,79 +4,14 @@ import QtQuick.Layouts 2.15
 
 Rectangle {
     id: root
+    anchors.fill: parent
     color: "#e8d8cb"
 
+    property var viewModel: null
     property string errorMessage: ""
 
     signal backClicked()
     signal createSuccess()
-
-    property var animalTypes: [
-        { text: "Dog", value: "Dog" },
-        { text: "Cat", value: "Cat" },
-        { text: "Other", value: "Other" }
-    ]
-    
-    property var breeds: [
-        { text: "Labrador", value: 1 },
-        { text: "German Shepherd", value: 2 },
-        { text: "Bulldog", value: 3 },
-        { text: "Persian Cat", value: 4 },
-        { text: "Siamese Cat", value: 5 },
-        { text: "Mixed", value: 6 }
-    ]
-    
-    property var sizes: [
-        { text: "Small", value: "Small" },
-        { text: "Medium", value: "Medium" },
-        { text: "Large", value: "Large" }
-    ]
-    
-    property var genders: [
-        { text: "Male", value: "Male" },
-        { text: "Female", value: "Female" },
-        { text: "Unknown", value: "Unknown" }
-    ]
-    
-    property var careLevels: [
-        { text: "Easy", value: "Easy" },
-        { text: "Moderate", value: "Moderate" },
-        { text: "Difficult", value: "Difficult" },
-        { text: "Special Needs", value: "SpecialNeeds" }
-    ]
-    
-    property var colors: [
-        { text: "Black", value: "Black" },
-        { text: "White", value: "White" },
-        { text: "Brown", value: "Brown" },
-        { text: "Grey", value: "Grey" },
-        { text: "Orange", value: "Orange" },
-        { text: "Cream", value: "Cream" },
-        { text: "Golden", value: "Golden" },
-        { text: "Spotted", value: "Spotted" },
-        { text: "Striped", value: "Striped" },
-        { text: "Mixed", value: "Mixed" }
-    ]
-    
-    property var goodWiths: [
-        { text: "Dogs", value: "Dogs" },
-        { text: "Cats", value: "Cats" },
-        { text: "Children", value: "Children" },
-        { text: "Elderly", value: "Elderly" }
-    ]
-
-    property string animalName: ""
-    property string description: ""
-    property int selectedAnimalTypeIndex: 0
-    property int selectedBreedIndex: 0
-    property int selectedSizeIndex: 0
-    property int selectedGenderIndex: 0
-    property string age: ""
-    property int selectedCareLevelIndex: 0
-    property int selectedColorIndex: 0
-    property int selectedGoodWithIndex: 0
-    
-    property bool isBusy: false
 
     QtObject {
         id: theme
@@ -94,46 +29,51 @@ Rectangle {
     readonly property real fieldValueFontSize: root.height * 0.025
     readonly property real fieldHeight: root.height * 0.06
     readonly property real fieldSpacing: root.height * 0.008
-    readonly property real fieldLeftMargin: root.width * 0.01
     
     readonly property real contentSpacing: root.height * 0.02
     readonly property real buttonHeight: root.height * 0.08
     readonly property real buttonFontSize: root.height * 0.025
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
-    readonly property real loaderTopMargin: 10
+    readonly property real bottomPadding: root.height * 0.05
 
-    function createAnimal() {
-        if (!animalName.trim()) {
-            errorMessage = "Please enter animal name"
-            return
+    Connections {
+        target: viewModel
+        function onErrorOccurred(type, message) {
+            root.errorMessage = message
+            errorTimer.start()
         }
-        
-        errorMessage = ""
-        isBusy = true
-        createTimer.start()
+        function onCreationFinished(success) {
+            if (success) {
+                root.errorMessage = ""
+                root.createSuccess()
+            }
+        }
     }
-    
+
     Timer {
-        id: createTimer
-        interval: 2000
-        onTriggered: {
-            isBusy = false
-            createSuccess()
+        id: errorTimer
+        interval: 3000
+        onTriggered: root.errorMessage = ""
+    }
+
+    Component.onCompleted: {
+        if (viewModel) {
+            viewModel.initialize()
         }
     }
 
     ScrollView {
+        id: scrollView
         anchors.fill: parent
-        contentWidth: parent.width
         clip: true
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         ColumnLayout {
-            width: parent.width * 0.9
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: scrollView.width
             spacing: root.contentSpacing
-            anchors.top: parent.top
-            anchors.topMargin: root.height * 0.05
+
+            Item { Layout.preferredHeight: root.height * 0.05 }
 
             Text {
                 text: "Create New Animal"
@@ -143,20 +83,21 @@ Rectangle {
                 font.pixelSize: root.height * 0.05
                 font.bold: true
                 color: theme.textDark
-                Layout.bottomMargin: 10
             }
 
-            // Name field
             ProfileDataField {
                 label: "Animal Name *"
-                value: root.animalName
-                onInputFinished: (val) => root.animalName = val
+                value: viewModel ? viewModel.name : ""
+                onInputFinished: (val) => { if (viewModel) viewModel.name = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Description field
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
                 
                 Text {
                     text: "Description (optional)"
@@ -175,17 +116,15 @@ Rectangle {
                         anchors.fill: parent
                         TextArea {
                             id: descInput
-                            text: root.description
+                            text: viewModel ? viewModel.description : ""
                             font.family: theme.fontName
                             font.pixelSize: root.fieldValueFontSize
                             color: theme.accentPink
                             wrapMode: TextArea.Wrap
-                            leftPadding: root.fieldLeftMargin
+                            leftPadding: 10
                             topPadding: 10
-                            enabled: !root.isBusy
-                            onTextChanged: {
-                                if (focus) root.description = text
-                            }
+                            enabled: viewModel && !viewModel.isBusy
+                            onTextChanged: { if (focus && viewModel) viewModel.description = text }
                             background: null
                             placeholderText: "Enter animal description..."
                             placeholderTextColor: theme.accentPink
@@ -194,110 +133,121 @@ Rectangle {
                 }
             }
 
-            // Animal Type combo
             ComboField {
-                label: "Animal Type"
-                model: root.animalTypes
-                currentIndex: root.selectedAnimalTypeIndex
-                onSelectedIndexChanged: (index) => root.selectedAnimalTypeIndex = index
+                label: "Animal Type *"
+                model: viewModel ? viewModel.animalTypes : []
+                currentValue: viewModel ? viewModel.animalType : ""
+                onValueSelected: (val) => { if (viewModel) viewModel.animalType = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Breed combo
             ComboField {
                 label: "Breed"
-                model: root.breeds
-                currentIndex: root.selectedBreedIndex
-                onSelectedIndexChanged: (index) => root.selectedBreedIndex = index
+                model: viewModel ? viewModel.breeds : []
+                currentValue: viewModel && viewModel.breedId ? String(viewModel.breedId) : ""
+                onValueSelected: (val) => { if (viewModel && val) viewModel.breedId = val }
+                enabled: viewModel && viewModel.isBreedEnabled && !viewModel.isBusy
+                placeholderText: viewModel && viewModel.animalType ? "Select breed..." : "Select animal type first"
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Size combo
             ComboField {
-                label: "Size"
-                model: root.sizes
-                currentIndex: root.selectedSizeIndex
-                onSelectedIndexChanged: (index) => root.selectedSizeIndex = index
+                label: "Size *"
+                model: viewModel ? viewModel.sizes : []
+                currentValue: viewModel ? viewModel.size : ""
+                onValueSelected: (val) => { if (viewModel) viewModel.size = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Gender combo
             ComboField {
-                label: "Gender"
-                model: root.genders
-                currentIndex: root.selectedGenderIndex
-                onSelectedIndexChanged: (index) => root.selectedGenderIndex = index
+                label: "Gender *"
+                model: viewModel ? viewModel.genders : []
+                currentValue: viewModel ? viewModel.gender : ""
+                onValueSelected: (val) => { if (viewModel) viewModel.gender = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Age field
             ProfileDataField {
-                label: "Age (in months)"
-                value: root.age
-                onInputFinished: (val) => root.age = val
+                label: "Age"
+                value: viewModel && viewModel.age >= 0 ? String(viewModel.age) : ""
+                inputMethodHints: Qt.ImhDigitsOnly
+                onInputFinished: (val) => { 
+                    if (viewModel) {
+                        var ageVal = parseInt(val)
+                        viewModel.age = (val === "" || isNaN(ageVal)) ? -1 : ageVal
+                    }
+                }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Care Level combo
             ComboField {
-                label: "Care Level"
-                model: root.careLevels
-                currentIndex: root.selectedCareLevelIndex
-                onSelectedIndexChanged: (index) => root.selectedCareLevelIndex = index
+                label: "Care Level *"
+                model: viewModel ? viewModel.careLevels : []
+                currentValue: viewModel ? viewModel.careLevel : ""
+                onValueSelected: (val) => { if (viewModel) viewModel.careLevel = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Color combo
             ComboField {
-                label: "Color"
-                model: root.colors
-                currentIndex: root.selectedColorIndex
-                onSelectedIndexChanged: (index) => root.selectedColorIndex = index
+                label: "Color *"
+                model: viewModel ? viewModel.colors : []
+                currentValue: viewModel ? viewModel.color : ""
+                onValueSelected: (val) => { if (viewModel) viewModel.color = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Good With combo
             ComboField {
-                label: "Good With"
-                model: root.goodWiths
-                currentIndex: root.selectedGoodWithIndex
-                onSelectedIndexChanged: (index) => root.selectedGoodWithIndex = index
+                label: "Good With *"
+                model: viewModel ? viewModel.goodWiths : []
+                currentValue: viewModel ? viewModel.goodWith : ""
+                onValueSelected: (val) => { if (viewModel) viewModel.goodWith = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            // Buttons
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.buttonSpacing
                 Layout.topMargin: root.contentSpacing
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
 
                 CustomButton {
-                    text: root.isBusy ? "Creating..." : "Create Animal"
+                    text: viewModel && viewModel.isBusy ? "Creating..." : "Create Animal"
                     baseColor: theme.purple
                     hoverColor: theme.accentPink
-                    textColor: theme.buttonText
-                    fontSize: root.buttonFontSize
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.buttonHeight
-                    enabled: !root.isBusy
-                    onClicked: root.createAnimal()
+                    fontSize: root.buttonFontSize
+                    isButtonEnabled: viewModel && !viewModel.isBusy
+                    onClicked: { if (viewModel) viewModel.createAnimal() }
                 }
 
                 CustomButton {
                     text: "Cancel"
                     baseColor: theme.purple
                     hoverColor: theme.accentPink
-                    textColor: theme.buttonText
-                    fontSize: root.buttonFontSize
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.buttonHeight
-                    enabled: !root.isBusy
+                    fontSize: root.buttonFontSize
+                    isButtonEnabled: viewModel && !viewModel.isBusy
                     onClicked: root.backClicked()
                 }
             }
 
-            LoaderSpinner {
-                Layout.fillWidth: true
-                Layout.preferredHeight: root.loaderSize
-                Layout.maximumHeight: root.loaderSize
-                Layout.minimumHeight: root.loaderSize
+            BusyIndicator {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: root.loaderTopMargin
-                Layout.bottomMargin: root.contentSpacing
-                running: root.isBusy
-                visible: root.isBusy
+                implicitWidth: root.loaderSize
+                implicitHeight: root.loaderSize
+                running: viewModel ? viewModel.isBusy : false
+                visible: running
             }
 
             Label {
@@ -309,16 +259,20 @@ Rectangle {
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
-                Layout.bottomMargin: root.height * 0.05
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
             }
 
-            Item { Layout.fillHeight: true }
+            Item { Layout.preferredHeight: root.bottomPadding }
         }
     }
+
+   
 
     component ProfileDataField : ColumnLayout {
         property string label: ""
         property string value: ""
+        property alias inputMethodHints: textField.inputMethodHints
         signal inputFinished(string newValue)
         
         Layout.fillWidth: true
@@ -332,14 +286,14 @@ Rectangle {
         }
         
         TextField {
+            id: textField
             text: parent.value
             font.family: theme.fontName
             font.pixelSize: root.fieldValueFontSize
             color: theme.accentPink
             Layout.fillWidth: true
             Layout.preferredHeight: root.fieldHeight
-            leftPadding: root.fieldLeftMargin
-            enabled: !root.isBusy
+            leftPadding: 10
             background: Rectangle { color: theme.fieldBg; radius: 10 }
             onTextChanged: if(focus) parent.inputFinished(text)
         }
@@ -348,8 +302,10 @@ Rectangle {
     component ComboField : ColumnLayout {
         property string label: ""
         property var model: []
-        property int currentIndex: -1
-        signal selectedIndexChanged(int index)
+        property string currentValue: ""
+        property string placeholderText: ""
+        property bool enabled: true
+        signal valueSelected(string value)
         
         Layout.fillWidth: true
         spacing: root.fieldSpacing
@@ -366,79 +322,94 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: root.fieldHeight
             textRole: "text"
+            valueRole: "value"
             model: parent.model
-            currentIndex: parent.currentIndex
+            enabled: parent.enabled
             
-            onActivated: (index) => parent.selectedIndexChanged(index)
-            
-            indicator: Canvas {
-                x: comboBox.width - width - 15
-                y: (comboBox.height - height) / 2
-                width: 12
-                height: 8
-                onPaint: {
-                    var context = getContext("2d");
-                    context.reset();
-                    context.moveTo(0, 0);
-                    context.lineTo(width, 0);
-                    context.lineTo(width / 2, height);
-                    context.closePath();
-                    context.fillStyle = theme.accentPink;
-                    context.fill();
+            currentIndex: {
+                if (!parent.currentValue) return 0
+                for (var i = 0; i < model.length; i++) {
+                    if (model[i] && String(model[i].value) === parent.currentValue) return i
                 }
+                return 0
+            }
+            
+            onActivated: {
+                var val = model[currentIndex] ? model[currentIndex].value : ""
+                parent.valueSelected(String(val))
             }
             
             contentItem: Text {
-                leftPadding: root.fieldLeftMargin
-                text: comboBox.displayText
+                leftPadding: 10
+                text: comboBox.currentIndex > 0 ? comboBox.displayText : (parent.placeholderText || "Select...")
                 font.family: theme.fontName
                 font.pixelSize: root.fieldValueFontSize
                 verticalAlignment: Text.AlignVCenter
                 color: theme.accentPink
-                elide: Text.ElideRight
             }
             
-            background: Rectangle { 
-                color: theme.fieldBg
-                radius: 10 
-            }
-            
-            delegate: ItemDelegate {
-                width: comboBox.width
-                hoverEnabled: true
-                contentItem: Text {
-                    text: modelData.text
-                    color: (parent.hovered || parent.highlighted) ? "white" : theme.textDark
-                    font.family: theme.fontName
-                    font.pixelSize: root.fieldValueFontSize
-                    verticalAlignment: Text.AlignVCenter
-                    elide: Text.ElideRight
-                }
-                background: Rectangle {
-                    color: (parent.hovered || parent.highlighted) ? theme.purple : "transparent"
-                }
-            }
+            background: Rectangle { color: theme.fieldBg; radius: 10 }
             
             popup: Popup {
                 y: comboBox.height + 3
                 width: comboBox.width
-                implicitHeight: contentItem.implicitHeight
+                implicitHeight: Math.min(contentItem.implicitHeight, 300)
                 padding: 1
-                
-                contentItem: ListView {
-                    clip: true
-                    implicitHeight: contentHeight
-                    model: comboBox.delegateModel
-                    currentIndex: comboBox.highlightedIndex
-                    ScrollIndicator.vertical: ScrollIndicator {}
-                }
-                
                 background: Rectangle {
                     color: theme.fieldBg
                     border.color: theme.dropBorder
                     radius: 10
                 }
+                contentItem: ListView {
+                    clip: true
+                    implicitHeight: contentHeight
+                    model: comboBox.popup.visible ? comboBox.delegateModel : null
+                }
             }
+
+            delegate: ItemDelegate {
+                width: comboBox.width
+                contentItem: Text {
+                    text: modelData.text
+                    color: hovered ? "white" : theme.textDark
+                    font.family: theme.fontName
+                    font.pixelSize: root.fieldValueFontSize
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    color: hovered ? theme.purple : "transparent"
+                }
+            }
+        }
+    }
+
+    component CustomButton : Rectangle {
+        id: btnRoot
+        property string text: ""
+        property color baseColor: "#b8abd7"
+        property color hoverColor: "#f4a7b9"
+        property real fontSize: 16
+        property bool isButtonEnabled: true 
+        
+        signal clicked()
+        
+        radius: 10
+        color: isButtonEnabled ? (btnMouseArea.containsMouse ? hoverColor : baseColor) : "#ccc"
+        
+        Text {
+            anchors.centerIn: parent
+            text: btnRoot.text
+            font.family: theme.fontName
+            font.pixelSize: btnRoot.fontSize
+            color: "white"
+        }
+        
+        MouseArea {
+            id: btnMouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: btnRoot.isButtonEnabled
+            onClicked: btnRoot.clicked()
         }
     }
 }

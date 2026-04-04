@@ -95,6 +95,23 @@ std::optional<services::ValidationError> Validator::getValidationError() const {
     return services::ValidationError{m_errors};
 }
 
+Validator& Validator::inRange(int min, int max) {
+    std::string fieldName = m_current_field;
+    if (!fieldName.empty()) {
+        fieldName[0] = std::toupper(fieldName[0]);
+    }
+
+    try {
+        int val = std::stoi(m_current_value);
+        if (val < min || val > max) {
+            addError(fieldName + " must be between " + std::to_string(min) + " and " + std::to_string(max));
+        }
+    } catch (...) {
+        addError(fieldName + " is required and must be between " + std::to_string(min) + " and " + std::to_string(max));
+    }
+    return *this;
+}
+
 void Validator::addError(std::string msg) { m_errors.push_back({m_current_field, std::move(msg)}); }
 
 }  // namespace pawspective::utils

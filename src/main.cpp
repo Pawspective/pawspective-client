@@ -6,10 +6,13 @@
 #include <QUrl>
 
 #include "mainwindow.hpp"
+#include "services/animal_service.hpp"
 #include "services/auth_service.hpp"
+#include "services/breed_service.hpp"
 #include "services/city_service.hpp"
 #include "services/organization_service.hpp"
 #include "services/user_service.hpp"
+#include "viewmodels/create_animal_viewmodel.hpp"
 #include "viewmodels/login_view_model.hpp"
 #include "viewmodels/organization_view_model.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
@@ -37,6 +40,8 @@ int main(int argc, char* argv[]) {
     pawspective::services::UserService userService(networkClient);
     pawspective::services::OrganizationService organizationService(networkClient);
     pawspective::services::CityService cityService(networkClient);
+    pawspective::services::AnimalService animalService(networkClient);
+    pawspective::services::BreedService breedService(networkClient);
     auto loginViewModel = new pawspective::viewmodels::LoginViewModel(authService, &app);
     auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
     auto registerOrganizationViewModel =
@@ -47,6 +52,7 @@ int main(int argc, char* argv[]) {
     auto userUpdateViewModel = new pawspective::viewmodels::UserUpdateViewModel(userService, authService);
     auto updateOrganizationViewModel =
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
+    auto createAnimalViewModel = new pawspective::viewmodels::CreateAnimalViewModel(animalService, breedService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -56,6 +62,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("userViewModel", userViewModel);
     engine.rootContext()->setContextProperty("updateOrganizationViewModel", updateOrganizationViewModel);
     engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);
+    engine.rootContext()->setContextProperty("createAnimalViewModel", createAnimalViewModel);
 
     QObject::connect(
         &engine,

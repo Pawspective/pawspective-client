@@ -55,6 +55,7 @@ add_executable(pawspective-client
     src/viewmodels/register_view_model.cpp
     src/viewmodels/register_organization_view_model.cpp
     src/viewmodels/update_organization_viewmodel.cpp
+    src/viewmodels/create_animal_viewmodel.cpp
     src/models/organization_dto.cpp
 	src/models/organization_update_dto.cpp
 	src/models/organization_register_dto.cpp

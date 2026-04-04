@@ -82,12 +82,12 @@ AnimalFilterDTO AnimalFilterDTO::fromJson(const QJsonObject& json) {
         dto.breeds = breedsVec;
     }
 
-    dto.animalTypes = utils::json::getOptionalEnumArray<AnimalType>(json, "animal_types", animalTypeFromApi);
+    dto.animalTypes = utils::json::getOptionalEnumArray<AnimalType>(json, "animalTypes", animalTypeFromApi);
     dto.sizes = utils::json::getOptionalEnumArray<AnimalSize>(json, "sizes", animalSizeFromApi);
     dto.genders = utils::json::getOptionalEnumArray<AnimalGender>(json, "genders", animalGenderFromApi);
-    dto.careLevels = utils::json::getOptionalEnumArray<CareLevel>(json, "care_levels", careLevelFromApi);
+    dto.careLevels = utils::json::getOptionalEnumArray<CareLevel>(json, "careLevels", careLevelFromApi);
     dto.colors = utils::json::getOptionalEnumArray<AnimalColor>(json, "colors", animalColorFromApi);
-    dto.goodWiths = utils::json::getOptionalEnumArray<GoodWith>(json, "good_withs", goodWithFromApi);
+    dto.goodWiths = utils::json::getOptionalEnumArray<GoodWith>(json, "goodWiths", goodWithFromApi);
     dto.ageLte = utils::json::getOptionalInt32(json, "age_lte");
     dto.ageGte = utils::json::getOptionalInt32(json, "age_gte");
 
