@@ -55,27 +55,28 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    contentWidth: cardsScroll.width
+                    contentWidth: -1
+                    ScrollBar.vertical.policy: ScrollBar.AlwaysOn
 
-                    Flow {
-                        width: cardsScroll.width
-                        spacing: 12
-                        padding: 4
+                    ColumnLayout {
+                        width: cardsScroll.width - cardsScroll.ScrollBar.vertical.width
+                        spacing: 8
 
                         OrganizationCardView {
                             organizationName: "LOL"
                             organizationCity: "Moscow"
                             organizationDescription: "Дырбулщищ"
                             organizationId: 1
-                            width: (parent.width - 28) / 2
+                            Layout.fillWidth: true
                             onClicked: function(id) { root.organizationClicked(id) }
                         }
 
                         OrganizationCardView {
                             organizationName: "KEK"
-                            organizationCity: "Kazan"
+                            organizationCity: "Тульская губерния"
+                            organizationDescription: "На краю дороги стоял дуб. Вероятно, в десять раз старше берёз, составлявших лес, он был в десять раз толще и в два раза выше каждой берёзы. Это был огромный в два обхвата дуб с обломанными, давно видно, суками и с обломанной корой, заросшей старыми болячками. С огромными своими неуклюжими, несимметрично-растопыренными, корявыми руками и пальцами, он старым, сердитым и презрительным уродом стоял между улыбающимися берёзами. Только он один не хотел подчиняться обаянию весны и не хотел видеть ни весны, ни солнца."
                             organizationId: 3
-                            width: (parent.width - 28) / 2
+                            Layout.fillWidth: true
                             onClicked: function(id) { root.organizationClicked(id) }
                         }
                     }
