@@ -32,7 +32,7 @@ Rectangle {
         clip: true
 
         ColumnLayout {
-            width: root.width
+            width: root.width - root.pad * 2
             spacing: root.height * 0.025
 
             // Header

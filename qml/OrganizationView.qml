@@ -401,20 +401,19 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            contentWidth: animalsScrollView.width
+            contentWidth: -1
+            ScrollBar.vertical.policy: ScrollBar.AlwaysOn
 
-            Flow {
-                id: animalsFlow
-                width: animalsScrollView.width
-                spacing: 12
-                padding: 4
+            ColumnLayout {
+                width: animalsScrollView.width - animalsScrollView.ScrollBar.vertical.width
+                spacing: 8
 
                 AnimalCardView {
                     animalName: "LOL"
                     animalType: "Dog"
                     animalAge: 3
                     animalId: 1
-                    width: (parent.width - 36) / 3
+                    Layout.fillWidth: true
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
 
@@ -422,8 +421,9 @@ Rectangle {
                     animalName: "KEK"
                     animalType: "Cat"
                     animalAge: 2
+                    animalDescription: "Любит анекдоты про Штирлица"
                     animalId: 2
-                    width: (parent.width - 36) / 3
+                    Layout.fillWidth: true
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
 
@@ -431,8 +431,9 @@ Rectangle {
                     animalName: "CHEBUREK"
                     animalType: "Dog"
                     animalAge: 5
+                    animalDescription: "Любит хинкали, не чебуреки!!"
                     animalId: 3
-                    width: (parent.width - 36) / 3
+                    Layout.fillWidth: true
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
 
@@ -441,7 +442,7 @@ Rectangle {
                     animalType: "Dog"
                     animalAge: 5
                     animalId: 4
-                    width: (parent.width - 36) / 3
+                    Layout.fillWidth: true
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
             }
