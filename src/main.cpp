@@ -14,6 +14,7 @@
 #include "services/user_service.hpp"
 #include "viewmodels/create_animal_viewmodel.hpp"
 #include "viewmodels/login_view_model.hpp"
+#include "viewmodels/organization_card_viewmodel.hpp"
 #include "viewmodels/organization_view_model.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
 #include "viewmodels/register_view_model.hpp"
@@ -53,6 +54,7 @@ int main(int argc, char* argv[]) {
     auto updateOrganizationViewModel =
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
     auto createAnimalViewModel = new pawspective::viewmodels::CreateAnimalViewModel(animalService, breedService, &app);
+    auto organizationCardViewModel = new pawspective::viewmodels::OrganizationCardViewModel(&app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -63,6 +65,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("updateOrganizationViewModel", updateOrganizationViewModel);
     engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);
     engine.rootContext()->setContextProperty("createAnimalViewModel", createAnimalViewModel);
+    engine.rootContext()->setContextProperty("organizationCardViewModel", organizationCardViewModel);
 
     QObject::connect(
         &engine,

@@ -49,6 +49,7 @@ Rectangle {
     signal editProfileClicked()
     signal registerOrganizationClicked()
     signal organizationClicked(var organizationId)
+    signal searchClicked()
 
     color: theme.pageBg
 
@@ -159,7 +160,7 @@ Rectangle {
                 spacing: root.sidebarSpacing
 
                 SidebarItem { text: "Profile"; active: true }
-                SidebarItem { text: "Search" }
+                SidebarItem { text: "Search"; onClicked: root.searchClicked() }
                 SidebarItem {
                     text: "Organization"
                     onClicked: {
