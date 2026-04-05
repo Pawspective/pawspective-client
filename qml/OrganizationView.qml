@@ -36,6 +36,7 @@ Rectangle {
     signal createOrganizationClicked()
     signal updateOrganizationClicked()
     signal createAnimalRequested()
+    signal animalDetailRequested(int animalId)
 
     readonly property real leftPanelWidth: root.width * 0.7
     readonly property real rightPanelWidth: root.width * 0.3
@@ -395,15 +396,55 @@ Rectangle {
 }
         /*******************************/
 
-        Text {
-            text: "Animals list placeholder"
-            font.family: theme.fontName
-            font.pixelSize: root.height * 0.03
-            color: theme.textDark
+        ScrollView {
+            id: animalsScrollView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
+            clip: true
+            contentWidth: animalsScrollView.width
+
+            Flow {
+                id: animalsFlow
+                width: animalsScrollView.width
+                spacing: 12
+                padding: 4
+
+                AnimalCardView {
+                    animalName: "LOL"
+                    animalType: "Dog"
+                    animalAge: 3
+                    animalId: 1
+                    width: (parent.width - 36) / 3
+                    onClicked: function(id) { root.animalDetailRequested(id) }
+                }
+
+                AnimalCardView {
+                    animalName: "KEK"
+                    animalType: "Cat"
+                    animalAge: 2
+                    animalId: 2
+                    width: (parent.width - 36) / 3
+                    onClicked: function(id) { root.animalDetailRequested(id) }
+                }
+
+                AnimalCardView {
+                    animalName: "CHEBUREK"
+                    animalType: "Dog"
+                    animalAge: 5
+                    animalId: 3
+                    width: (parent.width - 36) / 3
+                    onClicked: function(id) { root.animalDetailRequested(id) }
+                }
+
+                AnimalCardView {
+                    animalName: "KEKLOL"
+                    animalType: "Dog"
+                    animalAge: 5
+                    animalId: 4
+                    width: (parent.width - 36) / 3
+                    onClicked: function(id) { root.animalDetailRequested(id) }
+                }
+            }
         }
         }
         }
