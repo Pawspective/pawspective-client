@@ -32,39 +32,39 @@ void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
         emit ageChanged();
     }
 
-    QString gender = models::toApiString(dto.gender);
-    if (m_gender != gender) {
-        m_gender = gender;
+    QString newGender = models::toApiString(dto.gender);
+    if (m_gender != newGender) {
+        m_gender = newGender;
         emit genderChanged();
     }
 
-    QString size = models::toApiString(dto.size);
-    if (m_size != size) {
-        m_size = size;
+    QString newSize = models::toApiString(dto.size);
+    if (m_size != newSize) {
+        m_size = newSize;
         emit sizeChanged();
     }
 
-    QString careLevel = models::toApiString(dto.careLevel);
-    if (m_careLevel != careLevel) {
-        m_careLevel = careLevel;
+    QString newCareLevel = models::toApiString(dto.careLevel);
+    if (m_careLevel != newCareLevel) {
+        m_careLevel = newCareLevel;
         emit careLevelChanged();
     }
 
-    QString color = models::toApiString(dto.color);
-    if (m_color != color) {
-        m_color = color;
+    QString newColor = models::toApiString(dto.color);
+    if (m_color != newColor) {
+        m_color = newColor;
         emit colorChanged();
     }
 
-    QString goodWith = models::toApiString(dto.goodWith);
-    if (m_goodWith != goodWith) {
-        m_goodWith = goodWith;
+    QString newGoodWith = models::toApiString(dto.goodWith);
+    if (m_goodWith != newGoodWith) {
+        m_goodWith = newGoodWith;
         emit goodWithChanged();
     }
 
-    QString status = models::toApiString(dto.status);
-    if (m_status != status) {
-        m_status = status;
+    QString newStatus = models::toApiString(dto.status);
+    if (m_status != newStatus) {
+        m_status = newStatus;
         emit statusChanged();
     }
 
