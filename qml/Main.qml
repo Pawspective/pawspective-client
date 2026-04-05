@@ -159,6 +159,9 @@ ApplicationWindow {
             }
             stackView.push(animalCreateViewComponent)
         }
+        onAnimalDetailRequested: function(animalId) {
+            stackView.push(animalDetailViewComponent, { animalId: animalId })
+        }
         }
     }
 
@@ -187,6 +190,14 @@ ApplicationWindow {
         Component.onCompleted: {
             updateOrganizationViewModel.initialize()
         }
+        }
+    }
+
+    Component {
+        id: animalDetailViewComponent
+        AnimalDetailView {
+            viewModel: animalDetailViewModel
+            onBackClicked: stackView.pop()
         }
     }
 
