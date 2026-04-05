@@ -116,11 +116,22 @@ ApplicationWindow {
             onOrganizationClicked: function(organizationId) {
                 window.openOrganizationView(organizationId)
             }
+            onSearchClicked: stackView.push(searchViewComponent)
 
             Component.onCompleted: {
                 if (viewModel && viewModel.isAuthenticated) {
                     viewModel.refreshUserData()
                 }
+            }
+        }
+    }
+
+    Component {
+        id: searchViewComponent
+        SearchView {
+            onProfileRequested: stackView.pop()
+            onOrganizationClicked: function(organizationId) {
+                window.openOrganizationView(organizationId)
             }
         }
     }
