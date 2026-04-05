@@ -401,19 +401,33 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
+<<<<<<< HEAD
             contentWidth: -1
             ScrollBar.vertical.policy: ScrollBar.AlwaysOn
 
             ColumnLayout {
                 width: animalsScrollView.width - animalsScrollView.ScrollBar.vertical.width
                 spacing: 8
+=======
+            contentWidth: animalsScrollView.width
+
+            Flow {
+                id: animalsFlow
+                width: animalsScrollView.width
+                spacing: 12
+                padding: 4
+>>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
 
                 AnimalCardView {
                     animalName: "LOL"
                     animalType: "Dog"
                     animalAge: 3
                     animalId: 1
+<<<<<<< HEAD
                     Layout.fillWidth: true
+=======
+                    width: (parent.width - 36) / 3
+>>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
 
@@ -421,9 +435,14 @@ Rectangle {
                     animalName: "KEK"
                     animalType: "Cat"
                     animalAge: 2
+<<<<<<< HEAD
                     animalDescription: "Любит анекдоты про Штирлица"
                     animalId: 2
                     Layout.fillWidth: true
+=======
+                    animalId: 2
+                    width: (parent.width - 36) / 3
+>>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
 
@@ -431,9 +450,14 @@ Rectangle {
                     animalName: "CHEBUREK"
                     animalType: "Dog"
                     animalAge: 5
+<<<<<<< HEAD
                     animalDescription: "Любит хинкали, не чебуреки!!"
                     animalId: 3
                     Layout.fillWidth: true
+=======
+                    animalId: 3
+                    width: (parent.width - 36) / 3
+>>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
 
@@ -442,7 +466,11 @@ Rectangle {
                     animalType: "Dog"
                     animalAge: 5
                     animalId: 4
+<<<<<<< HEAD
                     Layout.fillWidth: true
+=======
+                    width: (parent.width - 36) / 3
+>>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
                     onClicked: function(id) { root.animalDetailRequested(id) }
                 }
             }

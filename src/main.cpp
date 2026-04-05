@@ -55,7 +55,10 @@ int main(int argc, char* argv[]) {
     auto updateOrganizationViewModel =
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
     auto createAnimalViewModel = new pawspective::viewmodels::CreateAnimalViewModel(animalService, breedService, &app);
+<<<<<<< HEAD
     auto organizationCardViewModel = new pawspective::viewmodels::OrganizationCardViewModel(&app);
+=======
+>>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
     auto animalDetailViewModel = new pawspective::viewmodels::AnimalDetailViewModel(&app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
@@ -67,7 +70,10 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("updateOrganizationViewModel", updateOrganizationViewModel);
     engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);
     engine.rootContext()->setContextProperty("createAnimalViewModel", createAnimalViewModel);
+<<<<<<< HEAD
     engine.rootContext()->setContextProperty("organizationCardViewModel", organizationCardViewModel);
+=======
+>>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
     engine.rootContext()->setContextProperty("animalDetailViewModel", animalDetailViewModel);
 
     QObject::connect(
