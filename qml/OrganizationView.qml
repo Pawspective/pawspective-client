@@ -408,6 +408,7 @@ Rectangle {
                 width: animalsScrollView.width - animalsScrollView.ScrollBar.vertical.width
                 spacing: 8
 
+                // TODO: mock — replace with Repeater over organizationViewModel.animals
                 AnimalCardView {
                     animalName: "LOL"
                     animalType: "Dog"

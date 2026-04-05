@@ -1,13 +1,70 @@
 #include "viewmodels/animal_detail_viewmodel.hpp"
 
 #include "models/animal_enums.hpp"
+#include "services/errors.hpp"
 
 namespace pawspective::viewmodels {
 
-AnimalDetailViewModel::AnimalDetailViewModel(QObject* parent) : QObject(parent) {}
+AnimalDetailViewModel::AnimalDetailViewModel(
+    services::AnimalService& animalService,
+    services::OrganizationService& organizationService,
+    QObject* parent
+)
+    : BaseViewModel(parent), m_animalService(animalService), m_organizationService(organizationService) {
+    connect(
+        &m_animalService,
+        &services::AnimalService::getAnimalSuccess,
+        this,
+        [this](const models::AnimalDTO& animal) {
+            setFromDTO(animal);
+            if (m_organizationId > 0) {
+                m_organizationService.getOrganization(m_organizationId);
+            } else {
+                setIsBusy(false);
+            }
+        }
+    );
+    connect(
+        &m_animalService,
+        &services::AnimalService::getAnimalFailed,
+        this,
+        [this](QSharedPointer<services::BaseError> error) {
+            setIsBusy(false);
+            if (const auto& validationError = error.dynamicCast<services::ValidationError>()) {
+                emitError(
+                    ValidationError,
+                    validationError->getErrors().empty()
+                        ? validationError->getMessage()
+                        : QString::fromStdString(validationError->getErrors()[0].errorMessage)
+                );
+            } else {
+                emitError(NetworkError, error->getMessage());
+            }
+        }
+    );
+    connect(
+        &m_organizationService,
+        &services::OrganizationService::getOrganizationSuccess,
+        this,
+        [this](const models::OrganizationDTO& org) {
+            setIsBusy(false);
+            setFromOrgDTO(org);
+        }
+    );
+    connect(
+        &m_organizationService,
+        &services::OrganizationService::getOrganizationFailed,
+        this,
+        [this](QSharedPointer<services::BaseError> error) {
+            setIsBusy(false);
+            emitError(NetworkError, error->getMessage());
+        }
+    );
+}
 
-AnimalDetailViewModel::AnimalDetailViewModel(const models::AnimalDTO& dto, QObject* parent) : QObject(parent) {
-    setFromDTO(dto);
+void AnimalDetailViewModel::loadAnimal(qint64 id) {
+    setIsBusy(true);
+    m_animalService.getAnimal(id);
 }
 
 void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
@@ -72,6 +129,30 @@ void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
     if (m_description != desc) {
         m_description = desc;
         emit descriptionChanged();
+    }
+
+    if (m_organizationId != dto.organizationId) {
+        m_organizationId = dto.organizationId;
+        emit organizationIdChanged();
+    }
+}
+
+void AnimalDetailViewModel::setFromOrgDTO(const models::OrganizationDTO& dto) {
+    if (m_organizationName != dto.name) {
+        m_organizationName = dto.name;
+        emit organizationNameChanged();
+    }
+
+    QString city = dto.city.name;
+    if (m_organizationCity != city) {
+        m_organizationCity = city;
+        emit organizationCityChanged();
+    }
+
+    QString desc = dto.description.value_or(QString{});
+    if (m_organizationDescription != desc) {
+        m_organizationDescription = desc;
+        emit organizationDescriptionChanged();
     }
 }
 

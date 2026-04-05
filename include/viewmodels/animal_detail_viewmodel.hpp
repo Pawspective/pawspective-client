@@ -3,11 +3,14 @@
 #include <QObject>
 #include <QString>
 
+#include "base.hpp"
 #include "models/animal_dto.hpp"
+#include "services/animal_service.hpp"
+#include "services/organization_service.hpp"
 
 namespace pawspective::viewmodels {
 
-class AnimalDetailViewModel : public QObject {
+class AnimalDetailViewModel : public BaseViewModel {
     Q_OBJECT
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
     Q_PROPERTY(QString animalType READ animalType NOTIFY animalTypeChanged)
@@ -20,10 +23,17 @@ class AnimalDetailViewModel : public QObject {
     Q_PROPERTY(QString goodWith READ goodWith NOTIFY goodWithChanged)
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
     Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
+    Q_PROPERTY(qint64 organizationId READ organizationId NOTIFY organizationIdChanged)
+    Q_PROPERTY(QString organizationName READ organizationName NOTIFY organizationNameChanged)
+    Q_PROPERTY(QString organizationCity READ organizationCity NOTIFY organizationCityChanged)
+    Q_PROPERTY(QString organizationDescription READ organizationDescription NOTIFY organizationDescriptionChanged)
 
 public:
-    explicit AnimalDetailViewModel(QObject* parent = nullptr);
-    explicit AnimalDetailViewModel(const models::AnimalDTO& dto, QObject* parent = nullptr);
+    explicit AnimalDetailViewModel(
+        services::AnimalService& animalService,
+        services::OrganizationService& organizationService,
+        QObject* parent = nullptr
+    );
 
     const QString& name() const { return m_name; }
     const QString& animalType() const { return m_animalType; }
@@ -36,8 +46,14 @@ public:
     const QString& goodWith() const { return m_goodWith; }
     const QString& status() const { return m_status; }
     const QString& description() const { return m_description; }
+    qint64 organizationId() const { return m_organizationId; }
+    const QString& organizationName() const { return m_organizationName; }
+    const QString& organizationCity() const { return m_organizationCity; }
+    const QString& organizationDescription() const { return m_organizationDescription; }
 
-    Q_INVOKABLE void setFromDTO(const models::AnimalDTO& dto);
+    Q_INVOKABLE void loadAnimal(qint64 id);
+    void initialize() override {}
+    void cleanup() override {}
 
 signals:
     void nameChanged();
@@ -51,8 +67,18 @@ signals:
     void goodWithChanged();
     void statusChanged();
     void descriptionChanged();
+    void organizationIdChanged();
+    void organizationNameChanged();
+    void organizationCityChanged();
+    void organizationDescriptionChanged();
 
 private:
+    void setFromDTO(const models::AnimalDTO& dto);
+    void setFromOrgDTO(const models::OrganizationDTO& dto);
+
+    services::AnimalService& m_animalService;
+    services::OrganizationService& m_organizationService;
+
     QString m_name;
     QString m_animalType;
     QString m_breedName;
@@ -64,6 +90,10 @@ private:
     QString m_goodWith;
     QString m_status;
     QString m_description;
+    qint64 m_organizationId = 0;
+    QString m_organizationName;
+    QString m_organizationCity;
+    QString m_organizationDescription;
 };
 
 }  // namespace pawspective::viewmodels

@@ -133,6 +133,9 @@ ApplicationWindow {
             onOrganizationClicked: function(organizationId) {
                 window.openOrganizationView(organizationId)
             }
+            onAnimalDetailRequested: function(animalId) {
+                stackView.push(animalDetailViewComponent, { animalId: animalId })
+            }
         }
     }
 
@@ -198,6 +201,8 @@ ApplicationWindow {
         AnimalDetailView {
             viewModel: animalDetailViewModel
             onBackClicked: stackView.pop()
+            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId) }
+            onUpdateAnimalRequested: console.log("Update animal requested")
         }
     }
 

@@ -56,7 +56,8 @@ int main(int argc, char* argv[]) {
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
     auto createAnimalViewModel = new pawspective::viewmodels::CreateAnimalViewModel(animalService, breedService, &app);
     auto organizationCardViewModel = new pawspective::viewmodels::OrganizationCardViewModel(&app);
-    auto animalDetailViewModel = new pawspective::viewmodels::AnimalDetailViewModel(&app);
+    auto animalDetailViewModel =
+        new pawspective::viewmodels::AnimalDetailViewModel(animalService, organizationService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
