@@ -56,10 +56,7 @@ add_executable(pawspective-client
     src/viewmodels/register_organization_view_model.cpp
     src/viewmodels/update_organization_viewmodel.cpp
     src/viewmodels/create_animal_viewmodel.cpp
-<<<<<<< HEAD
     src/viewmodels/organization_card_viewmodel.cpp
-=======
->>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
     src/viewmodels/animal_card_viewmodel.cpp
     src/viewmodels/animal_detail_viewmodel.cpp
     src/models/organization_dto.cpp
@@ -100,11 +97,8 @@ qt_add_qml_module(pawspective-client
         resources/reg_dog.png
         resources/heart_dog.png
         qml/AnimalCreateView.qml
-<<<<<<< HEAD
         qml/OrganizationCardView.qml
         qml/SearchView.qml
-=======
->>>>>>> e542a765a92e81fc781769114a70bcbd97b60e30
         qml/AnimalCardView.qml
         qml/AnimalDetailView.qml
 )
