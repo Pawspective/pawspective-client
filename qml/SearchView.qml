@@ -9,6 +9,7 @@ Rectangle {
 
     signal profileRequested()
     signal organizationClicked(int organizationId)
+    signal animalDetailRequested(int animalId)
 
     QtObject {
         id: theme
@@ -62,6 +63,28 @@ Rectangle {
                         width: cardsScroll.width - cardsScroll.ScrollBar.vertical.width
                         spacing: 8
 
+                        // TODO: mock — replace with Repeater over search results
+                        AnimalCardView {
+                            animalName: "Бублик"
+                            animalType: "Dog"
+                            animalAge: 3
+                            animalDescription: "Из твоей организации"
+                            animalId: 2
+                            Layout.fillWidth: true
+                            onClicked: function(id) { root.animalDetailRequested(id) }
+                        }
+
+                        AnimalCardView {
+                            animalName: "Мурзик"
+                            animalType: "Cat"
+                            animalAge: 5
+                            animalDescription: "Из другой организации"
+                            animalId: 3
+                            Layout.fillWidth: true
+                            onClicked: function(id) { root.animalDetailRequested(id) }
+                        }
+
+                        // TODO: mock — replace with Repeater over search results
                         OrganizationCardView {
                             organizationName: "LOL"
                             organizationCity: "Moscow"

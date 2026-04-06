@@ -133,6 +133,9 @@ ApplicationWindow {
             onOrganizationClicked: function(organizationId) {
                 window.openOrganizationView(organizationId)
             }
+            onAnimalDetailRequested: function(animalId) {
+                stackView.push(animalDetailViewComponent, { animalId: animalId })
+            }
         }
     }
 
@@ -158,6 +161,9 @@ ApplicationWindow {
                 createAnimalViewModel.setOrganizationId(orgId)
             }
             stackView.push(animalCreateViewComponent)
+        }
+        onAnimalDetailRequested: function(animalId) {
+            stackView.push(animalDetailViewComponent, { animalId: animalId })
         }
         }
     }
@@ -187,6 +193,16 @@ ApplicationWindow {
         Component.onCompleted: {
             updateOrganizationViewModel.initialize()
         }
+        }
+    }
+
+    Component {
+        id: animalDetailViewComponent
+        AnimalDetailView {
+            viewModel: animalDetailViewModel
+            onBackClicked: stackView.pop()
+            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId) }
+            onUpdateAnimalRequested: console.log("Update animal requested")
         }
     }
 
