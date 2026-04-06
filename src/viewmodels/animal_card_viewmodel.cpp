@@ -26,6 +26,12 @@ void AnimalCardViewModel::setFromDTO(const models::AnimalDTO& dto) {
         m_animalType = type;
         emit animalTypeChanged();
     }
+
+    QString desc = dto.description.value_or(QString{});
+    if (m_description != desc) {
+        m_description = desc;
+        emit descriptionChanged();
+    }
 }
 
 }  // namespace pawspective::viewmodels

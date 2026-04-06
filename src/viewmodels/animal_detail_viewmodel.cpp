@@ -134,6 +134,13 @@ void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
     if (m_organizationId != dto.organizationId) {
         m_organizationId = dto.organizationId;
         emit organizationIdChanged();
+
+        m_organizationName.clear();
+        emit organizationNameChanged();
+        m_organizationCity.clear();
+        emit organizationCityChanged();
+        m_organizationDescription.clear();
+        emit organizationDescriptionChanged();
     }
 }
 

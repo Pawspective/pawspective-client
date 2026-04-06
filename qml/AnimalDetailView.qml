@@ -7,6 +7,7 @@ Rectangle {
 
     property var viewModel: null
     property int animalId: 0
+    property var currentUserViewModel: userViewModel
 
     signal backClicked()
     signal organizationRequested(int organizationId)
@@ -19,7 +20,13 @@ Rectangle {
         }
     }
 
-    Component.onCompleted: {
+    StackView.onActivated: {
+        if (root.viewModel && root.animalId > 0) {
+            root.viewModel.loadAnimal(root.animalId)
+        }
+    }
+
+    onAnimalIdChanged: {
         if (root.viewModel && root.animalId > 0) {
             root.viewModel.loadAnimal(root.animalId)
         }
@@ -47,8 +54,8 @@ Rectangle {
     readonly property real sideMargin: root.width * 0.05
 
     readonly property bool isOwnOrganization: {
-        if (!viewModel || !userViewModel) return false
-        var userOrgId = userViewModel.userData ? Number(userViewModel.userData.organizationId) : 0
+        if (!viewModel || !root.currentUserViewModel) return false
+        var userOrgId = root.currentUserViewModel.userData ? Number(root.currentUserViewModel.userData.organizationId) : 0
         var animalOrgId = Number(viewModel.organizationId)
         return userOrgId > 0 && animalOrgId > 0 && userOrgId === animalOrgId
     }
