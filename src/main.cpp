@@ -22,6 +22,7 @@
 #include "viewmodels/update_organization_viewmodel.hpp"
 #include "viewmodels/user_update_viewmodel.hpp"
 #include "viewmodels/user_viewmodel.hpp"
+#include "viewmodels/search_organization_viewmodel.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
@@ -58,6 +59,8 @@ int main(int argc, char* argv[]) {
     auto organizationCardViewModel = new pawspective::viewmodels::OrganizationCardViewModel(&app);
     auto animalDetailViewModel =
         new pawspective::viewmodels::AnimalDetailViewModel(animalService, organizationService, &app);
+    auto searchOrganizationViewModel =
+        new pawspective::viewmodels::SearchOrganizationViewModel(organizationService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -70,6 +73,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("createAnimalViewModel", createAnimalViewModel);
     engine.rootContext()->setContextProperty("organizationCardViewModel", organizationCardViewModel);
     engine.rootContext()->setContextProperty("animalDetailViewModel", animalDetailViewModel);
+    engine.rootContext()->setContextProperty("searchOrganizationViewModel", searchOrganizationViewModel);
 
     QObject::connect(
         &engine,
