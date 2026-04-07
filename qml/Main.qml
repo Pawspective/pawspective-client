@@ -116,7 +116,11 @@ ApplicationWindow {
             onOrganizationClicked: function(organizationId) {
                 window.openOrganizationView(organizationId)
             }
-            onSearchClicked: stackView.push(searchViewComponent)
+            onSearchClicked: {
+                stackView.push(searchViewComponent, {
+                searchOrganizationViewModel: searchOrganizationViewModel
+            })
+            }
 
             Component.onCompleted: {
                 if (viewModel && viewModel.isAuthenticated) {
@@ -127,17 +131,32 @@ ApplicationWindow {
     }
 
     Component {
-        id: searchViewComponent
-        SearchView {
-            onProfileRequested: stackView.pop()
-            onOrganizationClicked: function(organizationId) {
-                window.openOrganizationView(organizationId)
+    id: searchViewComponent
+    SearchView {
+        searchOrganizationViewModel: searchOrganizationViewModel
+        userViewModel: userViewModel
+        
+        onProfileRequested: stackView.pop()
+        onOrganizationClicked: function(organizationId) {
+            window.openOrganizationView(organizationId)
+        }
+        onAnimalDetailRequested: function(animalId) {
+            stackView.push(animalDetailViewComponent, { animalId: animalId })
+        }
+        
+        Component.onCompleted: {
+            if (searchOrganizationViewModel) {
+                searchOrganizationViewModel.initialize()
             }
-            onAnimalDetailRequested: function(animalId) {
-                stackView.push(animalDetailViewComponent, { animalId: animalId })
+        }
+        
+        Component.onDestruction: {
+            if (searchOrganizationViewModel) {
+                searchOrganizationViewModel.cleanup()
             }
         }
     }
+}
 
     Component {
         id: registerOrganizationViewComponent
@@ -151,7 +170,11 @@ ApplicationWindow {
         id: organizationViewComponent
         OrganizationView {
             onProfileRequested: stackView.pop()
-            onSearchRequested: console.log("Search view is not implemented yet")
+            onSearchRequested: {
+            stackView.push(searchViewComponent, {
+                searchOrganizationViewModel: searchOrganizationViewModel
+            })
+        }
             onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
             onCreateAnimalRequested: {
