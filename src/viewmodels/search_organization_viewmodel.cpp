@@ -6,15 +6,15 @@ namespace pawspective::viewmodels {
 SearchOrganizationViewModel::SearchOrganizationViewModel(
     services::OrganizationService& organizationService,
     QObject* parent
-) : BaseViewModel(parent), m_organizationService(organizationService) 
-{
+)
+    : BaseViewModel(parent), m_organizationService(organizationService) {
     connect(
         &m_organizationService,
         &services::OrganizationService::findByNameContainingSuccess,
         this,
         &SearchOrganizationViewModel::handleSearchSuccess
     );
-    
+
     connect(
         &m_organizationService,
         &services::OrganizationService::findByNameContainingFailed,
@@ -41,7 +41,7 @@ void SearchOrganizationViewModel::setSearchQuery(const QString& query) {
     if (m_searchQuery == query) {
         return;
     }
-    
+
     m_searchQuery = query;
     emit searchQueryChanged();
 }
@@ -61,7 +61,7 @@ void SearchOrganizationViewModel::performSearch() {
     if (isBusy()) {
         return;
     }
-    
+
     setIsBusy(true);
     updateProperty(m_isSearching, true, [this]() { emit isSearchingChanged(); });
     m_organizationService.findByNameContaining(m_searchQuery);
@@ -70,7 +70,7 @@ void SearchOrganizationViewModel::performSearch() {
 void SearchOrganizationViewModel::handleSearchSuccess(const QList<models::OrganizationDTO>& organizations) {
     setIsBusy(false);
     updateProperty(m_isSearching, false, [this]() { emit isSearchingChanged(); });
-    
+
     if (organizations.isEmpty()) {
         clearOrganizationsList();
     } else {
@@ -81,11 +81,11 @@ void SearchOrganizationViewModel::handleSearchSuccess(const QList<models::Organi
 void SearchOrganizationViewModel::handleSearchFailed(QSharedPointer<services::BaseError> error) {
     setIsBusy(false);
     updateProperty(m_isSearching, false, [this]() { emit isSearchingChanged(); });
-    
+
     if (error) {
         emitError(ErrorType::NetworkError, error->getMessage());
     }
-    
+
     clearOrganizationsList();
 }
 
@@ -96,7 +96,7 @@ void SearchOrganizationViewModel::updateOrganizationsList(const QList<models::Or
         auto* cardVM = new OrganizationCardViewModel(org, this);
         m_organizationsList.append(QVariant::fromValue(cardVM));
     }
-    
+
     emit organizationsChanged();
 }
 
@@ -107,9 +107,9 @@ void SearchOrganizationViewModel::clearOrganizationsList() {
             obj->deleteLater();
         }
     }
-    
+
     m_organizationsList.clear();
     emit organizationsChanged();
 }
 
-} // namespace pawspective::viewmodels
+}  // namespace pawspective::viewmodels

@@ -19,10 +19,10 @@
 #include "viewmodels/organization_view_model.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
 #include "viewmodels/register_view_model.hpp"
+#include "viewmodels/search_organization_viewmodel.hpp"
 #include "viewmodels/update_organization_viewmodel.hpp"
 #include "viewmodels/user_update_viewmodel.hpp"
 #include "viewmodels/user_viewmodel.hpp"
-#include "viewmodels/search_organization_viewmodel.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
