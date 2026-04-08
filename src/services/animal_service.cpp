@@ -274,7 +274,7 @@ void AnimalService::getAnimalFilters() {
 
 void AnimalService::getAnimalsByOrganization(qint64 organizationId) {
     m_networkClient.get(
-        QUrl(QString("/org/%1/animals").arg(organizationId)),
+        QUrl(QString("/orgs/%1/animals").arg(organizationId)),
         [this](QNetworkReply& reply) {
             handleSuccessArray(
                 reply,
