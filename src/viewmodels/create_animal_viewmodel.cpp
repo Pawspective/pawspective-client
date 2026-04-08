@@ -222,4 +222,37 @@ void CreateAnimalViewModel::loadFilters() {
 
 void CreateAnimalViewModel::initialize() { loadFilters(); }
 
+void CreateAnimalViewModel::cleanup() {
+    m_registerDto = models::AnimalRegisterDTO{};
+    m_registerDto.status = models::AnimalStatus::Available;
+    m_registerDto.age = 0;
+    m_registerDto.breedId = 0;
+    m_registerDto.organizationId = m_organizationId;
+
+    m_animalType = std::nullopt;
+    m_size = std::nullopt;
+    m_gender = std::nullopt;
+    m_careLevel = std::nullopt;
+    m_color = std::nullopt;
+    m_goodWith = std::nullopt;
+
+    m_breedsList.clear();
+    m_isLoadingBreeds = false;
+
+    setIsBusy(false);
+
+    emit nameChanged();
+    emit descriptionChanged();
+    emit animalTypeChanged();
+    emit breedIdChanged();
+    emit sizeChanged();
+    emit genderChanged();
+    emit ageChanged();
+    emit careLevelChanged();
+    emit colorChanged();
+    emit goodWithChanged();
+    emit isBreedEnabledChanged();
+    emit breedsChanged();
+}
+
 }  // namespace pawspective::viewmodels

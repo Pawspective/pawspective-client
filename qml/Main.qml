@@ -235,17 +235,24 @@ ApplicationWindow {
             viewModel: createAnimalViewModel
             
             onBackClicked: {
-            console.log("AnimalCreateView back clicked")
+            createAnimalViewModel.cleanup()
             stackView.pop()
         }
         
         onCreateSuccess: {
-            console.log("Animal created successfully")
+            createAnimalViewModel.cleanup()
             stackView.pop()
         }
         
         Component.onCompleted: {
-            console.log("AnimalCreateView component completed")
+            if (createAnimalViewModel) {
+                createAnimalViewModel.initialize()
+            }
+        }
+        Component.onDestruction: {
+            if (createAnimalViewModel) {
+                createAnimalViewModel.cleanup()  
+            }
         }
         }
     }
