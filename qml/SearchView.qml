@@ -80,8 +80,13 @@ Rectangle {
                         }
                         TabButton {
                             text: "Organizations"
-                            active: root.currentTab === 1
-                            onClicked: root.currentTab = 1
+    active: root.currentTab === 1
+    onClicked: {
+        if (root.currentTab !== 1 && root.searchOrganizationViewModel) {
+            root.searchOrganizationViewModel.initialize()  
+        }
+        root.currentTab = 1
+    }
                         }
                     }
                 }
