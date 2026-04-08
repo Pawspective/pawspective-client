@@ -87,6 +87,7 @@ ApplicationWindow {
         LoginView {
             onRegisterRequested: stackView.push(registerViewComponent)
             onLoginSuccess: stackView.replace(userViewComponent)
+            Component.onDestruction: loginViewModel.cleanup()
         }
     }
 
@@ -97,6 +98,7 @@ ApplicationWindow {
             onRegisterSuccess: {
                 stackView.replace(loginViewComponent)
             }
+            Component.onDestruction: registerViewModel.cleanup()
         }
     }
 
@@ -163,6 +165,7 @@ ApplicationWindow {
         RegisterOrganizationView {
             onBackClicked: stackView.pop()
             onRegisterSuccess: stackView.pop()
+            Component.onDestruction: registerOrganizationViewModel.cleanup()
         }
     }
 
