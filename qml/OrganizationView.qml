@@ -37,6 +37,7 @@ Rectangle {
     signal updateOrganizationClicked()
     signal createAnimalRequested()
     signal animalDetailRequested(int animalId)
+    signal backClicked()
 
     readonly property real leftPanelWidth: root.width * 0.7
     readonly property real rightPanelWidth: root.width * 0.3
@@ -81,6 +82,41 @@ Rectangle {
                 anchors.fill: parent
                 anchors.margins: root.contentMargins
                 sourceComponent: root.hasOrganization ? organizationProfileComponent : createOrganizationComponent
+            }
+
+            // Back Button - positioned absolutely, doesn't affect layout
+            Rectangle {
+                id: backButton
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.topMargin: root.height * 0.005
+                anchors.leftMargin: root.contentMargins
+                width: root.height * 0.15
+                height: root.height * 0.04
+                color: backArea.containsMouse ? theme.accentPink : theme.purple
+                // TODO: This should be change when we change stack logic
+                visible: stackView.depth > 1 && !canUpdateOrganization
+                z: 10
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "←"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.pointSize: 18
+                    anchors.verticalCenterOffset: -3
+                    anchors.horizontalCenterOffset: 0
+                    scale: 1.5
+                    color: theme.buttonText
+                }
+
+                MouseArea {
+                    id: backArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.backClicked()
+                }
             }
         }
 
@@ -368,87 +404,80 @@ Rectangle {
     Component {
         id: animalsContent
         Item {
-        anchors.fill: parent
-        
-        ColumnLayout {
             anchors.fill: parent
-            spacing: 10
-
-        // Only for demonstration of tab content layout with action button; should be replaced with actual animals list.
-        CustomButton {
-    text: "+ Create Animal"
-    baseColor: theme.purple
-    hoverColor: theme.accentPink
-    textColor: theme.buttonText
-    fontSize: root.height * 0.025
-    Layout.alignment: Qt.AlignRight
-    Layout.preferredWidth: root.width * 0.15
-    Layout.preferredHeight: root.height * 0.06
-    Layout.rightMargin: root.height * 0.02
-    Layout.topMargin: root.height * 0.02
-    onClicked: {
-        if (createAnimalViewModel && organizationViewModel) {
-            var orgId = organizationViewModel.currentOrganizationId
-            createAnimalViewModel.setOrganizationId(orgId)
-        }
-        root.createAnimalRequested()
-    }
-}
-        /*******************************/
-
-        ScrollView {
-            id: animalsScrollView
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
-            contentWidth: -1
-            ScrollBar.vertical.policy: ScrollBar.AlwaysOn
-
-            ColumnLayout {
-                width: animalsScrollView.width - animalsScrollView.ScrollBar.vertical.width
-                spacing: 8
-
-                // TODO: mock — replace with Repeater over organizationViewModel.animals
-                AnimalCardView {
-                    animalName: "LOL"
-                    animalType: "Dog"
-                    animalAge: 3
-                    animalId: 1
-                    Layout.fillWidth: true
-                    onClicked: function(id) { root.animalDetailRequested(id) }
-                }
-
-                AnimalCardView {
-                    animalName: "KEK"
-                    animalType: "Cat"
-                    animalAge: 2
-                    animalDescription: "Любит анекдоты про Штирлица"
-                    animalId: 2
-                    Layout.fillWidth: true
-                    onClicked: function(id) { root.animalDetailRequested(id) }
-                }
-
-                AnimalCardView {
-                    animalName: "CHEBUREK"
-                    animalType: "Dog"
-                    animalAge: 5
-                    animalDescription: "Любит хинкали, не чебуреки!!"
-                    animalId: 3
-                    Layout.fillWidth: true
-                    onClicked: function(id) { root.animalDetailRequested(id) }
-                }
-
-                AnimalCardView {
-                    animalName: "KEKLOL"
-                    animalType: "Dog"
-                    animalAge: 5
-                    animalId: 4
-                    Layout.fillWidth: true
-                    onClicked: function(id) { root.animalDetailRequested(id) }
+            
+            property bool initialized: false
+            property var lastLoadedOrgId: -1
+            
+            function reloadAnimals() {
+                if (animalListViewModel && organizationViewModel) {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0 && orgId !== lastLoadedOrgId) {
+                        lastLoadedOrgId = orgId
+                        animalListViewModel.loadAnimalsForOrganization(orgId)
+                    }
                 }
             }
-        }
-        }
+            
+            // TODO: This double initalize 
+            Component.onCompleted: {
+                if (animalListViewModel && !initialized) {
+                    animalListViewModel.initialize()
+                    initialized = true
+                }
+                
+                reloadAnimals()
+                
+                if (organizationViewModel) {
+                    organizationViewModel.currentOrganizationIdChanged.connect(reloadAnimals)
+                }
+                
+                if (createAnimalViewModel) {
+                    createAnimalViewModel.creationFinished.connect(function(success) {
+                        if (success) {
+                            reloadAnimals()
+                        }
+                    })
+                }
+            }
+            
+            Component.onDestruction: {
+                if (animalListViewModel) {
+                    animalListViewModel.cleanup()
+                    initialized = false
+                }
+            }
+
+            Component {
+                id: createButtonComponent
+                CustomButton {
+                    text: "+ Create Animal"
+                    baseColor: theme.purple
+                    hoverColor: theme.accentPink
+                    textColor: theme.buttonText
+                    fontSize: root.height * 0.025
+                    Layout.alignment: Qt.AlignRight
+                    Layout.preferredWidth: root.width * 0.15
+                    Layout.preferredHeight: root.height * 0.06
+                    Layout.rightMargin: root.height * 0.02
+                    Layout.topMargin: root.height * 0.02
+                    onClicked: {
+                        if (createAnimalViewModel && organizationViewModel) {
+                            var orgId = organizationViewModel.currentOrganizationId
+                            createAnimalViewModel.setOrganizationId(orgId)
+                        }
+                        root.createAnimalRequested()
+                    }
+                }
+            }
+        
+            // Animal list view
+            AnimalListView {
+                headerComponent: canUpdateOrganization ? createButtonComponent : null
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                viewModel: animalListViewModel
+            }
         }
     }
 

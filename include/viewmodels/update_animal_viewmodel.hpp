@@ -124,7 +124,7 @@ private slots:
     void handleBreedsLoaded(const QList<models::BreedDTO>& breeds);
     void handleBreedsLoadFailed(QSharedPointer<services::BaseError> error);
 
-    // NOLINTNEXTLINE(readability-redundant-access-specifiers)
+    //NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private:
     void setupConnections();
     void loadFilters();
@@ -133,6 +133,7 @@ private:
     void updateDirtyStatus();
     void notifyAllChanged();
     void setDirty(bool dirty);
+    bool validateRequiredFields();
 
     template <typename T>
     QVariantList toVariantList(const std::optional<QVector<T>>& vec) const {

@@ -257,8 +257,8 @@ Rectangle {
                 Layout.rightMargin: root.sideMargin
                 Layout.preferredHeight: root.height * 0.08
                 onClicked: {
-                    console.log("Update animal clicked, id:", root.viewModel ? root.viewModel.organizationId : -1)
-                    root.updateAnimalRequested(root.viewModel ? root.viewModel.animalId : 0)
+                    console.log("Update animal clicked, id:", root.animalId)
+                    root.updateAnimalRequested(root.animalId)
                 }
             }
 

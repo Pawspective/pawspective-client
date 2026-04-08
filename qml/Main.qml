@@ -178,23 +178,24 @@ ApplicationWindow {
         OrganizationView {
             onProfileRequested: stackView.pop()
             onSearchRequested: {
-            stackView.push(searchViewComponent, {
-                searchOrganizationViewModel: searchOrganizationViewModel
-            })
-        }
+                stackView.push(searchViewComponent, {
+                    searchOrganizationViewModel: searchOrganizationViewModel
+                })
+            }
             onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
             onCreateAnimalRequested: {
-            var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
-            console.log("Creating animal for organization ID:", orgId)
-            if (orgId > 0) {
-                createAnimalViewModel.setOrganizationId(orgId)
+                var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
+                console.log("Creating animal for organization ID:", orgId)
+                if (orgId > 0) {
+                    createAnimalViewModel.setOrganizationId(orgId)
+                }
+                stackView.push(animalCreateViewComponent)
             }
-            stackView.push(animalCreateViewComponent)
-        }
-        onAnimalDetailRequested: function(animalId) {
-            stackView.push(animalDetailViewComponent, { animalId: animalId })
-        }
+            onAnimalDetailRequested: function(animalId) {
+                stackView.push(animalDetailViewComponent, { animalId: animalId })
+            }
+            onBackClicked: stackView.pop()
         }
     }
 
