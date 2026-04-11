@@ -37,6 +37,8 @@ Rectangle {
     readonly property real loaderSize: root.height * 0.1
     readonly property real bottomPadding: root.height * 0.05
 
+    readonly property real loaderTopMargin: 10
+
     Connections {
         target: viewModel
         function onErrorOccurred(type, message) {
@@ -100,7 +102,7 @@ Rectangle {
                 Layout.rightMargin: root.width * 0.05
                 
                 Text {
-                    text: "Description (optional)"
+                    text: "Description"
                     font.family: theme.fontName
                     font.pixelSize: root.fieldLabelFontSize
                     color: theme.textDark
@@ -143,7 +145,7 @@ Rectangle {
             }
 
             ComboField {
-                label: "Breed"
+                label: "Breed *"
                 model: viewModel ? viewModel.breeds : []
                 currentValue: viewModel && viewModel.breedId ? String(viewModel.breedId) : ""
                 onValueSelected: (val) => { if (viewModel && val) viewModel.breedId = val }
@@ -255,13 +257,17 @@ Rectangle {
                 }
             }
 
-            BusyIndicator {
-                Layout.alignment: Qt.AlignHCenter
-                implicitWidth: root.loaderSize
-                implicitHeight: root.loaderSize
-                running: viewModel ? viewModel.isBusy : false
-                visible: running
-            }
+            LoaderSpinner {
+    Layout.fillWidth: true
+    Layout.preferredHeight: root.loaderSize
+    Layout.maximumHeight: root.loaderSize
+    Layout.minimumHeight: root.loaderSize
+    Layout.alignment: Qt.AlignHCenter
+    Layout.topMargin: root.loaderTopMargin
+    Layout.bottomMargin: root.contentSpacing
+    running: viewModel ? viewModel.isBusy : false
+    visible: viewModel ? viewModel.isBusy : false
+}
 
             Label {
                 text: root.errorMessage 

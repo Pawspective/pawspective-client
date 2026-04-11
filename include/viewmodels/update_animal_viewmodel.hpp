@@ -124,7 +124,7 @@ private slots:
     void handleBreedsLoaded(const QList<models::BreedDTO>& breeds);
     void handleBreedsLoadFailed(QSharedPointer<services::BaseError> error);
 
-    //NOLINTNEXTLINE(readability-redundant-access-specifiers)
+    // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private:
     void setupConnections();
     void loadFilters();

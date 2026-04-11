@@ -112,7 +112,7 @@ Rectangle {
                 Layout.rightMargin: root.width * 0.05
                 
                 Text {
-                    text: "Description (optional)"
+                    text: "Description"
                     font.family: theme.fontName
                     font.pixelSize: root.fieldLabelFontSize
                     color: theme.textDark
@@ -271,11 +271,6 @@ Rectangle {
                     enabled: viewModel && !viewModel.isBusy && viewModel.isDirty
                     onClicked: { 
                         if (viewModel) {
-                            if (!viewModel.breedId || viewModel.breedId <= 0) {
-                                errorMessage = "Please select a breed."
-                                errorTimer.start()
-                                return
-                            }
                             viewModel.saveChanges()
                         }
                     }
@@ -309,34 +304,22 @@ Rectangle {
                 visible: viewModel ? viewModel.isBusy : false
             }
 
+            Label {
+    text: root.errorMessage 
+    color: theme.errorColor
+    font.family: theme.fontName
+    font.pixelSize: root.fieldLabelFontSize
+    visible: text.length > 0
+    wrapMode: Text.WordWrap
+    Layout.fillWidth: true
+    horizontalAlignment: Text.AlignHCenter
+}
+
             Item { Layout.preferredHeight: root.bottomPadding }
         }
     }
 
-    Rectangle {
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 20
-        height: errorText.implicitHeight + 20
-        visible: root.errorMessage.length > 0
-        color: theme.errorColor
-        radius: 10
-        z: 100
-
-        Text {
-            id: errorText
-            text: root.errorMessage
-            color: "white"
-            font.family: theme.fontName
-            font.pixelSize: root.fieldLabelFontSize
-            wrapMode: Text.WordWrap
-            anchors.centerIn: parent
-            width: parent.width - 20
-            horizontalAlignment: Text.AlignHCenter
-        }
-    }
-
+   
     component ProfileDataField : ColumnLayout {
         property string label: ""
         property string value: ""
@@ -478,15 +461,6 @@ Rectangle {
                 }
             }
         }
-        
-        Text {
-            visible: parent.required && (!parent.currentValue || parent.currentValue === "")
-            text: "*"
-            color: theme.errorColor
-            font.pixelSize: root.fieldValueFontSize
-            font.bold: true
-            Layout.leftMargin: 5
-        }
     }
 
     component CustomButton : Rectangle {
@@ -522,4 +496,3 @@ Rectangle {
 }
 
 //TODO: отображение загрузки в create animal и update animal
-//TODO: нельзя сохранять, когда пустое поле для породы 
