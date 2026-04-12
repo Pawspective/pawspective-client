@@ -105,50 +105,50 @@ void AnimalService::getAnimals(const models::AnimalFilterDTO& filter) {
 
     if (filter.breeds) {
         for (int64_t breedId : *filter.breeds) {
-            query.addQueryItem("breedId", QString::number(breedId));
+            query.addQueryItem("breeds", QString::number(breedId));
         }
     }
     if (filter.animalTypes) {
         for (models::AnimalType type : *filter.animalTypes) {
-            query.addQueryItem("animalType", models::toApiString(type));
+            query.addQueryItem("animal_types", models::toApiString(type));
         }
     }
     if (filter.sizes) {
         for (models::AnimalSize size : *filter.sizes) {
-            query.addQueryItem("size", models::toApiString(size));
+            query.addQueryItem("sizes", models::toApiString(size));
         }
     }
     if (filter.genders) {
         for (models::AnimalGender gender : *filter.genders) {
-            query.addQueryItem("gender", models::toApiString(gender));
+            query.addQueryItem("genders", models::toApiString(gender));
         }
     }
     if (filter.careLevels) {
         for (models::CareLevel level : *filter.careLevels) {
-            query.addQueryItem("careLevel", models::toApiString(level));
+            query.addQueryItem("care_levels", models::toApiString(level));
         }
     }
     if (filter.colors) {
         for (models::AnimalColor color : *filter.colors) {
-            query.addQueryItem("color", models::toApiString(color));
+            query.addQueryItem("colors", models::toApiString(color));
         }
     }
     if (filter.goodWiths) {
         for (models::GoodWith goodWith : *filter.goodWiths) {
-            query.addQueryItem("goodWith", models::toApiString(goodWith));
+            query.addQueryItem("good_withs", models::toApiString(goodWith));
         }
     }
     if (filter.ageLte) {
-        query.addQueryItem("ageLte", QString::number(*filter.ageLte));
+        query.addQueryItem("age_lte", QString::number(*filter.ageLte));
     }
     if (filter.ageGte) {
-        query.addQueryItem("ageGte", QString::number(*filter.ageGte));
+        query.addQueryItem("age_gte", QString::number(*filter.ageGte));
     }
 
     if (!query.isEmpty()) {
         url.setQuery(query);
     }
-
+    qDebug() << "Requesting animals with URL:" << url.toString();
     m_networkClient.get(
         url,
         [this](QNetworkReply& reply) {
