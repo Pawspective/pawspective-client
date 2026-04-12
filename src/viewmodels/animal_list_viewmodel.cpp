@@ -122,8 +122,7 @@ std::optional<pawspective::models::AnimalSize> parseAnimalSize(const QString& va
     if (normalized == "medium") {
         return pawspective::models::AnimalSize::Medium;
     }
-    if (normalized == "large" || normalized == "xlarge" || normalized == "x_large"
-        || normalized == "extra_large") {
+    if (normalized == "large" || normalized == "xlarge" || normalized == "x_large" || normalized == "extra_large") {
         return pawspective::models::AnimalSize::Large;
     }
     return std::nullopt;
@@ -284,20 +283,6 @@ QVariantList toEnumFilterOptions(
     return result;
 }
 
-QVariantList toBreedFilterOptions(const std::optional<QVector<int64_t>>& values) {
-    QVariantList result;
-    if (!values.has_value()) {
-        return result;
-    }
-
-    for (const auto& breedId : values.value()) {
-        const QString idText = QString::number(breedId);
-        result.append(toFilterOption("breeds", idText, QString("Breed #%1").arg(idText)));
-    }
-
-    return result;
-}
-
 }  // namespace
 
 namespace pawspective::viewmodels {
@@ -365,9 +350,7 @@ AnimalListViewModel::AnimalListViewModel(
 
 QAbstractListModel* AnimalListViewModel::listModel() { return m_listModel; }
 
-void AnimalListViewModel::initialize() {
-    loadAvailableFilters();
-}
+void AnimalListViewModel::initialize() { loadAvailableFilters(); }
 
 void AnimalListViewModel::cleanup() {
     if (auto internalModel = qobject_cast<detail::AnimalListInternalModel*>(m_listModel)) {
@@ -434,8 +417,7 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
 
     filter.animalTypes = parseEnumVector<models::AnimalType>(groupedFilters.value("animalTypes"), parseAnimalType);
     filter.sizes = parseEnumVector<models::AnimalSize>(groupedFilters.value("sizes"), parseAnimalSize);
-    filter.genders =
-        parseEnumVector<models::AnimalGender>(groupedFilters.value("genders"), parseAnimalGender);
+    filter.genders = parseEnumVector<models::AnimalGender>(groupedFilters.value("genders"), parseAnimalGender);
     filter.careLevels = parseEnumVector<models::CareLevel>(groupedFilters.value("careLevels"), parseCareLevel);
     filter.colors = parseEnumVector<models::AnimalColor>(groupedFilters.value("colors"), parseAnimalColor);
     filter.goodWiths = parseEnumVector<models::GoodWith>(groupedFilters.value("goodWiths"), parseGoodWith);
@@ -447,7 +429,7 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
     } else {
         qDebug() << "ageMin not set or invalid";
     }
-    
+
     if (filterData.contains("ageMax") && ageMax >= 0) {
         filter.ageLte = ageMax;
         qDebug() << "Applied ageLte filter:" << ageMax;
@@ -542,22 +524,21 @@ void AnimalListViewModel::handleGetAnimalsByOrganizationFailed(QSharedPointer<se
 
 void AnimalListViewModel::handleGetAnimalFiltersSuccess(const models::AnimalFilterDTO& filters) {
     const QVariantList breeds = m_requestedBreedTypes.isEmpty() ? QVariantList() : m_availableBreeds;
-    const QVariantList animalTypes =
-        toEnumFilterOptions<models::AnimalType>(filters.animalTypes, "animalTypes", models::toApiString);
+    const QVariantList
+        animalTypes = toEnumFilterOptions<models::AnimalType>(filters.animalTypes, "animalTypes", models::toApiString);
     const QVariantList sizes = toEnumFilterOptions<models::AnimalSize>(filters.sizes, "sizes", models::toApiString);
-    const QVariantList genders =
-        toEnumFilterOptions<models::AnimalGender>(filters.genders, "genders", models::toApiString);
-    const QVariantList careLevels =
-        toEnumFilterOptions<models::CareLevel>(filters.careLevels, "careLevels", models::toApiString);
-    const QVariantList colors =
-        toEnumFilterOptions<models::AnimalColor>(filters.colors, "colors", models::toApiString);
-    const QVariantList goodWiths =
-        toEnumFilterOptions<models::GoodWith>(filters.goodWiths, "goodWiths", models::toApiString);
+    const QVariantList
+        genders = toEnumFilterOptions<models::AnimalGender>(filters.genders, "genders", models::toApiString);
+    const QVariantList
+        careLevels = toEnumFilterOptions<models::CareLevel>(filters.careLevels, "careLevels", models::toApiString);
+    const QVariantList colors = toEnumFilterOptions<models::AnimalColor>(filters.colors, "colors", models::toApiString);
+    const QVariantList
+        goodWiths = toEnumFilterOptions<models::GoodWith>(filters.goodWiths, "goodWiths", models::toApiString);
 
-    const bool changed = m_availableBreeds != breeds || m_availableAnimalTypes != animalTypes
-                         || m_availableSizes != sizes || m_availableGenders != genders
-                         || m_availableCareLevels != careLevels || m_availableColors != colors
-                         || m_availableGoodWiths != goodWiths;
+    const bool changed =
+        m_availableBreeds != breeds || m_availableAnimalTypes != animalTypes || m_availableSizes != sizes ||
+        m_availableGenders != genders || m_availableCareLevels != careLevels || m_availableColors != colors ||
+        m_availableGoodWiths != goodWiths;
 
     if (!changed) {
         return;
@@ -580,7 +561,6 @@ void AnimalListViewModel::handleGetAnimalFiltersFailed(QSharedPointer<services::
         emitError(ErrorType::NetworkError, error->getMessage());
     }
 }
-
 
 void AnimalListViewModel::handleGetBreedsSuccess(const QList<models::BreedDTO>& breeds) {
     if (m_requestedBreedTypes.isEmpty()) {
