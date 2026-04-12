@@ -104,6 +104,8 @@ qt_add_qml_module(pawspective-client
         qml/AnimalCardView.qml
         qml/AnimalDetailView.qml
         qml/AnimalListView.qml
+        qml/FieldTag.qml
+        qml/FilterRangeInput.qml
 )
 
 target_include_directories(pawspective-client PRIVATE include)
