@@ -34,13 +34,6 @@ ApplicationWindow {
         }
     }
 
-    Connections {
-    target: updateAnimalViewModel
-    function onSaveCompleted() {
-        stackView.pop()
-    }
-}
-
 
     function openOrganizationView(organizationId) {
         let resolvedOrganizationId = null
@@ -94,6 +87,7 @@ ApplicationWindow {
         LoginView {
             onRegisterRequested: stackView.push(registerViewComponent)
             onLoginSuccess: stackView.replace(userViewComponent)
+            Component.onDestruction: loginViewModel.cleanup()
         }
     }
 
@@ -102,8 +96,9 @@ ApplicationWindow {
         RegisterView {
             onBackClicked: stackView.pop()
             onRegisterSuccess: {
-                stackView.replace(userViewComponent)
+                stackView.replace(loginViewComponent)
             }
+            Component.onDestruction: registerViewModel.cleanup()
         }
     }
 
@@ -111,14 +106,14 @@ ApplicationWindow {
         id: userViewComponent
         UserView {
             viewModel: userViewModel
-            
+
             onLogoutClicked: stackView.replace(loginViewComponent)
-            
+
             onEditProfileClicked: {
-                userUpdateViewModel.initialize() 
+                userUpdateViewModel.initialize()
                 stackView.push(userUpdateViewComponent)
             }
-            
+
             onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onOrganizationClicked: function(organizationId) {
                 window.openOrganizationView(organizationId)
@@ -142,7 +137,7 @@ ApplicationWindow {
     SearchView {
         searchOrganizationViewModel: searchOrganizationViewModel
         userViewModel: userViewModel
-        
+
         onProfileRequested: stackView.pop()
         onOrganizationClicked: function(organizationId) {
             window.openOrganizationView(organizationId)
@@ -150,13 +145,13 @@ ApplicationWindow {
         onAnimalDetailRequested: function(animalId) {
             stackView.push(animalDetailViewComponent, { animalId: animalId })
         }
-        
+
         Component.onCompleted: {
             if (searchOrganizationViewModel) {
                 searchOrganizationViewModel.initialize()
             }
         }
-        
+
         Component.onDestruction: {
             if (searchOrganizationViewModel) {
                 searchOrganizationViewModel.cleanup()
@@ -170,6 +165,7 @@ ApplicationWindow {
         RegisterOrganizationView {
             onBackClicked: stackView.pop()
             onRegisterSuccess: stackView.pop()
+            Component.onDestruction: registerOrganizationViewModel.cleanup()
         }
     }
 
@@ -216,9 +212,9 @@ ApplicationWindow {
     Component {
         id: updateOrganizationViewComponent
         UpdateOrganizationView {
-            viewModel: updateOrganizationViewModel 
+            viewModel: updateOrganizationViewModel
         onDiscard: {
-            updateOrganizationViewModel.cleanup() 
+            updateOrganizationViewModel.cleanup()
             stackView.pop()
         }
         Component.onCompleted: {
@@ -244,17 +240,17 @@ ApplicationWindow {
         id: animalCreateViewComponent
         AnimalCreateView {
             viewModel: createAnimalViewModel
-            
+
             onBackClicked: {
             createAnimalViewModel.cleanup()
             stackView.pop()
         }
-        
+
         onCreateSuccess: {
             createAnimalViewModel.cleanup()
             stackView.pop()
         }
-        
+
         Component.onCompleted: {
             if (createAnimalViewModel) {
                 createAnimalViewModel.initialize()

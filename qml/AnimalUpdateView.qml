@@ -63,18 +63,6 @@ Rectangle {
         onTriggered: root.errorMessage = ""
     }
 
-    Component.onCompleted: {
-        if (viewModel) {
-            viewModel.initialize()
-        }
-    }
-
-    Component.onDestruction: {
-        if (viewModel) {
-            viewModel.cleanup()
-        }
-    }
-
     ScrollView {
         id: scrollView
         anchors.fill: parent
@@ -494,5 +482,3 @@ Rectangle {
         }
     }
 }
-
-//TODO: отображение загрузки в create animal и update animal

@@ -45,7 +45,12 @@ public:
     Q_INVOKABLE void loadCities();
 
     void initialize() override;
-    void cleanup() override {}
+    void cleanup() override {
+        setName({});
+        setDescription({});
+        setCityId(0);
+        setIsBusy(false);
+    }
 
 signals:
     void nameChanged();

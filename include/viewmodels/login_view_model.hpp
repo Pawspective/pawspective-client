@@ -27,7 +27,11 @@ public:
     Q_INVOKABLE void login();
 
     void initialize() override {}
-    void cleanup() override {}
+    void cleanup() override {
+        setEmail({});
+        setPassword({});
+        setIsBusy(false);
+    }
 
 signals:
     void emailChanged();
