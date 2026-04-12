@@ -229,7 +229,10 @@ ApplicationWindow {
             viewModel: animalDetailViewModel
             onBackClicked: stackView.pop()
             onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId) }
-            onUpdateAnimalRequested: console.log("Update animal requested")
+            onUpdateAnimalRequested: function(animalId) {
+            updateAnimalViewModel.setAnimalId(animalId)
+            stackView.push(animalUpdateViewComponent)
+        }
         }
     }
 
@@ -239,18 +242,53 @@ ApplicationWindow {
             viewModel: createAnimalViewModel
 
             onBackClicked: {
-            console.log("AnimalCreateView back clicked")
+            createAnimalViewModel.cleanup()
             stackView.pop()
         }
 
         onCreateSuccess: {
-            console.log("Animal created successfully")
+            createAnimalViewModel.cleanup()
             stackView.pop()
         }
 
         Component.onCompleted: {
-            console.log("AnimalCreateView component completed")
+            if (createAnimalViewModel) {
+                createAnimalViewModel.initialize()
+            }
+        }
+        Component.onDestruction: {
+            if (createAnimalViewModel) {
+                createAnimalViewModel.cleanup()  
+            }
         }
         }
     }
+    Component {
+    id: animalUpdateViewComponent
+    AnimalUpdateView {
+        viewModel: updateAnimalViewModel
+        
+        onDiscard: {
+            updateAnimalViewModel.cleanup()
+            stackView.pop()
+        }
+        
+        onSaveCompleted: {
+            updateAnimalViewModel.cleanup()
+            stackView.pop()
+        }
+        
+        Component.onCompleted: {
+            if (updateAnimalViewModel) {
+                updateAnimalViewModel.initialize()
+            }
+        }
+        Component.onDestruction: {
+            if (updateAnimalViewModel) {
+                updateAnimalViewModel.cleanup()
+            }
+        }
+    }
+}
+
 }

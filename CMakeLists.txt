@@ -60,6 +60,7 @@ add_executable(pawspective-client
     src/viewmodels/animal_card_viewmodel.cpp
     src/viewmodels/animal_detail_viewmodel.cpp
     src/viewmodels/search_organization_viewmodel.cpp
+    src/viewmodels/update_animal_viewmodel.cpp
     src/viewmodels/animal_list_viewmodel.cpp
     src/models/organization_dto.cpp
 	src/models/organization_update_dto.cpp
@@ -103,6 +104,7 @@ qt_add_qml_module(pawspective-client
         qml/SearchView.qml
         qml/AnimalCardView.qml
         qml/AnimalDetailView.qml
+        qml/AnimalUpdateView.qml
         qml/AnimalListView.qml
 )
 

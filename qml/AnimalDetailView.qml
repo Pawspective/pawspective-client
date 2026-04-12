@@ -11,7 +11,7 @@ Rectangle {
 
     signal backClicked()
     signal organizationRequested(int organizationId)
-    signal updateAnimalRequested()
+    signal updateAnimalRequested(int animalId)
 
     Connections {
         target: root.viewModel
@@ -257,8 +257,8 @@ Rectangle {
                 Layout.rightMargin: root.sideMargin
                 Layout.preferredHeight: root.height * 0.08
                 onClicked: {
-                    console.log("Update animal clicked, id:", root.viewModel ? root.viewModel.organizationId : -1)
-                    root.updateAnimalRequested()
+                    console.log("Update animal clicked, id:", root.animalId)
+                    root.updateAnimalRequested(root.animalId)
                 }
             }
 

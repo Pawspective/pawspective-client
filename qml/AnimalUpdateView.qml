@@ -4,14 +4,13 @@ import QtQuick.Layouts 2.15
 
 Rectangle {
     id: root
-    anchors.fill: parent
     color: "#e8d8cb"
 
     property var viewModel: null
     property string errorMessage: ""
 
-    signal backClicked()
-    signal createSuccess()
+    signal discard()
+    signal saveCompleted()
 
     QtObject {
         id: theme
@@ -29,27 +28,32 @@ Rectangle {
     readonly property real fieldValueFontSize: root.height * 0.025
     readonly property real fieldHeight: root.height * 0.06
     readonly property real fieldSpacing: root.height * 0.008
+    readonly property real fieldLeftMargin: root.width * 0.01
     
     readonly property real contentSpacing: root.height * 0.02
     readonly property real buttonHeight: root.height * 0.08
     readonly property real buttonFontSize: root.height * 0.025
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
-    readonly property real bottomPadding: root.height * 0.05
-
     readonly property real loaderTopMargin: 10
+    readonly property real bottomPadding: root.height * 0.05
 
     Connections {
         target: viewModel
-        function onErrorOccurred(type, message) {
+        function onLoadFailed(message) {
             root.errorMessage = message
             errorTimer.start()
         }
-        function onCreationFinished(success) {
-            if (success) {
-                root.errorMessage = ""
-                root.createSuccess()
-            }
+        function onSaveFailed(message) {
+            root.errorMessage = message
+            errorTimer.start()
+        }
+        function onSaveCompleted() {
+            root.errorMessage = ""
+            root.saveCompleted()
+        }
+        function onLoadCompleted() {
+            root.errorMessage = ""
         }
     }
 
@@ -57,12 +61,6 @@ Rectangle {
         id: errorTimer
         interval: 3000
         onTriggered: root.errorMessage = ""
-    }
-
-    Component.onCompleted: {
-        if (viewModel) {
-            viewModel.initialize()
-        }
     }
 
     ScrollView {
@@ -78,7 +76,7 @@ Rectangle {
             Item { Layout.preferredHeight: root.height * 0.05 }
 
             Text {
-                text: "Create New Animal"
+                text: "Update Animal"
                 Layout.fillWidth: true
                 horizontalAlignment: Text.AlignHCenter
                 font.family: theme.fontName
@@ -148,9 +146,14 @@ Rectangle {
                 label: "Breed *"
                 model: viewModel ? viewModel.breeds : []
                 currentValue: viewModel && viewModel.breedId ? String(viewModel.breedId) : ""
-                onValueSelected: (val) => { if (viewModel && val) viewModel.breedId = val }
+                onValueSelected: (val) => { 
+                    if (viewModel && val) {
+                        viewModel.breedId = parseInt(val)
+                    }
+                }
                 enabled: viewModel && viewModel.isBreedEnabled && !viewModel.isBusy
                 placeholderText: viewModel && viewModel.animalType ? "Select breed..." : "Select animal type first"
+                required: true
                 Layout.leftMargin: root.width * 0.05
                 Layout.rightMargin: root.width * 0.05
             }
@@ -184,11 +187,13 @@ Rectangle {
 
                         if (trimmedVal === "") {
                             errorMessage = "Age is required."
+                            errorTimer.start()
                             return
                         }
 
                         if (isNaN(ageVal) || ageVal < 0 || ageVal > 100) {
                             errorMessage = "Age must be a number between 0 and 100."
+                            errorTimer.start()
                             return
                         }
 
@@ -227,6 +232,15 @@ Rectangle {
                 Layout.rightMargin: root.width * 0.05
             }
 
+            ComboField {
+                label: "Status *"
+                model: viewModel ? viewModel.statuses : []
+                currentValue: viewModel ? viewModel.status : ""
+                onValueSelected: (val) => { if (viewModel) viewModel.status = val }
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.buttonSpacing
@@ -235,59 +249,65 @@ Rectangle {
                 Layout.rightMargin: root.width * 0.05
 
                 CustomButton {
-                    text: viewModel && viewModel.isBusy ? "Creating..." : "Create Animal"
-                    baseColor: theme.purple
-                    hoverColor: theme.accentPink
+                    text: viewModel && viewModel.isBusy ? "Saving..." : "Save Changes"
+                    baseColor: (viewModel && viewModel.isDirty) ? theme.purple : "#cccccc"
+                    hoverColor: (viewModel && viewModel.isDirty) ? theme.accentPink : "#cccccc"
+                    textColor: theme.buttonText
+                    fontSize: root.buttonFontSize
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.buttonHeight
-                    fontSize: root.buttonFontSize
-                    isButtonEnabled: viewModel && !viewModel.isBusy
-                    onClicked: { if (viewModel) viewModel.createAnimal() }
+                    enabled: viewModel && !viewModel.isBusy && viewModel.isDirty
+                    onClicked: { 
+                        if (viewModel) {
+                            viewModel.saveChanges()
+                        }
+                    }
                 }
 
                 CustomButton {
-                    text: "Cancel"
+                    text: "Discard Changes"
                     baseColor: theme.purple
                     hoverColor: theme.accentPink
+                    textColor: theme.buttonText
+                    fontSize: root.buttonFontSize
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.buttonHeight
-                    fontSize: root.buttonFontSize
-                    isButtonEnabled: viewModel && !viewModel.isBusy
-                    onClicked: root.backClicked()
+                    enabled: viewModel && !viewModel.isBusy
+                    onClicked: {
+                        if (viewModel) viewModel.discardChanges()
+                        root.discard()
+                    }
                 }
             }
 
             LoaderSpinner {
-    Layout.fillWidth: true
-    Layout.preferredHeight: root.loaderSize
-    Layout.maximumHeight: root.loaderSize
-    Layout.minimumHeight: root.loaderSize
-    Layout.alignment: Qt.AlignHCenter
-    Layout.topMargin: root.loaderTopMargin
-    Layout.bottomMargin: root.contentSpacing
-    running: viewModel ? viewModel.isBusy : false
-    visible: viewModel ? viewModel.isBusy : false
-}
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.loaderSize
+                Layout.maximumHeight: root.loaderSize
+                Layout.minimumHeight: root.loaderSize
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: root.loaderTopMargin
+                Layout.bottomMargin: root.contentSpacing
+                running: viewModel ? viewModel.isBusy : false
+                visible: viewModel ? viewModel.isBusy : false
+            }
 
             Label {
-                text: root.errorMessage 
-                color: theme.errorColor
-                font.family: theme.fontName
-                font.pixelSize: root.fieldLabelFontSize
-                visible: text.length > 0
-                wrapMode: Text.WordWrap
-                Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
-                Layout.leftMargin: root.width * 0.05
-                Layout.rightMargin: root.width * 0.05
-            }
+    text: root.errorMessage 
+    color: theme.errorColor
+    font.family: theme.fontName
+    font.pixelSize: root.fieldLabelFontSize
+    visible: text.length > 0
+    wrapMode: Text.WordWrap
+    Layout.fillWidth: true
+    horizontalAlignment: Text.AlignHCenter
+}
 
             Item { Layout.preferredHeight: root.bottomPadding }
         }
     }
 
    
-
     component ProfileDataField : ColumnLayout {
         property string label: ""
         property string value: ""
@@ -313,6 +333,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: root.fieldHeight
             leftPadding: 10
+            enabled: viewModel && !viewModel.isBusy
             background: Rectangle { color: theme.fieldBg; radius: 10 }
             onTextChanged: if(focus) parent.inputFinished(text)
         }
@@ -324,6 +345,7 @@ Rectangle {
         property string currentValue: ""
         property string placeholderText: ""
         property bool enabled: true
+        property bool required: false
         signal valueSelected(string value)
         
         Layout.fillWidth: true
@@ -343,14 +365,14 @@ Rectangle {
             textRole: "text"
             valueRole: "value"
             model: parent.model
-            enabled: parent.enabled
+            enabled: parent.enabled && viewModel && !viewModel.isBusy
             
             currentIndex: {
-                if (!parent.currentValue) return 0
+                if (!parent.currentValue || parent.currentValue === "") return -1
                 for (var i = 0; i < model.length; i++) {
                     if (model[i] && String(model[i].value) === parent.currentValue) return i
                 }
-                return 0
+                return -1
             }
             
             onActivated: {
@@ -360,14 +382,40 @@ Rectangle {
             
             contentItem: Text {
                 leftPadding: 10
-                text: comboBox.currentIndex > 0 ? comboBox.displayText : (parent.placeholderText || "Select...")
+                text: comboBox.currentIndex >= 0 ? comboBox.displayText : (parent.placeholderText || "Select...")
                 font.family: theme.fontName
                 font.pixelSize: root.fieldValueFontSize
                 verticalAlignment: Text.AlignVCenter
                 color: theme.accentPink
+                elide: Text.ElideRight
             }
             
-            background: Rectangle { color: theme.fieldBg; radius: 10 }
+            background: Rectangle { 
+                color: theme.fieldBg
+                radius: 10
+                border.color: parent.required && (!parent.currentValue || parent.currentValue === "") ? theme.errorColor : "transparent"
+                border.width: parent.required && (!parent.currentValue || parent.currentValue === "") ? 2 : 0
+            }
+            
+            indicator: Canvas {
+                id: arrowCanvas
+                x: comboBox.width - width - 15
+                y: (comboBox.height - height) / 2
+                width: 12
+                height: 8
+                visible: comboBox.enabled
+                
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    ctx.moveTo(0, 0)
+                    ctx.lineTo(width, 0)
+                    ctx.lineTo(width / 2, height)
+                    ctx.closePath()
+                    ctx.fillStyle = theme.accentPink
+                    ctx.fill()
+                }
+            }
             
             popup: Popup {
                 y: comboBox.height + 3
@@ -388,15 +436,16 @@ Rectangle {
 
             delegate: ItemDelegate {
                 width: comboBox.width
+                hoverEnabled: true
                 contentItem: Text {
                     text: modelData.text
-                    color: hovered ? "white" : theme.textDark
+                    color: (parent.hovered || parent.highlighted) ? "white" : theme.textDark
                     font.family: theme.fontName
                     font.pixelSize: root.fieldValueFontSize
                     verticalAlignment: Text.AlignVCenter
                 }
                 background: Rectangle {
-                    color: hovered ? theme.purple : "transparent"
+                    color: (parent.hovered || parent.highlighted) ? theme.purple : "transparent"
                 }
             }
         }
@@ -407,27 +456,28 @@ Rectangle {
         property string text: ""
         property color baseColor: "#b8abd7"
         property color hoverColor: "#f4a7b9"
+        property color textColor: "#e7ebf5"
         property real fontSize: 16
-        property bool isButtonEnabled: true 
+        property bool enabled: true
         
         signal clicked()
         
         radius: 10
-        color: isButtonEnabled ? (btnMouseArea.containsMouse ? hoverColor : baseColor) : "#ccc"
+        color: enabled ? (btnMouseArea.containsMouse ? hoverColor : baseColor) : "#cccccc"
         
         Text {
             anchors.centerIn: parent
             text: btnRoot.text
             font.family: theme.fontName
             font.pixelSize: btnRoot.fontSize
-            color: "white"
+            color: btnRoot.textColor
         }
         
         MouseArea {
             id: btnMouseArea
             anchors.fill: parent
             hoverEnabled: true
-            enabled: btnRoot.isButtonEnabled
+            enabled: btnRoot.enabled
             onClicked: btnRoot.clicked()
         }
     }

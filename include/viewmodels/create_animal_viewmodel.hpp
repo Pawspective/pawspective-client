@@ -170,7 +170,7 @@ public:
     }
 
     void initialize() override;
-    void cleanup() override {}
+    void cleanup() override;
 
 signals:
     void nameChanged();

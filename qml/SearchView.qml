@@ -29,6 +29,8 @@ Rectangle {
     readonly property real rightPanelWidth: root.width * 0.3
     readonly property real contentMargins: root.height * 0.05
     readonly property real contentSpacing: root.height * 0.02
+    readonly property real loaderSize: root.height * 0.1
+readonly property real loaderTopMargin: 10
 
     property int currentTab: 1
     
@@ -80,8 +82,13 @@ Rectangle {
                         }
                         TabButton {
                             text: "Organizations"
-                            active: root.currentTab === 1
-                            onClicked: root.currentTab = 1
+    active: root.currentTab === 1
+    onClicked: {
+        if (root.currentTab !== 1 && root.searchOrganizationViewModel) {
+            root.searchOrganizationViewModel.initialize()  
+        }
+        root.currentTab = 1
+    }
                         }
                     }
                 }
@@ -345,38 +352,17 @@ Rectangle {
                             }
                         }
 
-                        Item {
-                            anchors.centerIn: parent
-                            width: root.height * 0.12
-                            height: root.height * 0.12
-                            visible: root.searchOrganizationViewModel && root.searchOrganizationViewModel.isSearching
-
-                            Image {
-                                id: pawIcon
-                                anchors.centerIn: parent
-                                width: parent.width
-                                height: parent.height
-                                source: "../resources/paw.png"
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
-                                
-                                RotationAnimation on rotation {
-                                    id: pawRotation
-                                    from: 0
-                                    to: 360
-                                    duration: 1500
-                                    loops: Animation.Infinite
-                                    running: parent.parent.visible
-                                }
-                            }
-                            
-                            Text {
-                                anchors.centerIn: parent
-                                text: "🐾"
-                                font.pixelSize: root.height * 0.08
-                                visible: false
-                            }
-                        }
+                        LoaderSpinner {
+    Layout.fillWidth: true
+    Layout.preferredHeight: root.loaderSize
+    Layout.maximumHeight: root.loaderSize
+    Layout.minimumHeight: root.loaderSize
+    Layout.alignment: Qt.AlignHCenter
+    Layout.topMargin: root.loaderTopMargin
+    Layout.bottomMargin: root.contentSpacing
+    running: root.searchOrganizationViewModel ? root.searchOrganizationViewModel.isSearching : false
+    visible: root.searchOrganizationViewModel ? root.searchOrganizationViewModel.isSearching : false
+}
 
                         ColumnLayout {
                             anchors.centerIn: parent
