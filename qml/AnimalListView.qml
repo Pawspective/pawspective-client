@@ -22,13 +22,15 @@ Item {
 
         clip: true
         boundsBehavior: Flickable.StopAtBounds
+        
+        readonly property real scrollBarMargin: verticalScrollBar.width + 6
 
         header: headerComponent ? headerWrapper : null
         
         Component {
             id: headerWrapper
             Item {
-                width: animalListView.width
+                width: animalListView.width - animalListView.scrollBarMargin
                 height: header.height + headerMargin
                 
                 Loader {
@@ -41,9 +43,27 @@ Item {
             }
         }
 
+        footer: animalListView.count === 0 ? emptyStateFooter : null
+        
+        Component {
+            id: emptyStateFooter
+            Item {
+                width: animalListView.width - animalListView.scrollBarMargin
+                height: Math.max(animalListView.height * 0.75, root.height * 0.3)
+                
+                Text {
+                    anchors.centerIn: parent
+                    text: "No animals"
+                    font.family: root.fontName
+                    font.pixelSize: root.height * 0.05
+                    color: root.textDark
+                }
+            }
+        }
+
         spacing: root.height * 0.012
         delegate: AnimalCardView {
-            width: animalListView.width
+            width: animalListView.width - animalListView.scrollBarMargin
             animalName: model.animalName ? model.animalName : ""
             animalDescription: model.animalDescription ? model.animalDescription : ""
             animalAge: model.animalAge ? model.animalAge : 0
@@ -55,6 +75,7 @@ Item {
         }
 
         ScrollBar.vertical: ScrollBar { 
+            id: verticalScrollBar
             policy: ScrollBar.AsNeeded 
         }
 
@@ -65,14 +86,5 @@ Item {
                 root.viewModel.cleanup()
             }
         }
-    }
-    
-    Text {
-        anchors.centerIn: parent
-        visible: animalListView.count === 0
-        text: "No animals"
-        font.family: root.fontName
-        font.pixelSize: root.height * 0.05
-        color: root.textDark
     }
 }
