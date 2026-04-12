@@ -47,7 +47,14 @@ public:
     Q_INVOKABLE void registerUser();
 
     void initialize() override {}
-    void cleanup() override {}
+    void cleanup() override {
+        setFirstName({});
+        setLastName({});
+        setEmail({});
+        setPassword({});
+        setConfirmPassword({});
+        setIsBusy(false);
+    }
 
 signals:
     void firstNameChanged();
