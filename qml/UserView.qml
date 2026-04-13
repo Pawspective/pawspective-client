@@ -7,6 +7,7 @@ Rectangle {
     //anchors.fill: parent
 
     property var viewModel: null
+    property bool suppressLoading: false
 
     QtObject {
         id: theme
@@ -55,8 +56,8 @@ Rectangle {
 
     LoaderSpinner {
         anchors.centerIn: parent
-        running: viewModel ? viewModel.isBusy : false
-        visible: viewModel ? viewModel.isBusy : false
+        running: viewModel ? (viewModel.isBusy && !root.suppressLoading) : false
+        visible: viewModel ? (viewModel.isBusy && !root.suppressLoading) : false
         z: 10
     }
 

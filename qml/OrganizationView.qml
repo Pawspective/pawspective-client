@@ -62,10 +62,50 @@ Rectangle {
             } else if (currentUserOrganizationId > 0) {
                 organizationViewModel.setCanUpdateOrganization(true)
                 organizationViewModel.initializeForOrganization(currentUserOrganizationId)
+            } else if (userViewModel && userViewModel.isBusy) {
+                return
             } else {
                 organizationViewModel.setCanUpdateOrganization(false)
                 organizationViewModel.initializeForCreateOrganization()
             }
+        }
+    }
+
+    Connections {
+        target: userViewModel
+        function onUserDataLoaded() {
+            if (!organizationViewModel || organizationViewModel.isBusy) {
+                return
+            }
+
+            if (root.organizationId !== null) {
+                return
+            }
+
+            const currentUserOrganizationId = Number(userViewModel.userData.organizationId)
+            if (currentUserOrganizationId > 0) {
+                if (organizationViewModel.hasOrganization
+                    && organizationViewModel.currentOrganizationId === currentUserOrganizationId) {
+                    return
+                }
+                organizationViewModel.setCanUpdateOrganization(true)
+                organizationViewModel.initializeForOrganization(currentUserOrganizationId)
+            } else {
+                organizationViewModel.setCanUpdateOrganization(false)
+                organizationViewModel.initializeForCreateOrganization()
+            }
+        }
+        function onUserDataLoadFailed() {
+            if (!organizationViewModel || organizationViewModel.isBusy) {
+                return
+            }
+
+            if (root.organizationId !== null) {
+                return
+            }
+
+            organizationViewModel.setCanUpdateOrganization(false)
+            organizationViewModel.initializeForCreateOrganization()
         }
     }
 
@@ -83,7 +123,15 @@ Rectangle {
             Loader {
                 anchors.fill: parent
                 anchors.margins: root.contentMargins
-                sourceComponent: root.hasOrganization ? organizationProfileComponent : createOrganizationComponent
+                sourceComponent: (organizationViewModel && organizationViewModel.isBusy)
+                                 || (userViewModel
+                                     && userViewModel.isBusy
+                                     && root.organizationId === null
+                                     && Number(userViewModel.userData.organizationId || 0) <= 0)
+                                 ? emptyOrganizationComponent
+                                 : (root.hasOrganization
+                                    ? organizationProfileComponent
+                                    : createOrganizationComponent)
             }
 
             // Back Button - positioned absolutely, doesn't affect layout
@@ -135,19 +183,29 @@ Rectangle {
                 SidebarItem {
                     text: "Profile"
                     active: root.navigationSource === "profile"
-                    onClicked: root.profileRequested()
+                    onClicked: {
+                        if (!active) {
+                            root.profileRequested()
+                        }
+                    }
                 }
                 SidebarItem {
                     text: "Search"
                     active: root.navigationSource === "search"
-                    onClicked: root.searchRequested()
+                    onClicked: {
+                        if (!active) {
+                            root.searchRequested()
+                        }
+                    }
                 }
                 SidebarItem {
                     text: "Organization"
                     active: root.navigationSource === "sidebar" 
                     onClicked: {
-                        const rawOrganizationId = userViewModel ? userViewModel.userData.organizationId : null
-                        root.organizationRequested(rawOrganizationId === undefined ? null : rawOrganizationId)
+                        if (!active) {
+                            const rawOrganizationId = userViewModel ? userViewModel.userData.organizationId : null
+                            root.organizationRequested(rawOrganizationId === undefined ? null : rawOrganizationId)
+                        }
                     }
                 }
 
@@ -221,6 +279,12 @@ Rectangle {
                 }
             }
         }
+    }
+
+    Component {
+        id: emptyOrganizationComponent
+
+        Item { }
     }
 
     Component {
