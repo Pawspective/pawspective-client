@@ -9,6 +9,7 @@ Rectangle {
     // Optional context for reusable organization screen.
     // organizationId === null means "create organization" mode.
     property var organizationId: null
+    property string navigationSource: "sidebar"  // Track how we got here: "sidebar", "search", "animal"
 
     QtObject {
         id: theme
@@ -33,6 +34,7 @@ Rectangle {
 
     signal profileRequested()
     signal searchRequested()
+    signal organizationRequested(int orgId)
     signal createOrganizationClicked()
     signal updateOrganizationClicked()
     signal createAnimalRequested()
@@ -132,15 +134,21 @@ Rectangle {
 
                 SidebarItem {
                     text: "Profile"
+                    active: root.navigationSource === "profile"
                     onClicked: root.profileRequested()
                 }
                 SidebarItem {
                     text: "Search"
+                    active: root.navigationSource === "search"
                     onClicked: root.searchRequested()
                 }
                 SidebarItem {
                     text: "Organization"
-                    active: true
+                    active: root.navigationSource === "sidebar" 
+                    onClicked: {
+                        const rawOrganizationId = userViewModel ? userViewModel.userData.organizationId : null
+                        root.organizationRequested(rawOrganizationId === undefined ? null : rawOrganizationId)
+                    }
                 }
 
                 Image {

@@ -35,7 +35,7 @@ ApplicationWindow {
     }
 
 
-    function openOrganizationView(organizationId) {
+    function openOrganizationView(organizationId, source) {
         let resolvedOrganizationId = null
         if (organizationId !== null && organizationId !== undefined) {
             const normalizedOrganizationId = Number(organizationId)
@@ -44,8 +44,10 @@ ApplicationWindow {
                                    : null
         }
 
-        stackView.push(organizationViewComponent, {
-            organizationId: resolvedOrganizationId
+        const navigationSource = source || "sidebar"
+        stackView.replace(null, organizationViewComponent, {
+            organizationId: resolvedOrganizationId,
+            navigationSource: navigationSource
         })
     }
 
@@ -116,10 +118,10 @@ ApplicationWindow {
 
             onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onOrganizationClicked: function(organizationId) {
-                window.openOrganizationView(organizationId)
+                window.openOrganizationView(organizationId, "sidebar")
             }
             onSearchClicked: {
-                stackView.push(searchViewComponent, {
+                stackView.replace(null, searchViewComponent, {
                 searchOrganizationViewModel: searchOrganizationViewModel
             })
             }
@@ -136,11 +138,10 @@ ApplicationWindow {
     id: searchViewComponent
     SearchView {
         searchOrganizationViewModel: searchOrganizationViewModel
-        userViewModel: userViewModel
 
-        onProfileRequested: stackView.pop()
+        onProfileRequested: stackView.replace(null, userViewComponent)
         onOrganizationClicked: function(organizationId) {
-            window.openOrganizationView(organizationId)
+            window.openOrganizationView(organizationId, "search")
         }
         onAnimalDetailRequested: function(animalId) {
             stackView.push(animalDetailViewComponent, { animalId: animalId })
@@ -150,6 +151,7 @@ ApplicationWindow {
             if (searchOrganizationViewModel) {
                 searchOrganizationViewModel.initialize()
             }
+            userViewModel = window.userViewModel
         }
 
         Component.onDestruction: {
@@ -172,12 +174,14 @@ ApplicationWindow {
     Component {
         id: organizationViewComponent
         OrganizationView {
-            onProfileRequested: stackView.pop()
+            onProfileRequested: stackView.replace(null, userViewComponent)
             onSearchRequested: {
-                stackView.push(searchViewComponent, {
+                stackView.replace(null, searchViewComponent, {
                     searchOrganizationViewModel: searchOrganizationViewModel
                 })
             }
+            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId, "sidebar") }
+            
             onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
             onCreateAnimalRequested: {
@@ -228,7 +232,7 @@ ApplicationWindow {
         AnimalDetailView {
             viewModel: animalDetailViewModel
             onBackClicked: stackView.pop()
-            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId) }
+            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId, "search") }
             onUpdateAnimalRequested: function(animalId) {
             updateAnimalViewModel.setAnimalId(animalId)
             stackView.push(animalUpdateViewComponent)
