@@ -166,7 +166,12 @@ ApplicationWindow {
         id: registerOrganizationViewComponent
         RegisterOrganizationView {
             onBackClicked: stackView.pop()
-            onRegisterSuccess: stackView.pop()
+            onRegisterSuccess: {
+                if (userViewModel) {
+                    userViewModel.refreshUserData()
+                }
+                stackView.pop()
+            }
             Component.onDestruction: registerOrganizationViewModel.cleanup()
         }
     }
