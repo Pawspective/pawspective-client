@@ -141,7 +141,7 @@ ApplicationWindow {
 
         onProfileRequested: stackView.replace(null, userViewComponent)
         onOrganizationClicked: function(organizationId) {
-            window.openOrganizationView(organizationId, "search")
+            window.openOrganizationView(organizationId, "sidebar")
         }
         onAnimalDetailRequested: function(animalId) {
             stackView.push(animalDetailViewComponent, { animalId: animalId })
