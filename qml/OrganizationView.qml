@@ -419,7 +419,6 @@ Rectangle {
                 }
             }
             
-            // TODO: This double initalize 
             Component.onCompleted: {
                 if (animalListViewModel && !initialized) {
                     animalListViewModel.initialize()
@@ -430,14 +429,6 @@ Rectangle {
                 
                 if (organizationViewModel) {
                     organizationViewModel.currentOrganizationIdChanged.connect(reloadAnimals)
-                }
-                
-                if (createAnimalViewModel) {
-                    createAnimalViewModel.creationFinished.connect(function(success) {
-                        if (success) {
-                            reloadAnimals()
-                        }
-                    })
                 }
             }
             
