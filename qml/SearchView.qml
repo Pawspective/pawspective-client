@@ -403,27 +403,378 @@ readonly property real loaderTopMargin: 10
         id: animalsContent
 
         ColumnLayout {
+            id: animalsContentRoot
             anchors.fill: parent
             spacing: root.height * 0.015
 
-            Item { Layout.fillHeight: true }
+            property var ageRangeMin: null
+            property var ageRangeMax: null
+            property int animalTypesSelectedCount: typesSelectedModel.count
 
-            ColumnLayout {
-                Layout.alignment: Qt.AlignCenter
-                spacing: root.height * 0.025
-
-                Image {
-                    source: "../resources/sad_cat.png"
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.preferredWidth: root.width * 0.35
-                    Layout.preferredHeight: root.height * 0.35
+            Component.onCompleted: {
+                if (animalListViewModel) {
+                    animalListViewModel.loadAvailableFilters()
+                    animalsContentRoot.syncAvailableFilters()
                 }
+            }
+
+            function collectFilterItems(model) {
+                var selected = []
+                if (!model) {
+                    return selected
+                }
+                for (var index = 0; index < model.count; ++index) {
+                    var item = model.get(index)
+                    var filterItem = {
+                        dtoField: item.dtoField,
+                        dtoValue: item.dtoValue,
+                        displayName: item.displayName
+                    }
+                    // console.log("Collected filter: field=" + filterItem.dtoField + ", value=" + filterItem.dtoValue + ", display=" + filterItem.displayName)
+                    selected.push(filterItem)
+                }
+                return selected
+            }
+
+            function collectSelectedTypes() {
+                var selected = []
+                if (!typesSelectedModel) {
+                    return selected
+                }
+                for (var index = 0; index < typesSelectedModel.count; ++index) {
+                    var item = typesSelectedModel.get(index)
+                    var typeValue = item.dtoValue
+                    if (!typeValue || String(typeValue).length === 0) {
+                        typeValue = item.displayName
+                    }
+                    if (typeValue) {
+                        selected.push(typeValue)
+                    }
+                }
+                return selected
+            }
+
+            function collectSelectedFilters() {
+                return [].concat(
+                    collectFilterItems(breedsSelectedModel),
+                    collectFilterItems(typesSelectedModel),
+                    collectFilterItems(sizesSelectedModel),
+                    collectFilterItems(gendersSelectedModel),
+                    collectFilterItems(careLevelsSelectedModel),
+                    collectFilterItems(colorsSelectedModel),
+                    collectFilterItems(goodWithsSelectedModel)
+                )
+            }
+
+            function clearFilterModel(model) {
+                if (model && model.count > 0) {
+                    model.clear()
+                }
+            }
+
+            function populateFilterModel(targetModel, sourceItems) {
+                clearFilterModel(targetModel)
+                if (!sourceItems || sourceItems.length === undefined) {
+                    return
+                }
+
+                for (var index = 0; index < sourceItems.length; ++index) {
+                    var entry = sourceItems[index]
+                    targetModel.append({
+                        dtoField: entry.dtoField,
+                        dtoValue: entry.dtoValue,
+                        displayName: entry.displayName
+                    })
+                }
+            }
+
+            function syncAvailableFilters() {
+                if (!animalListViewModel) {
+                    return
+                }
+
+                populateFilterModel(breedsAvailableModel, animalListViewModel.availableBreeds)
+                populateFilterModel(typesAvailableModel, animalListViewModel.availableAnimalTypes)
+                populateFilterModel(sizesAvailableModel, animalListViewModel.availableSizes)
+                populateFilterModel(gendersAvailableModel, animalListViewModel.availableGenders)
+                populateFilterModel(careLevelsAvailableModel, animalListViewModel.availableCareLevels)
+                populateFilterModel(colorsAvailableModel, animalListViewModel.availableColors)
+                populateFilterModel(goodWithsAvailableModel, animalListViewModel.availableGoodWiths)
+            }
+
+            function onAnimalTypesChanged() {
+                if (!animalListViewModel) {
+                    return
+                }
+                
+                var selectedTypes = collectSelectedTypes()
+                // console.log("Animal types changed: " + selectedTypes.length + " types selected")
+                
+                // Clear selected breeds when types change
+                clearFilterModel(breedsSelectedModel)
+                
+                // Load breeds for selected types (or clear if no types selected)
+                animalListViewModel.loadBreedsForAnimalTypes(selectedTypes)
+            }
+
+            function applyFilters() {
+                // console.log("applyFilters called")
+                if (!animalListViewModel) {
+                    console.log("ERROR: animalListViewModel is null")
+                    return
+                }
+
+                var selectedFilters = collectSelectedFilters()
+                // console.log("Apply: collected " + selectedFilters.length + " total filters")
+                // for (var i = 0; i < selectedFilters.length; ++i) {
+                    // console.log("Filter " + i + ": field=" + selectedFilters[i].dtoField + ", value=" + selectedFilters[i].dtoValue)
+                // }
+                
+                var filterObj = {
+                    filters: selectedFilters
+                }
+                
+                // Only add age filters if they are set
+                if (animalsContentRoot.ageRangeMin !== null) {
+                    filterObj.ageMin = animalsContentRoot.ageRangeMin
+                    // console.log("Apply: ageMin=" + filterObj.ageMin)
+                } else {
+                    // console.log("Apply: ageMin is not set (empty)")
+                }
+                
+                if (animalsContentRoot.ageRangeMax !== null) {
+                    filterObj.ageMax = animalsContentRoot.ageRangeMax
+                    // console.log("Apply: ageMax=" + filterObj.ageMax)
+                } else {
+                    // console.log("Apply: ageMax is not set (empty)")
+                }
+                
+                // console.log("Apply: calling loadAnimalByFilters with " + filterObj.filters.length + " filters")
+                
+                animalListViewModel.loadAnimalByFilters(filterObj)
+                // console.log("loadAnimalByFilters called successfully")
+            }
+
+            function clearFilters() {
+                clearFilterModel(breedsSelectedModel)
+                clearFilterModel(typesSelectedModel)
+                clearFilterModel(sizesSelectedModel)
+                clearFilterModel(gendersSelectedModel)
+                clearFilterModel(careLevelsSelectedModel)
+                clearFilterModel(colorsSelectedModel)
+                clearFilterModel(goodWithsSelectedModel)
+                animalsContentRoot.ageRangeMin = null
+                animalsContentRoot.ageRangeMax = null
+                animalListViewModel.cleanup()
+                if (animalListViewModel) {
+                    animalListViewModel.loadAvailableFilters()
+                    syncAvailableFilters()
+                }
+            }
+
+            Connections {
+                target: animalListViewModel
+
+                function onAvailableFiltersChanged() {
+                    animalsContentRoot.syncAvailableFilters()
+                }
+            }
+
+            Connections {
+                target: typesSelectedModel
+
+                function onCountChanged() {
+                    animalsContentRoot.onAnimalTypesChanged()
+                }
+            }
+
+            Component {
+                id: animalFiltersHeader
+
+                GridLayout {
+                    id: filterGrid
+                    width: parent ? parent.width : animalsContentRoot.width
+                    columns: 2
+                    columnSpacing: 12
+                    rowSpacing: 12
+
+                    Text {
+                        Layout.columnSpan: 2
+                        text: "🐾 Animal Filters"
+                        font.family: theme.fontName
+                        font.pixelSize: root.height * 0.04
+                        font.bold: true
+                        color: theme.textDark
+                    }
+
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Animal Types"
+                        availableItems: typesAvailableModel
+                        selectedItems: typesSelectedModel
+                    }
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Breeds"
+                        availableItems: breedsAvailableModel
+                        selectedItems: breedsSelectedModel
+                    }
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Sizes"
+                        availableItems: sizesAvailableModel
+                        selectedItems: sizesSelectedModel
+                    }
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Genders"
+                        availableItems: gendersAvailableModel
+                        selectedItems: gendersSelectedModel
+                    }
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Care Levels"
+                        availableItems: careLevelsAvailableModel
+                        selectedItems: careLevelsSelectedModel
+                    }
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Colors"
+                        availableItems: colorsAvailableModel
+                        selectedItems: colorsSelectedModel
+                    }
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Good With"
+                        availableItems: goodWithsAvailableModel
+                        selectedItems: goodWithsSelectedModel
+                    }
+
+                    FilterRangeInput {
+                        id: ageRange
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Age Range (years)"
+                        onValueMinChanged: animalsContentRoot.ageRangeMin = valueMin
+                        onValueMaxChanged: animalsContentRoot.ageRangeMax = valueMax
+                    }
+
+                    RowLayout {
+                        Layout.columnSpan: 2
+                        Layout.fillWidth: true
+                        spacing: root.width * 0.015
+
+                        CustomButton {
+                            text: "Apply Filters"
+                            baseColor: theme.purple
+                            hoverColor: theme.accentPink
+                            textColor: theme.buttonText
+                            fontSize: root.height * 0.02
+                            Layout.preferredWidth: root.width * 0.14
+                            Layout.preferredHeight: root.height * 0.055
+                            onClicked: {
+                                // console.log("Apply button clicked")
+                                animalsContentRoot.applyFilters()
+                            }
+                        }
+
+                        CustomButton {
+                            text: "Clear"
+                            baseColor: theme.accentPink
+                            hoverColor: theme.purple
+                            textColor: theme.buttonText
+                            fontSize: root.height * 0.02
+                            Layout.preferredWidth: root.width * 0.09
+                            Layout.preferredHeight: root.height * 0.055
+                            onClicked: animalsContentRoot.clearFilters()
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
+
 
             }
 
-            Item { Layout.fillHeight: true }
+            AnimalListView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                viewModel: animalListViewModel
+                headerComponent: animalFiltersHeader
+            }
+
+            // Filter Data Models
+            ListModel {
+                id: breedsAvailableModel
+            }
+
+            ListModel {
+                id: breedsSelectedModel
+            }
+
+            ListModel {
+                id: typesAvailableModel
+            }
+
+            ListModel {
+                id: typesSelectedModel
+            }
+
+            ListModel {
+                id: sizesAvailableModel
+            }
+
+            ListModel {
+                id: sizesSelectedModel
+            }
+
+            ListModel {
+                id: gendersAvailableModel
+            }
+
+            ListModel {
+                id: gendersSelectedModel
+            }
+
+            ListModel {
+                id: careLevelsAvailableModel
+            }
+
+            ListModel {
+                id: careLevelsSelectedModel
+            }
+
+            ListModel {
+                id: colorsAvailableModel
+            }
+
+            ListModel {
+                id: colorsSelectedModel
+            }
+
+            ListModel {
+                id: goodWithsAvailableModel
+            }
+
+            ListModel {
+                id: goodWithsSelectedModel
+            }
         }
     }
 
