@@ -43,13 +43,21 @@ Item {
             }
         }
 
-        footer: animalListView.count === 0 ? emptyStateFooter : null
+        footer: (animalListView.count === 0 || root.viewModel?.isLoading) ? emptyOrLoadingFooter : null
         
         Component {
-            id: emptyStateFooter
+            id: emptyOrLoadingFooter
             Item {
                 width: animalListView.width - animalListView.scrollBarMargin
                 height: Math.max(animalListView.height * 0.75, root.height * 0.3)
+                
+                LoaderSpinner {
+                    anchors.centerIn: parent
+                    width: parent.width * 0.2
+                    height: width
+                    running: root.viewModel ? root.viewModel.isLoading : false
+                    visible: running
+                }
                 
                 Text {
                     anchors.centerIn: parent
@@ -57,6 +65,7 @@ Item {
                     font.family: root.fontName
                     font.pixelSize: root.height * 0.05
                     color: root.textDark
+                    visible: !root.viewModel?.isLoading
                 }
             }
         }

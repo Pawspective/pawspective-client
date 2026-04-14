@@ -374,6 +374,7 @@ void AnimalListViewModel::loadAnimalsForOrganization(qint64 organizationId) {
         return;
     }
 
+    updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
     setIsBusy(true);
     m_animalService.getAnimalsByOrganization(organizationId);
 }
@@ -443,6 +444,7 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
         filter.ageLte = correctedMax;
     }
 
+    updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
     setIsBusy(true);
     m_animalService.getAnimals(filter);
 }
@@ -494,10 +496,12 @@ void AnimalListViewModel::handleGetAnimalsSuccess(const QList<models::AnimalDTO>
         qDebug() << "Received" << animals.size() << "animals by filters";
         internalModel->update(animals);
     }
+    updateProperty(m_isLoading, false, [this]() { emit isLoadingChanged(); });
     setIsBusy(false);
 }
 
 void AnimalListViewModel::handleGetAnimalsFailed(QSharedPointer<services::BaseError> error) {
+    updateProperty(m_isLoading, false, [this]() { emit isLoadingChanged(); });
     setIsBusy(false);
     if (error) {
         qWarning() << "Failed to load animals by filters:" << error->getMessage();
@@ -510,10 +514,12 @@ void AnimalListViewModel::handleGetAnimalsByOrganizationSuccess(const QList<mode
         qDebug() << "Received" << animals.size() << "animals for organization" << m_currentOrganizationId;
         internalModel->update(animals);
     }
+    updateProperty(m_isLoading, false, [this]() { emit isLoadingChanged(); });
     setIsBusy(false);
 }
 
 void AnimalListViewModel::handleGetAnimalsByOrganizationFailed(QSharedPointer<services::BaseError> error) {
+    updateProperty(m_isLoading, false, [this]() { emit isLoadingChanged(); });
     setIsBusy(false);
     if (error) {
         qWarning()
