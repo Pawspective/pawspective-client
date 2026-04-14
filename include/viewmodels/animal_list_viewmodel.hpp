@@ -64,6 +64,7 @@ class AnimalListViewModel : public BaseViewModel {
     Q_OBJECT
 
     Q_PROPERTY(QAbstractListModel* listModel READ listModel CONSTANT)
+    Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
     Q_PROPERTY(QVariantList availableBreeds READ availableBreeds NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableAnimalTypes READ availableAnimalTypes NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableSizes READ availableSizes NOTIFY availableFiltersChanged)
@@ -83,6 +84,7 @@ public:
     ~AnimalListViewModel() override = default;
 
     QAbstractListModel* listModel();
+    bool isLoading() const { return m_isLoading; }
     QVariantList availableBreeds() const { return m_availableBreeds; }
     QVariantList availableAnimalTypes() const { return m_availableAnimalTypes; }
     QVariantList availableSizes() const { return m_availableSizes; }
@@ -102,6 +104,7 @@ public:
 
 signals:
     void availableFiltersChanged();
+    void isLoadingChanged();
 
 private:
     QAbstractListModel* m_listModel;
@@ -117,6 +120,7 @@ private:
     QVariantList m_availableGoodWiths;
     QSet<models::AnimalType> m_requestedBreedTypes;
     qint64 m_currentOrganizationId = 0;
+    bool m_isLoading = false;
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private slots:

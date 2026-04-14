@@ -717,6 +717,7 @@ readonly property real loaderTopMargin: 10
                 Layout.fillHeight: true
                 viewModel: animalListViewModel
                 headerComponent: animalFiltersHeader
+                showEmptyImage: true
             }
 
             // Filter Data Models
