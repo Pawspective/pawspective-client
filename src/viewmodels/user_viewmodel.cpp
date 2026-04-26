@@ -77,11 +77,13 @@ void UserViewModel::handleLoginFailed(QSharedPointer<services::BaseError> error)
 }
 
 void UserViewModel::handleLogoutSuccess() {
+    setIsBusy(false);
     updateProperty(m_isAuthenticated, false, [this] { emit authStateChanged(); });
     clearUserData();
 }
 
 void UserViewModel::handleLogoutFailed(QSharedPointer<services::BaseError> error) {
+    setIsBusy(false);
     if (error) {
         emitError(ErrorType::NetworkError, error->getMessage());
     }
