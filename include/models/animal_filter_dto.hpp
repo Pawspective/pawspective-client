@@ -10,6 +10,7 @@ namespace pawspective::models {
 
 struct AnimalFilterDTO {
     std::optional<QVector<int64_t>> breeds;
+    std::optional<QVector<int64_t>> cities;
     std::optional<QVector<AnimalType>> animalTypes;
     std::optional<QVector<AnimalSize>> sizes;
     std::optional<QVector<AnimalGender>> genders;

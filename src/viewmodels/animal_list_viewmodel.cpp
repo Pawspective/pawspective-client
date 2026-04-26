@@ -283,6 +283,22 @@ QVariantList toEnumFilterOptions(
     return result;
 }
 
+QVariantList buildCityFilterOptions(
+    const std::optional<QVector<int64_t>>& cityIds,
+    const QHash<int64_t, QString>& cityNames
+) {
+    QVariantList result;
+    if (!cityIds.has_value()) {
+        return result;
+    }
+    for (const auto& cityId : cityIds.value()) {
+        const QString idText = QString::number(cityId);
+        const QString name = cityNames.value(cityId, idText);
+        result.append(toFilterOption("cities", idText, name));
+    }
+    return result;
+}
+
 }  // namespace
 
 namespace pawspective::viewmodels {
@@ -291,13 +307,15 @@ AnimalListViewModel::AnimalListViewModel(
     services::AnimalService& animalService,
     services::BreedService& breedService,
     services::OrganizationService& organizationService,
+    services::CityService& cityService,
     QObject* parent
 )
     : BaseViewModel(parent),
       m_listModel(new detail::AnimalListInternalModel(this)),
       m_animalService(animalService),
       m_breedService(breedService),
-      m_organizationService(organizationService) {
+      m_organizationService(organizationService),
+      m_cityService(cityService) {
     connect(
         &m_animalService,
         &services::AnimalService::getAnimalsSuccess,
@@ -346,6 +364,13 @@ AnimalListViewModel::AnimalListViewModel(
         this,
         &AnimalListViewModel::handleGetBreedsFailed
     );
+    connect(
+        &m_cityService,
+        &services::CityService::getCitiesSuccess,
+        this,
+        &AnimalListViewModel::handleGetCitiesSuccess
+    );
+    connect(&m_cityService, &services::CityService::getCitiesFailed, this, &AnimalListViewModel::handleGetCitiesFailed);
 }
 
 QAbstractListModel* AnimalListViewModel::listModel() { return m_listModel; }
@@ -416,6 +441,20 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
         }
     }
 
+    if (groupedFilters.contains("cities")) {
+        QVector<int64_t> cityIds;
+        for (const auto& rawCityId : groupedFilters["cities"]) {
+            bool ok = false;
+            const qint64 cityId = rawCityId.toLongLong(&ok);
+            if (ok && cityId > 0) {
+                cityIds.append(cityId);
+            }
+        }
+        if (!cityIds.isEmpty()) {
+            filter.cities = cityIds;
+        }
+    }
+
     filter.animalTypes = parseEnumVector<models::AnimalType>(groupedFilters.value("animalTypes"), parseAnimalType);
     filter.sizes = parseEnumVector<models::AnimalSize>(groupedFilters.value("sizes"), parseAnimalSize);
     filter.genders = parseEnumVector<models::AnimalGender>(groupedFilters.value("genders"), parseAnimalGender);
@@ -449,7 +488,7 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
     m_animalService.getAnimals(filter);
 }
 
-void AnimalListViewModel::loadAvailableFilters() { m_animalService.getAnimalFilters(); }
+void AnimalListViewModel::loadAvailableFilters() { m_cityService.getCities(); }
 
 void AnimalListViewModel::loadBreedsForAnimalTypes(const QVariantList& selectedTypes) {
     QSet<models::AnimalType> requestedTypes;
@@ -540,11 +579,12 @@ void AnimalListViewModel::handleGetAnimalFiltersSuccess(const models::AnimalFilt
     const QVariantList colors = toEnumFilterOptions<models::AnimalColor>(filters.colors, "colors", models::toApiString);
     const QVariantList
         goodWiths = toEnumFilterOptions<models::GoodWith>(filters.goodWiths, "goodWiths", models::toApiString);
+    const QVariantList cities = buildCityFilterOptions(filters.cities, m_cityNames);
 
     const bool changed =
         m_availableBreeds != breeds || m_availableAnimalTypes != animalTypes || m_availableSizes != sizes ||
         m_availableGenders != genders || m_availableCareLevels != careLevels || m_availableColors != colors ||
-        m_availableGoodWiths != goodWiths;
+        m_availableGoodWiths != goodWiths || m_availableCities != cities;
 
     if (!changed) {
         return;
@@ -557,7 +597,7 @@ void AnimalListViewModel::handleGetAnimalFiltersSuccess(const models::AnimalFilt
     m_availableCareLevels = careLevels;
     m_availableColors = colors;
     m_availableGoodWiths = goodWiths;
-
+    m_availableCities = cities;
     emit availableFiltersChanged();
 }
 
@@ -612,6 +652,22 @@ void AnimalListViewModel::handleGetBreedsFailed(QSharedPointer<services::BaseErr
         qWarning() << "Failed to load breeds:" << error->getMessage();
         emitError(ErrorType::NetworkError, error->getMessage());
     }
+}
+
+void AnimalListViewModel::handleGetCitiesSuccess(const QList<models::CityDTO>& cities) {
+    m_cityNames.clear();
+    for (const auto& city : cities) {
+        m_cityNames[city.id] = city.name;
+    }
+    m_animalService.getAnimalFilters();
+}
+
+void AnimalListViewModel::handleGetCitiesFailed(QSharedPointer<services::BaseError> error) {
+    if (error) {
+        qWarning() << "Failed to load cities:" << error->getMessage();
+        emitError(ErrorType::NetworkError, error->getMessage());
+    }
+    m_animalService.getAnimalFilters();
 }
 
 }  // namespace pawspective::viewmodels

@@ -462,7 +462,8 @@ readonly property real loaderTopMargin: 10
                     collectFilterItems(gendersSelectedModel),
                     collectFilterItems(careLevelsSelectedModel),
                     collectFilterItems(colorsSelectedModel),
-                    collectFilterItems(goodWithsSelectedModel)
+                    collectFilterItems(goodWithsSelectedModel),
+                    collectFilterItems(citiesSelectedModel)
                 )
             }
 
@@ -500,6 +501,7 @@ readonly property real loaderTopMargin: 10
                 populateFilterModel(careLevelsAvailableModel, animalListViewModel.availableCareLevels)
                 populateFilterModel(colorsAvailableModel, animalListViewModel.availableColors)
                 populateFilterModel(goodWithsAvailableModel, animalListViewModel.availableGoodWiths)
+                populateFilterModel(citiesAvailableModel, animalListViewModel.availableCities)
             }
 
             function onAnimalTypesChanged() {
@@ -563,6 +565,7 @@ readonly property real loaderTopMargin: 10
                 clearFilterModel(careLevelsSelectedModel)
                 clearFilterModel(colorsSelectedModel)
                 clearFilterModel(goodWithsSelectedModel)
+                clearFilterModel(citiesSelectedModel)
                 animalsContentRoot.ageRangeMin = null
                 animalsContentRoot.ageRangeMax = null
                 animalListViewModel.cleanup()
@@ -663,6 +666,14 @@ readonly property real loaderTopMargin: 10
                         availableItems: goodWithsAvailableModel
                         selectedItems: goodWithsSelectedModel
                     }
+
+                    FieldTag {
+    Layout.fillWidth: true
+    Layout.fillHeight: true
+    labelText: "Cities"
+    availableItems: citiesAvailableModel
+    selectedItems: citiesSelectedModel
+}
 
                     FilterRangeInput {
                         id: ageRange
@@ -775,6 +786,14 @@ readonly property real loaderTopMargin: 10
 
             ListModel {
                 id: goodWithsSelectedModel
+            }
+
+            ListModel {
+                id: citiesAvailableModel
+            }
+
+            ListModel {
+                id: citiesSelectedModel
             }
         }
     }

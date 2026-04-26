@@ -3,6 +3,7 @@
 #include "models/animal_dto.hpp"
 #include "services/animal_service.hpp"
 #include "services/breed_service.hpp"
+#include "services/city_service.hpp"
 #include "services/organization_service.hpp"
 #include "viewmodels/base.hpp"
 
@@ -66,6 +67,7 @@ class AnimalListViewModel : public BaseViewModel {
     Q_PROPERTY(QAbstractListModel* listModel READ listModel CONSTANT)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
     Q_PROPERTY(QVariantList availableBreeds READ availableBreeds NOTIFY availableFiltersChanged)
+    Q_PROPERTY(QVariantList availableCities READ availableCities NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableAnimalTypes READ availableAnimalTypes NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableSizes READ availableSizes NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableGenders READ availableGenders NOTIFY availableFiltersChanged)
@@ -78,6 +80,7 @@ public:
         services::AnimalService& animalService,
         services::BreedService& breedService,
         services::OrganizationService& organizationService,
+        services::CityService& cityService,
         QObject* parent = nullptr
     );
 
@@ -86,6 +89,7 @@ public:
     QAbstractListModel* listModel();
     bool isLoading() const { return m_isLoading; }
     QVariantList availableBreeds() const { return m_availableBreeds; }
+    QVariantList availableCities() const { return m_availableCities; }
     QVariantList availableAnimalTypes() const { return m_availableAnimalTypes; }
     QVariantList availableSizes() const { return m_availableSizes; }
     QVariantList availableGenders() const { return m_availableGenders; }
@@ -111,7 +115,10 @@ private:
     services::AnimalService& m_animalService;
     services::BreedService& m_breedService;
     services::OrganizationService& m_organizationService;
+    services::CityService& m_cityService;
+    QHash<int64_t, QString> m_cityNames;
     QVariantList m_availableBreeds;
+    QVariantList m_availableCities;
     QVariantList m_availableAnimalTypes;
     QVariantList m_availableSizes;
     QVariantList m_availableGenders;
@@ -132,6 +139,8 @@ private slots:
     void handleGetAnimalFiltersFailed(QSharedPointer<services::BaseError> error);
     void handleGetBreedsSuccess(const QList<models::BreedDTO>& breeds);
     void handleGetBreedsFailed(QSharedPointer<services::BaseError> error);
+    void handleGetCitiesSuccess(const QList<models::CityDTO>& cities);
+    void handleGetCitiesFailed(QSharedPointer<services::BaseError> error);
 };
 
 }  // namespace pawspective::viewmodels

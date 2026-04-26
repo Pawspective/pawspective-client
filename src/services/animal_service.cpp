@@ -108,6 +108,12 @@ void AnimalService::getAnimals(const models::AnimalFilterDTO& filter) {
             query.addQueryItem("breeds", QString::number(breedId));
         }
     }
+    if (filter.cities) {
+        for (const int64_t& cityId : *filter.cities) {
+            query.addQueryItem("city_ids", QString::number(cityId));
+        }
+    }
+
     if (filter.animalTypes) {
         for (models::AnimalType type : *filter.animalTypes) {
             query.addQueryItem("animal_types", models::toApiString(type));
