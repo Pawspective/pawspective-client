@@ -14,6 +14,13 @@ QJsonObject AnimalFilterDTO::toJson() const {
         }
         json["breeds"] = breedsArray;
     }
+    if (cities.has_value()) {
+        QJsonArray citiesArray;
+        for (const auto& city : cities.value()) {
+            citiesArray.append(city);
+        }
+        json["cities"] = citiesArray;
+    }
     if (animalTypes.has_value()) {
         QJsonArray animalTypesArray;
         for (const auto& animalType : animalTypes.value()) {
@@ -81,7 +88,18 @@ AnimalFilterDTO AnimalFilterDTO::fromJson(const QJsonObject& json) {
         }
         dto.breeds = breedsVec;
     }
-
+    if (json.contains("cityIds") && json["cityIds"].isArray()) {
+        QJsonArray citiesArray = json["cityIds"].toArray();
+        QVector<int64_t> citiesVec;
+        for (const auto& cityId : citiesArray) {
+            if (cityId.isDouble()) {
+                citiesVec.append(cityId.toInteger());
+            } else {
+                throw std::invalid_argument("Invalid value in cities array");
+            }
+        }
+        dto.cities = citiesVec;
+    }
     dto.animalTypes = utils::json::getOptionalEnumArray<AnimalType>(json, "animalTypes", animalTypeFromApi);
     dto.sizes = utils::json::getOptionalEnumArray<AnimalSize>(json, "sizes", animalSizeFromApi);
     dto.genders = utils::json::getOptionalEnumArray<AnimalGender>(json, "genders", animalGenderFromApi);

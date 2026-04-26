@@ -64,8 +64,13 @@ int main(int argc, char* argv[]) {
     auto searchOrganizationViewModel =
         new pawspective::viewmodels::SearchOrganizationViewModel(organizationService, &app);
     auto updateAnimalViewModel = new pawspective::viewmodels::UpdateAnimalViewModel(animalService, breedService, &app);
-    auto animalListViewModel =
-        new pawspective::viewmodels::AnimalListViewModel(animalService, breedService, organizationService, &app);
+    auto animalListViewModel = new pawspective::viewmodels::AnimalListViewModel(
+        animalService,
+        breedService,
+        organizationService,
+        cityService,
+        &app
+    );
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
