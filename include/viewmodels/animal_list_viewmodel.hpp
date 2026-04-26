@@ -1,6 +1,7 @@
 #pragma once
 
 #include "models/animal_dto.hpp"
+#include "models/animal_filter_dto.hpp"
 #include "services/animal_service.hpp"
 #include "services/breed_service.hpp"
 #include "services/organization_service.hpp"
@@ -65,6 +66,10 @@ class AnimalListViewModel : public BaseViewModel {
 
     Q_PROPERTY(QAbstractListModel* listModel READ listModel CONSTANT)
     Q_PROPERTY(bool isLoading READ isLoading NOTIFY isLoadingChanged)
+    Q_PROPERTY(int currentPage READ currentPage NOTIFY paginationChanged)
+    Q_PROPERTY(qint64 totalPages READ totalPages NOTIFY paginationChanged)
+    Q_PROPERTY(qint64 totalCount READ totalCount NOTIFY paginationChanged)
+    Q_PROPERTY(int pageSize READ pageSize NOTIFY paginationChanged)
     Q_PROPERTY(QVariantList availableBreeds READ availableBreeds NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableAnimalTypes READ availableAnimalTypes NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableSizes READ availableSizes NOTIFY availableFiltersChanged)
@@ -85,6 +90,10 @@ public:
 
     QAbstractListModel* listModel();
     bool isLoading() const { return m_isLoading; }
+    int currentPage() const { return m_currentPage; }
+    qint64 totalPages() const { return m_totalPages; }
+    qint64 totalCount() const { return m_totalCount; }
+    int pageSize() const { return m_pageSize; }
     QVariantList availableBreeds() const { return m_availableBreeds; }
     QVariantList availableAnimalTypes() const { return m_availableAnimalTypes; }
     QVariantList availableSizes() const { return m_availableSizes; }
@@ -99,12 +108,16 @@ public:
     Q_INVOKABLE void replaceAllAnimals(const QList<models::AnimalDTO>& animals);
     Q_INVOKABLE void loadAnimalsForOrganization(qint64 organizationId);
     Q_INVOKABLE void loadAnimalByFilters(const QVariantMap& filterData);
+    Q_INVOKABLE void goToPage(int page);
+    Q_INVOKABLE void nextPage();
+    Q_INVOKABLE void prevPage();
     Q_INVOKABLE void loadAvailableFilters();
     Q_INVOKABLE void loadBreedsForAnimalTypes(const QVariantList& selectedTypes);
 
 signals:
     void availableFiltersChanged();
     void isLoadingChanged();
+    void paginationChanged();
 
 private:
     QAbstractListModel* m_listModel;
@@ -121,10 +134,15 @@ private:
     QSet<models::AnimalType> m_requestedBreedTypes;
     qint64 m_currentOrganizationId = 0;
     bool m_isLoading = false;
+    int m_currentPage = 1;
+    qint64 m_totalPages = 0;
+    qint64 m_totalCount = 0;
+    int m_pageSize = 10;
+    models::AnimalFilterDTO m_currentFilter;
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private slots:
-    void handleGetAnimalsSuccess(const QList<models::AnimalDTO>& animals);
+    void handleGetAnimalsSuccess(const models::AnimalListDTO& result);
     void handleGetAnimalsFailed(QSharedPointer<services::BaseError> error);
     void handleGetAnimalsByOrganizationSuccess(const QList<models::AnimalDTO>& animals);
     void handleGetAnimalsByOrganizationFailed(QSharedPointer<services::BaseError> error);

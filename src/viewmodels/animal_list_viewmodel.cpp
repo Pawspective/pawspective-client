@@ -444,9 +444,37 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
         filter.ageLte = correctedMax;
     }
 
+    filter.limit = m_pageSize;
+    filter.page = 1;
+    m_currentFilter = filter;
+    m_currentPage = 1;
+
     updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
     setIsBusy(true);
-    m_animalService.getAnimals(filter);
+    m_animalService.getAnimals(m_currentFilter);
+}
+
+void AnimalListViewModel::goToPage(int page) {
+    if (page < 1 || page > m_totalPages || m_currentOrganizationId != 0) {
+        return;
+    }
+    m_currentPage = page;
+    m_currentFilter.page = page;
+    updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
+    setIsBusy(true);
+    m_animalService.getAnimals(m_currentFilter);
+}
+
+void AnimalListViewModel::nextPage() {
+    if (m_currentPage < m_totalPages) {
+        goToPage(m_currentPage + 1);
+    }
+}
+
+void AnimalListViewModel::prevPage() {
+    if (m_currentPage > 1) {
+        goToPage(m_currentPage - 1);
+    }
 }
 
 void AnimalListViewModel::loadAvailableFilters() { m_animalService.getAnimalFilters(); }
@@ -491,11 +519,16 @@ void AnimalListViewModel::loadBreedsForAnimalTypes(const QVariantList& selectedT
     }
 }
 
-void AnimalListViewModel::handleGetAnimalsSuccess(const QList<models::AnimalDTO>& animals) {
+void AnimalListViewModel::handleGetAnimalsSuccess(const models::AnimalListDTO& result) {
     if (auto internalModel = qobject_cast<detail::AnimalListInternalModel*>(m_listModel)) {
-        qDebug() << "Received" << animals.size() << "animals by filters";
-        internalModel->update(animals);
+        qDebug() << "Received" << result.items.size() << "animals by filters (page" << result.page << "of" << result.totalPages << ")";
+        internalModel->update(result.items);
     }
+    m_currentPage = result.page;
+    m_totalPages = result.totalPages;
+    m_totalCount = result.totalCount;
+    m_pageSize = result.limit > 0 ? result.limit : m_pageSize;
+    emit paginationChanged();
     updateProperty(m_isLoading, false, [this]() { emit isLoadingChanged(); });
     setIsBusy(false);
 }

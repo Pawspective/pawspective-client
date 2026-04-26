@@ -1,5 +1,7 @@
 #include "../include/models/animal_dto.hpp"
 
+#include <QJsonArray>
+
 #include "utils/json.hpp"
 
 namespace pawspective::models {
@@ -39,6 +41,20 @@ AnimalDTO AnimalDTO::fromJson(const QJsonObject& json) {
     dto.age = pawspective::utils::json::getRequiredInt32(json, "age");
     dto.description = pawspective::utils::json::getOptionalString(json, "description");
     dto.status = animalStatusFromApi(pawspective::utils::json::getRequiredString(json, "status"));
+    return dto;
+}
+
+AnimalListDTO AnimalListDTO::fromJson(const QJsonObject& json) {
+    AnimalListDTO dto;
+    dto.page = pawspective::utils::json::getRequiredInt32(json, "page");
+    dto.limit = pawspective::utils::json::getRequiredInt32(json, "limit");
+    dto.totalCount = pawspective::utils::json::getRequiredInt64(json, "total_count");
+    dto.totalPages = pawspective::utils::json::getRequiredInt64(json, "total_pages");
+
+    const QJsonArray items = json["items"].toArray();
+    for (const auto& item : items) {
+        dto.items.append(AnimalDTO::fromJson(item.toObject()));
+    }
     return dto;
 }
 

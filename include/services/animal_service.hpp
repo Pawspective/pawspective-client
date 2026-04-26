@@ -27,7 +27,7 @@ public:
     void getAnimalsByOrganization(qint64 organizationId);
 
 signals:
-    void getAnimalsSuccess(const QList<models::AnimalDTO>& animals);
+    void getAnimalsSuccess(const models::AnimalListDTO& result);
     void getAnimalSuccess(const models::AnimalDTO& animal);
     void createAnimalSuccess(const models::AnimalDTO& animal);
     void updateAnimalSuccess(const models::AnimalDTO& animal);
