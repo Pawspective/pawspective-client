@@ -43,6 +43,14 @@ void UserViewModel::initialize() {
     }
 }
 
+void UserViewModel::logout() {
+    if (isBusy()) {
+        return;
+    }
+    setIsBusy(true);
+    m_authService.logout();
+}
+
 void UserViewModel::cleanup() { clearUserData(); }
 
 void UserViewModel::refreshUserData() { loadUserData(); }
