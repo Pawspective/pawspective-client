@@ -5,20 +5,23 @@ import QtQuick.Layouts 1.15
 Item {
     id: root
     anchors.fill: parent
-    
+
     // If viewModel is not passed, use global animalListViewModel
     property var viewModel: typeof animalListViewModel !== 'undefined' ? animalListViewModel : null
     property Component headerComponent: null
     property bool showEmptyImage: false  // Show sad_cat image when list is empty
-    
+
     readonly property color textDark: "#8572af"
     readonly property string fontName: "Comic Sans MS"
 
-
+    readonly property bool hasPagination: viewModel && viewModel.totalPages > 1
 
     ListView {
         id: animalListView
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: hasPagination ? paginationRow.top : parent.bottom
         // anchors.margins: root.height * 0.015
 
         clip: true
@@ -112,6 +115,61 @@ Item {
         Component.onDestruction: {
             if (root.viewModel) {
                 root.viewModel.cleanup()
+            }
+        }
+    }
+
+    Row {
+        id: paginationRow
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottomMargin: root.height * 0.01
+        spacing: root.width * 0.02
+        visible: root.hasPagination
+
+        Button {
+            id: prevButton
+            text: "<"
+            enabled: root.viewModel && root.viewModel.currentPage > 1 && !root.viewModel.isLoading
+            onClicked: root.viewModel.prevPage()
+            background: Rectangle {
+                color: prevButton.enabled ? "#8572af" : "#c4b8e0"
+                radius: 6
+            }
+            contentItem: Text {
+                text: prevButton.text
+                font.family: root.fontName
+                font.pixelSize: Math.min(root.width, root.height) * 0.04
+                color: "white"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.viewModel ? (root.viewModel.currentPage + " / " + root.viewModel.totalPages) : ""
+            font.family: root.fontName
+            font.pixelSize: Math.min(root.width, root.height) * 0.035
+            color: root.textDark
+        }
+
+        Button {
+            id: nextButton
+            text: ">"
+            enabled: root.viewModel && root.viewModel.currentPage < root.viewModel.totalPages && !root.viewModel.isLoading
+            onClicked: root.viewModel.nextPage()
+            background: Rectangle {
+                color: nextButton.enabled ? "#8572af" : "#c4b8e0"
+                radius: 6
+            }
+            contentItem: Text {
+                text: nextButton.text
+                font.family: root.fontName
+                font.pixelSize: Math.min(root.width, root.height) * 0.04
+                color: "white"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
             }
         }
     }

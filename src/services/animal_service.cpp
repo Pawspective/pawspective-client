@@ -150,22 +150,18 @@ void AnimalService::getAnimals(const models::AnimalFilterDTO& filter) {
     if (filter.ageGte) {
         query.addQueryItem("age_gte", QString::number(*filter.ageGte));
     }
+    query.addQueryItem("page", QString::number(filter.page.value_or(1)));
+    query.addQueryItem("limit", QString::number(filter.limit.value_or(10)));
 
-    if (!query.isEmpty()) {
-        url.setQuery(query);
-    }
+    url.setQuery(query);
     qDebug() << "Requesting animals with URL:" << url.toString();
     m_networkClient.get(
         url,
         [this](QNetworkReply& reply) {
-            handleSuccessArray(
+            handleSuccess(
                 reply,
-                [this](const QJsonArray& arr) {
-                    QList<models::AnimalDTO> animals;
-                    for (const auto& item : arr) {
-                        animals.append(models::AnimalDTO::fromJson(item.toObject()));
-                    }
-                    emit getAnimalsSuccess(animals);
+                [this](const QJsonObject& obj) {
+                    emit getAnimalsSuccess(models::AnimalListDTO::fromJson(obj));
                 },
                 [this](QSharedPointer<BaseError> error) { emit getAnimalsFailed(error); }
             );
