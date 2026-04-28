@@ -43,6 +43,14 @@ void UserViewModel::initialize() {
     }
 }
 
+void UserViewModel::logout() {
+    if (isBusy()) {
+        return;
+    }
+    setIsBusy(true);
+    m_authService.logout();
+}
+
 void UserViewModel::cleanup() { clearUserData(); }
 
 void UserViewModel::refreshUserData() { loadUserData(); }
@@ -69,11 +77,13 @@ void UserViewModel::handleLoginFailed(QSharedPointer<services::BaseError> error)
 }
 
 void UserViewModel::handleLogoutSuccess() {
+    setIsBusy(false);
     updateProperty(m_isAuthenticated, false, [this] { emit authStateChanged(); });
     clearUserData();
 }
 
 void UserViewModel::handleLogoutFailed(QSharedPointer<services::BaseError> error) {
+    setIsBusy(false);
     if (error) {
         emitError(ErrorType::NetworkError, error->getMessage());
     }

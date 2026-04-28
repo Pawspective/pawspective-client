@@ -2,7 +2,6 @@
 #include <QNetworkAccessManager>
 #include <QObject>
 #include <QString>
-#include <QTimer>
 #include <cstdint>
 #include <functional>
 #include <optional>
@@ -26,10 +25,6 @@ public:
     // Token management
     bool isAuthenticated() const;
 
-    // Token refresh management
-    void startTokenRefreshTimer();
-    void stopTokenRefreshTimer();
-
 signals:
     void loginSuccess(
         const QString& accessToken,
@@ -46,9 +41,6 @@ signals:
     void refreshFailed(QSharedPointer<services::BaseError> error);
     void getCurrentUserFailed(QSharedPointer<services::BaseError> error);
 
-private slots:
-    void onRefreshTimerTimeout();
-
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private:
     void handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError);
@@ -61,14 +53,11 @@ private:
     void clearSession();
 
     std::tuple<QString, QString, QString> parseTokenResponse(const QJsonObject& obj);
-    void scheduleTokenRefresh(int expiresIn);
 
     NetworkClient& m_networkClient;
     QString m_accessToken;
     QString m_refreshToken;
     std::optional<std::uint64_t> m_userId;
-
-    QTimer m_refreshTimer;
     bool m_isRefreshing = false;
 };
 

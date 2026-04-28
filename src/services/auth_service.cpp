@@ -9,9 +9,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QString>
-#include <QTimer>
 #include <QUrl>
-#include <algorithm>
 #include <optional>
 #include "services/errors.hpp"
 #include "services/network_client.hpp"
@@ -87,8 +85,6 @@ AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient), m_userId(std::nullopt) {
     connect(&m_networkClient, &NetworkClient::unauthorizedAccess, this, &AuthService::handleUnauthorizedAccess);
     connect(&m_networkClient, &NetworkClient::invalidTokenDetected, this, [this]() { clearSession(); });
-    m_refreshTimer.setSingleShot(true);
-    connect(&m_refreshTimer, &QTimer::timeout, this, &AuthService::onRefreshTimerTimeout);
     m_networkClient.setTokenProvider([this]() { return m_accessToken; });
     m_networkClient.setUserId(m_userId);
 }
@@ -99,7 +95,6 @@ void AuthService::clearSession() {
     m_refreshToken.clear();
     m_userId = std::nullopt;
     m_networkClient.setUserId(std::nullopt);
-    stopTokenRefreshTimer();
     m_networkClient.clearPendingRequests();
     emit sessionEnded();
 }
@@ -184,11 +179,6 @@ void AuthService::login(const QString& email, const QString& password) {
                         m_networkClient.setUserId(id);
                     }
 
-                    auto expiresIn = extractTokenExpiration(accessToken);
-                    if (expiresIn.has_value()) {
-                        scheduleTokenRefresh(expiresIn.value());
-                    }
-
                     emit loginSuccess(accessToken, refreshToken, tokenType, userId.value_or(0));
                 },
                 [this](QSharedPointer<BaseError> error) { emit loginFailed(error); }
@@ -203,9 +193,14 @@ void AuthService::login(const QString& email, const QString& password) {
 void AuthService::logout() {
     QUrl url("/auth/logout");
 
+    QJsonObject json;
+    json["refresh_token"] = m_refreshToken;
+
+    QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
+
     m_networkClient.post(
         url,
-        QByteArray(),
+        std::move(data),
         [this](QNetworkReply& reply) {
             handleSuccess(
                 reply,
@@ -259,10 +254,6 @@ void AuthService::refreshToken(const QString& refreshToken) {
                         m_userId = id;
                         m_networkClient.setUserId(id);
                     }
-                    auto expiresIn = extractTokenExpiration(accessToken);
-                    if (expiresIn.has_value()) {
-                        scheduleTokenRefresh(expiresIn.value());
-                    }
 
                     m_isRefreshing = false;
                     m_networkClient.retryPendingRequests();
@@ -282,38 +273,6 @@ void AuthService::refreshToken(const QString& refreshToken) {
             });
         }
     );
-}
-
-void AuthService::scheduleTokenRefresh(int expiresIn) {
-    stopTokenRefreshTimer();
-
-    const int refreshBeforeExpiry = 60;
-    int refreshIn = std::max(1, expiresIn - refreshBeforeExpiry);
-    if (expiresIn < refreshBeforeExpiry * 2) {
-        refreshIn = expiresIn / 2;
-    }
-    m_refreshTimer.start(refreshIn * 1000);
-}
-
-void AuthService::onRefreshTimerTimeout() {
-    if (!m_refreshToken.isEmpty() && !m_isRefreshing) {
-        refreshToken(m_refreshToken);
-    }
-}
-
-void AuthService::startTokenRefreshTimer() {
-    if (!m_accessToken.isEmpty()) {
-        auto expiresIn = extractTokenExpiration(m_accessToken);
-        if (expiresIn.has_value()) {
-            scheduleTokenRefresh(expiresIn.value());
-        }
-    }
-}
-
-void AuthService::stopTokenRefreshTimer() {
-    if (m_refreshTimer.isActive()) {
-        m_refreshTimer.stop();
-    }
 }
 
 void AuthService::getCurrentUser() {

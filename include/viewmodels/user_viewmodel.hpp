@@ -28,6 +28,7 @@ public:
     Q_INVOKABLE void initialize() override;
     Q_INVOKABLE void cleanup() override;
     Q_INVOKABLE void refreshUserData();
+    Q_INVOKABLE void logout();
 
 signals:
 

@@ -108,7 +108,10 @@ ApplicationWindow {
         UserView {
             viewModel: userViewModel
 
-            onLogoutClicked: stackView.replace(loginViewComponent)
+            onLogoutClicked: {
+                userViewModel.logout()
+                stackView.replace(loginViewComponent)
+            }
 
             onEditProfileClicked: {
                 userUpdateViewModel.initialize()
