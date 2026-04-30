@@ -516,29 +516,6 @@ void AnimalListViewModel::prevPage() {
     }
 }
 
-void AnimalListViewModel::goToPage(int page) {
-    if (page < 1 || page > m_totalPages || m_currentOrganizationId != 0) {
-        return;
-    }
-    m_currentPage = page;
-    m_currentFilter.page = page;
-    updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
-    setIsBusy(true);
-    m_animalService.getAnimals(m_currentFilter);
-}
-
-void AnimalListViewModel::nextPage() {
-    if (m_currentPage < m_totalPages) {
-        goToPage(m_currentPage + 1);
-    }
-}
-
-void AnimalListViewModel::prevPage() {
-    if (m_currentPage > 1) {
-        goToPage(m_currentPage - 1);
-    }
-}
-
 void AnimalListViewModel::loadAvailableFilters() { m_cityService.getCities(); }
 
 void AnimalListViewModel::loadBreedsForAnimalTypes(const QVariantList& selectedTypes) {
