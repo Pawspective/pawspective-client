@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QJsonObject>
+#include <QList>
 #include <QString>
 #include <optional>
 
@@ -25,6 +26,16 @@ struct AnimalDTO {
 
     QJsonObject toJson() const;
     static AnimalDTO fromJson(const QJsonObject& json);
+};
+
+struct AnimalListDTO {
+    QList<AnimalDTO> items;
+    int page{};
+    int limit{};
+    qint64 totalCount{};
+    qint64 totalPages{};
+
+    static AnimalListDTO fromJson(const QJsonObject& json);
 };
 
 }  // namespace pawspective::models

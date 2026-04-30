@@ -19,6 +19,8 @@ struct AnimalFilterDTO {
     std::optional<QVector<GoodWith>> goodWiths;
     std::optional<int> ageLte;
     std::optional<int> ageGte;
+    std::optional<int> page;
+    std::optional<int> limit;
 
     QJsonObject toJson() const;
     static AnimalFilterDTO fromJson(const QJsonObject& json);
