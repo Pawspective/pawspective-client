@@ -154,9 +154,7 @@ void AnimalService::getAnimals(const models::AnimalFilterDTO& filter) {
         [this](QNetworkReply& reply) {
             handleSuccess(
                 reply,
-                [this](const QJsonObject& obj) {
-                    emit getAnimalsSuccess(models::AnimalListDTO::fromJson(obj));
-                },
+                [this](const QJsonObject& obj) { emit getAnimalsSuccess(models::AnimalListDTO::fromJson(obj)); },
                 [this](QSharedPointer<BaseError> error) { emit getAnimalsFailed(error); }
             );
         },
