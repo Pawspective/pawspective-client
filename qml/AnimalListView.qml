@@ -155,25 +155,19 @@ Item {
         visible: root.hasPagination
 
         // ← Prev
-        Button {
+        CustomButton {
             id: prevButton
             text: "<"
             enabled: root.viewModel && root.viewModel.currentPage > 1 && !root.viewModel.isLoading
             onClicked: root.viewModel.prevPage()
             implicitWidth: Math.min(root.width, root.height) * 0.09
             implicitHeight: Math.min(root.width, root.height) * 0.07
-            background: Rectangle {
-                color: prevButton.enabled ? "#8572af" : "#c4b8e0"
-                radius: 6
-            }
-            contentItem: Text {
-                text: prevButton.text
-                font.family: root.fontName
-                font.pixelSize: Math.min(root.width, root.height) * 0.035
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
+            fontSize: Math.min(root.width, root.height) * 0.035
+            baseColor: prevButton.enabled ? "#8572af" : "#c4b8e0"
+            hoverColor: "#7060a0"
+            clickColor: "#5a4a8a"
+            textColor: "white"
+            radius: 6
         }
 
         // Page number buttons
@@ -198,7 +192,7 @@ Item {
                 }
 
                 // Page button
-                Button {
+                CustomButton {
                     id: pageBtn
                     anchors.fill: parent
                     visible: modelData !== -1
@@ -207,47 +201,35 @@ Item {
 
                     readonly property bool isCurrent: modelData === (root.viewModel ? root.viewModel.currentPage : -1)
 
-                    background: Rectangle {
-                        color: "transparent"
-                        border.color: pageBtn.isCurrent ? "#5a4a8a" : "transparent"
-                        border.width: pageBtn.isCurrent ? 2 : 0
-                        radius: 6
-                    }
-                    contentItem: Text {
-                        text: modelData !== -1 ? modelData : ""
-                        font.family: root.fontName
-                        font.pixelSize: Math.min(root.width, root.height) * 0.032
-                        font.bold: pageBtn.isCurrent
-                        color: pageBtn.isCurrent ? "#5a4a8a"
+                    text: modelData !== -1 ? String(modelData) : ""
+                    fontSize: Math.min(root.width, root.height) * 0.032
+                    baseColor: "#00f0ecf9"
+                    hoverColor: "#f0ecf9"
+                    clickColor: "#e0d8f5"
+                    textColor: pageBtn.isCurrent ? "#5a4a8a"
                              : pageBtn.enabled   ? "#8572af"
                              :                    "#c4b8e0"
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
+                    border.color: pageBtn.isCurrent ? "#5a4a8a" : "transparent"
+                    border.width: pageBtn.isCurrent ? 2 : 0
+                    radius: 6
                 }
             }
         }
 
         // Next →
-        Button {
+        CustomButton {
             id: nextButton
             text: ">"
             enabled: root.viewModel && root.viewModel.currentPage < root.viewModel.totalPages && !root.viewModel.isLoading
             onClicked: root.viewModel.nextPage()
             implicitWidth: Math.min(root.width, root.height) * 0.09
             implicitHeight: Math.min(root.width, root.height) * 0.07
-            background: Rectangle {
-                color: nextButton.enabled ? "#8572af" : "#c4b8e0"
-                radius: 6
-            }
-            contentItem: Text {
-                text: nextButton.text
-                font.family: root.fontName
-                font.pixelSize: Math.min(root.width, root.height) * 0.035
-                color: "white"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
+            fontSize: Math.min(root.width, root.height) * 0.035
+            baseColor: nextButton.enabled ? "#8572af" : "#c4b8e0"
+            hoverColor: "#7060a0"
+            clickColor: "#5a4a8a"
+            textColor: "white"
+            radius: 6
         }
     }
 }
