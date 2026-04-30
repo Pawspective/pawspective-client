@@ -560,7 +560,9 @@ void AnimalListViewModel::loadBreedsForAnimalTypes(const QVariantList& selectedT
 
 void AnimalListViewModel::handleGetAnimalsSuccess(const models::AnimalListDTO& result) {
     if (auto internalModel = qobject_cast<detail::AnimalListInternalModel*>(m_listModel)) {
-        qDebug() << "Received" << result.items.size() << "animals by filters (page" << result.page << "of" << result.totalPages << ")";
+        qDebug()
+            << "Received" << result.items.size() << "animals by filters (page" << result.page << "of"
+            << result.totalPages << ")";
         internalModel->update(result.items);
     }
     m_currentPage = result.page;

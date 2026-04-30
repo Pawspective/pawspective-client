@@ -119,19 +119,49 @@ Item {
         }
     }
 
+    // Builds the list of page buttons to display:
+    // [1] [...] [cur-1] [cur] [cur+1] [...] [last]
+    function buildPageWindow() {
+        if (!viewModel || viewModel.totalPages <= 1) return []
+        const cur = viewModel.currentPage
+        const last = viewModel.totalPages
+        const window = 2  // pages on each side of current
+        let pages = []
+
+        // always include page 1
+        pages.push(1)
+
+        const winStart = Math.max(2, cur - window)
+        const winEnd = Math.min(last - 1, cur + window)
+
+        if (winStart > 2) pages.push(-1)  // left ellipsis
+
+        for (let p = winStart; p <= winEnd; p++) pages.push(p)
+
+        if (winEnd < last - 1) pages.push(-1)  // right ellipsis
+
+        // always include last page (if more than 1 page total)
+        if (last > 1) pages.push(last)
+
+        return pages
+    }
+
     Row {
         id: paginationRow
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: root.height * 0.01
-        spacing: root.width * 0.02
+        spacing: root.width * 0.01
         visible: root.hasPagination
 
+        // ← Prev
         Button {
             id: prevButton
             text: "<"
             enabled: root.viewModel && root.viewModel.currentPage > 1 && !root.viewModel.isLoading
             onClicked: root.viewModel.prevPage()
+            implicitWidth: Math.min(root.width, root.height) * 0.09
+            implicitHeight: Math.min(root.width, root.height) * 0.07
             background: Rectangle {
                 color: prevButton.enabled ? "#8572af" : "#c4b8e0"
                 radius: 6
@@ -139,26 +169,73 @@ Item {
             contentItem: Text {
                 text: prevButton.text
                 font.family: root.fontName
-                font.pixelSize: Math.min(root.width, root.height) * 0.04
+                font.pixelSize: Math.min(root.width, root.height) * 0.035
                 color: "white"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
         }
 
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.viewModel ? (root.viewModel.currentPage + " / " + root.viewModel.totalPages) : ""
-            font.family: root.fontName
-            font.pixelSize: Math.min(root.width, root.height) * 0.035
-            color: root.textDark
+        // Page number buttons
+        Repeater {
+            model: root.buildPageWindow()
+
+            delegate: Item {
+                implicitWidth: modelData === -1
+                    ? Math.min(root.width, root.height) * 0.05
+                    : Math.min(root.width, root.height) * 0.09
+                implicitHeight: Math.min(root.width, root.height) * 0.07
+                anchors.verticalCenter: parent.verticalCenter
+
+                // Ellipsis
+                Text {
+                    anchors.centerIn: parent
+                    visible: modelData === -1
+                    text: "..."
+                    font.family: root.fontName
+                    font.pixelSize: Math.min(root.width, root.height) * 0.035
+                    color: root.textDark
+                }
+
+                // Page button
+                Button {
+                    id: pageBtn
+                    anchors.fill: parent
+                    visible: modelData !== -1
+                    enabled: !root.viewModel.isLoading && modelData !== root.viewModel.currentPage
+                    onClicked: root.viewModel.goToPage(modelData)
+
+                    readonly property bool isCurrent: modelData === (root.viewModel ? root.viewModel.currentPage : -1)
+
+                    background: Rectangle {
+                        color: "transparent"
+                        border.color: pageBtn.isCurrent ? "#5a4a8a" : "transparent"
+                        border.width: pageBtn.isCurrent ? 2 : 0
+                        radius: 6
+                    }
+                    contentItem: Text {
+                        text: modelData !== -1 ? modelData : ""
+                        font.family: root.fontName
+                        font.pixelSize: Math.min(root.width, root.height) * 0.032
+                        font.bold: pageBtn.isCurrent
+                        color: pageBtn.isCurrent ? "#5a4a8a"
+                             : pageBtn.enabled   ? "#8572af"
+                             :                    "#c4b8e0"
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+            }
         }
 
+        // Next →
         Button {
             id: nextButton
             text: ">"
             enabled: root.viewModel && root.viewModel.currentPage < root.viewModel.totalPages && !root.viewModel.isLoading
             onClicked: root.viewModel.nextPage()
+            implicitWidth: Math.min(root.width, root.height) * 0.09
+            implicitHeight: Math.min(root.width, root.height) * 0.07
             background: Rectangle {
                 color: nextButton.enabled ? "#8572af" : "#c4b8e0"
                 radius: 6
@@ -166,7 +243,7 @@ Item {
             contentItem: Text {
                 text: nextButton.text
                 font.family: root.fontName
-                font.pixelSize: Math.min(root.width, root.height) * 0.04
+                font.pixelSize: Math.min(root.width, root.height) * 0.035
                 color: "white"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
