@@ -144,6 +144,48 @@ static QByteArray validAnimalArrayJson() {
     return QJsonDocument(arr).toJson(QJsonDocument::Compact);
 }
 
+static QByteArray validAnimalListJson(int page = 1, int limit = 10) {
+    QJsonObject list;
+    list["page"] = page;
+    list["limit"] = limit;
+    list["total_count"] = 2;
+    list["total_pages"] = 1;
+
+    QJsonArray items;
+
+    QJsonObject a1;
+    a1["id"] = 1;
+    a1["organization_id"] = 10;
+    a1["name"] = "Buddy";
+    a1["breed"] = breedJson(1, "dog", "Labrador");
+    a1["size"] = "medium";
+    a1["gender"] = "male";
+    a1["care_level"] = "easy";
+    a1["color"] = "black";
+    a1["good_with"] = "dogs";
+    a1["age"] = 3;
+    a1["status"] = "available";
+
+    QJsonObject a2;
+    a2["id"] = 2;
+    a2["organization_id"] = 10;
+    a2["name"] = "Whiskers";
+    a2["breed"] = breedJson(2, "cat", "Siamese");
+    a2["size"] = "small";
+    a2["gender"] = "female";
+    a2["care_level"] = "moderate";
+    a2["color"] = "white";
+    a2["good_with"] = "cats";
+    a2["age"] = 2;
+    a2["status"] = "available";
+
+    items.append(a1);
+    items.append(a2);
+    list["items"] = items;
+
+    return QJsonDocument(list).toJson(QJsonDocument::Compact);
+}
+
 static QByteArray validFilterJson() {
     QJsonObject filter;
     QJsonArray breeds;
@@ -846,15 +888,19 @@ void TestAnimalService::testGetAnimalsByOrganization_Success_EmitsGetAnimalsByOr
     service.getAnimalsByOrganization(10);
     QCOMPARE(mock.getCalls.size(), 1);
 
-    mock.triggerSuccess(mock.getCalls, validAnimalArrayJson());
+    mock.triggerSuccess(mock.getCalls, validAnimalListJson());
 
     QCOMPARE(successSpy.count(), 1);
     QCOMPARE(failedSpy.count(), 0);
 
-    auto animals = qvariant_cast<QList<AnimalDTO>>(successSpy.at(0).at(0));
-    QCOMPARE(animals.size(), 2);
-    QCOMPARE(animals[0].name, QString("Buddy"));
-    QCOMPARE(animals[1].name, QString("Whiskers"));
+    auto result = qvariant_cast<AnimalListDTO>(successSpy.at(0).at(0));
+    QCOMPARE(result.items.size(), 2);
+    QCOMPARE(result.items[0].name, QString("Buddy"));
+    QCOMPARE(result.items[1].name, QString("Whiskers"));
+    QCOMPARE(result.page, 1);
+    QCOMPARE(result.limit, 10);
+    QCOMPARE(result.totalPages, static_cast<qint64>(1));
+    QCOMPARE(result.totalCount, static_cast<qint64>(2));
 }
 
 void TestAnimalService::testGetAnimalsByOrganization_NetworkError_EmitsGetAnimalsByOrganizationFailed() {
@@ -908,7 +954,10 @@ void TestAnimalService::testGetAnimalsByOrganization_UsesCorrectEndpoint() {
     service.getAnimalsByOrganization(42);
 
     QCOMPARE(mock.getCalls.size(), 1);
-    QVERIFY(mock.getCalls[0].endpoint.path().contains("/org/42/animals"));
+    QVERIFY(mock.getCalls[0].endpoint.path().contains("/orgs/42/animals"));
+    const QString query = mock.getCalls[0].endpoint.query();
+    QVERIFY(query.contains("page=1"));
+    QVERIFY(query.contains("limit=10"));
 }
 
 // ---------------------------------------------------------------------------

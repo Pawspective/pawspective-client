@@ -151,7 +151,7 @@ private:
 private slots:
     void handleGetAnimalsSuccess(const models::AnimalListDTO& result);
     void handleGetAnimalsFailed(QSharedPointer<services::BaseError> error);
-    void handleGetAnimalsByOrganizationSuccess(const QList<models::AnimalDTO>& animals);
+    void handleGetAnimalsByOrganizationSuccess(const models::AnimalListDTO& result);
     void handleGetAnimalsByOrganizationFailed(QSharedPointer<services::BaseError> error);
     void handleGetAnimalFiltersSuccess(const models::AnimalFilterDTO& filters);
     void handleGetAnimalFiltersFailed(QSharedPointer<services::BaseError> error);

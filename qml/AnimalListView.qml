@@ -10,11 +10,12 @@ Item {
     property var viewModel: typeof animalListViewModel !== 'undefined' ? animalListViewModel : null
     property Component headerComponent: null
     property bool showEmptyImage: false  // Show sad_cat image when list is empty
+    property bool showPaginationControls: true
 
     readonly property color textDark: "#8572af"
     readonly property string fontName: "Comic Sans MS"
 
-    readonly property bool hasPagination: viewModel && viewModel.totalPages > 1
+    readonly property bool hasPagination: viewModel && viewModel.totalPages > 1 && showPaginationControls
 
     ListView {
         id: animalListView

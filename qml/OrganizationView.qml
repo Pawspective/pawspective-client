@@ -480,6 +480,7 @@ Rectangle {
             
             property bool initialized: false
             property var lastLoadedOrgId: -1
+            readonly property bool hasPagination: animalListViewModel && animalListViewModel.totalPages > 1
             
             function reloadAnimals() {
                 if (animalListViewModel && organizationViewModel) {
@@ -489,6 +490,29 @@ Rectangle {
                         animalListViewModel.loadAnimalsForOrganization(orgId)
                     }
                 }
+            }
+
+            function buildPageWindow() {
+                if (!animalListViewModel || animalListViewModel.totalPages <= 1) return []
+                const cur = animalListViewModel.currentPage
+                const last = animalListViewModel.totalPages
+                const window = 2
+                let pages = []
+
+                pages.push(1)
+
+                const winStart = Math.max(2, cur - window)
+                const winEnd = Math.min(last - 1, cur + window)
+
+                if (winStart > 2) pages.push(-1)
+
+                for (let p = winStart; p <= winEnd; p++) pages.push(p)
+
+                if (winEnd < last - 1) pages.push(-1)
+
+                if (last > 1) pages.push(last)
+
+                return pages
             }
             
             Component.onCompleted: {
@@ -534,12 +558,105 @@ Rectangle {
                 }
             }
         
-            // Animal list view
-            AnimalListView {
-                headerComponent: canUpdateOrganization ? createButtonComponent : null
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                viewModel: animalListViewModel
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: root.height * 0.01
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    // Animal list view
+                    AnimalListView {
+                        id: organizationAnimalList
+                        anchors.fill: parent
+                        headerComponent: canUpdateOrganization ? createButtonComponent : null
+                        viewModel: animalListViewModel
+                        showPaginationControls: false
+                    }
+                }
+
+                Row {
+                    id: paginationRow
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: root.height * 0.01
+                    spacing: root.width * 0.01
+                    visible: hasPagination
+
+                    CustomButton {
+                        id: prevButton
+                        text: "<"
+                        enabled: animalListViewModel && animalListViewModel.currentPage > 1 && !animalListViewModel.isLoading
+                        onClicked: animalListViewModel.prevPage()
+                        implicitWidth: Math.min(root.width, root.height) * 0.09
+                        implicitHeight: Math.min(root.width, root.height) * 0.07
+                        fontSize: Math.min(root.width, root.height) * 0.035
+                        baseColor: prevButton.enabled ? "#8572af" : "#c4b8e0"
+                        hoverColor: "#7060a0"
+                        clickColor: "#5a4a8a"
+                        textColor: "white"
+                        radius: 6
+                    }
+
+                    Repeater {
+                        model: buildPageWindow()
+
+                        delegate: Item {
+                            implicitWidth: modelData === -1
+                                ? Math.min(root.width, root.height) * 0.05
+                                : Math.min(root.width, root.height) * 0.09
+                            implicitHeight: Math.min(root.width, root.height) * 0.07
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Text {
+                                anchors.centerIn: parent
+                                visible: modelData === -1
+                                text: "..."
+                                font.family: theme.fontName
+                                font.pixelSize: Math.min(root.width, root.height) * 0.035
+                                color: theme.textDark
+                            }
+
+                            CustomButton {
+                                id: pageBtn
+                                anchors.fill: parent
+                                visible: modelData !== -1
+                                enabled: !animalListViewModel.isLoading && modelData !== animalListViewModel.currentPage
+                                onClicked: animalListViewModel.goToPage(modelData)
+
+                                readonly property bool isCurrent: modelData === (animalListViewModel ? animalListViewModel.currentPage : -1)
+
+                                text: modelData !== -1 ? String(modelData) : ""
+                                fontSize: Math.min(root.width, root.height) * 0.032
+                                baseColor: "#00f0ecf9"
+                                hoverColor: "#f0ecf9"
+                                clickColor: "#e0d8f5"
+                                textColor: pageBtn.isCurrent ? "#5a4a8a"
+                                         : pageBtn.enabled   ? "#8572af"
+                                         :                    "#c4b8e0"
+                                border.color: pageBtn.isCurrent ? "#5a4a8a" : "transparent"
+                                border.width: pageBtn.isCurrent ? 2 : 0
+                                radius: 6
+                            }
+                        }
+                    }
+
+                    CustomButton {
+                        id: nextButton
+                        text: ">"
+                        enabled: animalListViewModel && animalListViewModel.currentPage < animalListViewModel.totalPages
+                                 && !animalListViewModel.isLoading
+                        onClicked: animalListViewModel.nextPage()
+                        implicitWidth: Math.min(root.width, root.height) * 0.09
+                        implicitHeight: Math.min(root.width, root.height) * 0.07
+                        fontSize: Math.min(root.width, root.height) * 0.035
+                        baseColor: nextButton.enabled ? "#8572af" : "#c4b8e0"
+                        hoverColor: "#7060a0"
+                        clickColor: "#5a4a8a"
+                        textColor: "white"
+                        radius: 6
+                    }
+                }
             }
         }
     }

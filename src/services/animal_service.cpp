@@ -272,18 +272,20 @@ void AnimalService::getAnimalFilters() {
     );
 }
 
-void AnimalService::getAnimalsByOrganization(qint64 organizationId) {
+void AnimalService::getAnimalsByOrganization(qint64 organizationId, int page, int limit) {
+    QUrl url(QString("/orgs/%1/animals").arg(organizationId));
+    QUrlQuery query;
+    query.addQueryItem("page", QString::number(page));
+    query.addQueryItem("limit", QString::number(limit));
+    url.setQuery(query);
+
     m_networkClient.get(
-        QUrl(QString("/orgs/%1/animals").arg(organizationId)),
+        url,
         [this](QNetworkReply& reply) {
-            handleSuccessArray(
+            handleSuccess(
                 reply,
-                [this](const QJsonArray& arr) {
-                    QList<models::AnimalDTO> animals;
-                    for (const auto& item : arr) {
-                        animals.append(models::AnimalDTO::fromJson(item.toObject()));
-                    }
-                    emit getAnimalsByOrganizationSuccess(animals);
+                [this](const QJsonObject& obj) {
+                    emit getAnimalsByOrganizationSuccess(models::AnimalListDTO::fromJson(obj));
                 },
                 [this](QSharedPointer<BaseError> error) { emit getAnimalsByOrganizationFailed(error); }
             );

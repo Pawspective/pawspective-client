@@ -2,6 +2,7 @@
 
 #include <QJsonObject>
 #include <QList>
+#include <QMetaType>
 #include <QString>
 #include <optional>
 
@@ -39,3 +40,5 @@ struct AnimalListDTO {
 };
 
 }  // namespace pawspective::models
+
+Q_DECLARE_METATYPE(pawspective::models::AnimalListDTO)
