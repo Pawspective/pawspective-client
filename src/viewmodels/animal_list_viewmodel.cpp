@@ -399,9 +399,14 @@ void AnimalListViewModel::loadAnimalsForOrganization(qint64 organizationId) {
         return;
     }
 
+    m_currentPage = 1;
+    m_totalPages = 0;
+    m_totalCount = 0;
+    emit paginationChanged();
+
     updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
     setIsBusy(true);
-    m_animalService.getAnimalsByOrganization(organizationId);
+    m_animalService.getAnimalsByOrganization(organizationId, m_currentPage, m_pageSize);
 }
 
 void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
@@ -494,9 +499,18 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
 }
 
 void AnimalListViewModel::goToPage(int page) {
-    if (page < 1 || page > m_totalPages || m_currentOrganizationId != 0) {
+    if (page < 1 || (m_totalPages > 0 && page > m_totalPages)) {
         return;
     }
+
+    if (m_currentOrganizationId != 0) {
+        m_currentPage = page;
+        updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
+        setIsBusy(true);
+        m_animalService.getAnimalsByOrganization(m_currentOrganizationId, m_currentPage, m_pageSize);
+        return;
+    }
+
     m_currentPage = page;
     m_currentFilter.page = page;
     updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
@@ -583,11 +597,18 @@ void AnimalListViewModel::handleGetAnimalsFailed(QSharedPointer<services::BaseEr
     }
 }
 
-void AnimalListViewModel::handleGetAnimalsByOrganizationSuccess(const QList<models::AnimalDTO>& animals) {
+void AnimalListViewModel::handleGetAnimalsByOrganizationSuccess(const models::AnimalListDTO& result) {
     if (auto internalModel = qobject_cast<detail::AnimalListInternalModel*>(m_listModel)) {
-        qDebug() << "Received" << animals.size() << "animals for organization" << m_currentOrganizationId;
-        internalModel->update(animals);
+        qDebug()
+            << "Received" << result.items.size() << "animals for organization" << m_currentOrganizationId << "(page"
+            << result.page << "of" << result.totalPages << ")";
+        internalModel->update(result.items);
     }
+    m_currentPage = result.page;
+    m_totalPages = result.totalPages;
+    m_totalCount = result.totalCount;
+    m_pageSize = result.limit > 0 ? result.limit : m_pageSize;
+    emit paginationChanged();
     updateProperty(m_isLoading, false, [this]() { emit isLoadingChanged(); });
     setIsBusy(false);
 }
