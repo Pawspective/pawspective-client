@@ -8,6 +8,9 @@ ApplicationWindow {
     height: 1000
     visible: true
     title: "User Profile App"
+    property bool organizationRefreshPending: false
+    property var organizationRefreshHandler: null
+    property var organizationRefreshFailHandler: null
 
     // Session end handling
     Connections {
@@ -36,8 +39,10 @@ ApplicationWindow {
     signal animalCreated()
     signal animalUpdated()
 
-    function openOrganizationView(organizationId) {
+    function openOrganizationView(organizationId, source, allowRefresh) {
         let resolvedOrganizationId = null
+        const shouldRefresh = allowRefresh === undefined ? true : allowRefresh
+
         if (organizationId !== null && organizationId !== undefined) {
             const normalizedOrganizationId = Number(organizationId)
             resolvedOrganizationId = Number.isFinite(normalizedOrganizationId) && normalizedOrganizationId > 0
@@ -45,8 +50,55 @@ ApplicationWindow {
                                    : null
         }
 
-        stackView.push(organizationViewComponent, {
-            organizationId: resolvedOrganizationId
+        if (resolvedOrganizationId === null && userViewModel && userViewModel.userData) {
+            const fallbackOrgId = Number(userViewModel.userData.organizationId)
+            if (Number.isFinite(fallbackOrgId) && fallbackOrgId > 0) {
+                resolvedOrganizationId = fallbackOrgId
+            }
+        }
+
+        if (resolvedOrganizationId === null && userViewModel && shouldRefresh) {
+            if (organizationRefreshPending) {
+                return
+            }
+
+            if (stackView.currentItem && stackView.currentItem.suppressLoading !== undefined) {
+                stackView.currentItem.suppressLoading = true
+            }
+
+            organizationRefreshPending = true
+            organizationRefreshHandler = function() {
+                userViewModel.userDataLoaded.disconnect(organizationRefreshHandler)
+                if (organizationRefreshFailHandler) {
+                    userViewModel.userDataLoadFailed.disconnect(organizationRefreshFailHandler)
+                }
+                organizationRefreshPending = false
+                organizationRefreshHandler = null
+                organizationRefreshFailHandler = null
+                const loadedOrgId = Number(userViewModel.userData.organizationId)
+                openOrganizationView(loadedOrgId, source, false)
+            }
+            organizationRefreshFailHandler = function() {
+                userViewModel.userDataLoaded.disconnect(organizationRefreshHandler)
+                userViewModel.userDataLoadFailed.disconnect(organizationRefreshFailHandler)
+                organizationRefreshPending = false
+                organizationRefreshHandler = null
+                organizationRefreshFailHandler = null
+                if (stackView.currentItem && stackView.currentItem.suppressLoading !== undefined) {
+                    stackView.currentItem.suppressLoading = false
+                }
+            }
+
+            userViewModel.userDataLoaded.connect(organizationRefreshHandler)
+            userViewModel.userDataLoadFailed.connect(organizationRefreshFailHandler)
+            userViewModel.refreshUserData()
+            return
+        }
+
+        const navigationSource = source || "sidebar"
+        stackView.replace(null, organizationViewComponent, {
+            organizationId: resolvedOrganizationId,
+            navigationSource: navigationSource
         })
     }
 
@@ -120,10 +172,10 @@ ApplicationWindow {
 
             onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onOrganizationClicked: function(organizationId) {
-                window.openOrganizationView(organizationId)
+                window.openOrganizationView(organizationId, "sidebar")
             }
             onSearchClicked: {
-                stackView.push(searchViewComponent, {
+                stackView.replace(null, searchViewComponent, {
                 searchOrganizationViewModel: searchOrganizationViewModel
             })
             }
@@ -140,11 +192,13 @@ ApplicationWindow {
     id: searchViewComponent
     SearchView {
         searchOrganizationViewModel: searchOrganizationViewModel
-        userViewModel: userViewModel
 
-        onProfileRequested: stackView.pop()
+        onProfileRequested: stackView.replace(null, userViewComponent)
         onOrganizationClicked: function(organizationId) {
-            window.openOrganizationView(organizationId)
+            window.openOrganizationView(organizationId, "search")
+        }
+        onOrganizationSidebarClicked: function(organizationId) {
+            window.openOrganizationView(organizationId, "sidebar")
         }
         onAnimalDetailRequested: function(animalId) {
             stackView.push(animalDetailViewComponent, { animalId: animalId, currentUserViewModel: userViewModel })
@@ -154,6 +208,7 @@ ApplicationWindow {
             if (searchOrganizationViewModel) {
                 searchOrganizationViewModel.initialize()
             }
+            userViewModel = window.userViewModel
         }
 
         Component.onDestruction: {
@@ -168,7 +223,13 @@ ApplicationWindow {
         id: registerOrganizationViewComponent
         RegisterOrganizationView {
             onBackClicked: stackView.pop()
-            onRegisterSuccess: stackView.pop()
+            onRegisterSuccess: {
+                if (!userViewModel) {
+                    stackView.pop()
+                    return
+                }
+                window.openOrganizationView(null, "sidebar", true)
+            }
             Component.onDestruction: registerOrganizationViewModel.cleanup()
         }
     }
@@ -176,12 +237,14 @@ ApplicationWindow {
     Component {
         id: organizationViewComponent
         OrganizationView {
-            onProfileRequested: stackView.pop()
+            onProfileRequested: stackView.replace(null, userViewComponent)
             onSearchRequested: {
-                stackView.push(searchViewComponent, {
+                stackView.replace(null, searchViewComponent, {
                     searchOrganizationViewModel: searchOrganizationViewModel
                 })
             }
+            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId, "sidebar") }
+            
             onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
             onCreateAnimalRequested: {
@@ -255,7 +318,7 @@ ApplicationWindow {
             viewModel: animalDetailViewModel
             currentUserViewModel: userViewModel
             onBackClicked: stackView.pop()
-            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId) }
+            onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId, "search") }
             onUpdateAnimalRequested: function(animalId) {
             updateAnimalViewModel.setAnimalId(animalId)
             stackView.push(animalUpdateViewComponent)

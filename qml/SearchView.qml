@@ -11,6 +11,7 @@ Rectangle {
     
     signal profileRequested()
     signal organizationClicked(var organizationId)
+    signal organizationSidebarClicked(var organizationId)
     signal animalDetailRequested(int animalId)
 
     QtObject {
@@ -131,7 +132,7 @@ readonly property real loaderTopMargin: 10
                     text: "Organization"
                     onClicked: {
                         const rawOrganizationId = root.userViewModel ? root.userViewModel.userData.organizationId : null
-                        root.organizationClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
+                        root.organizationSidebarClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
                     }
                 }
 
