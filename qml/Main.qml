@@ -192,6 +192,7 @@ ApplicationWindow {
     id: searchViewComponent
     SearchView {
         searchOrganizationViewModel: searchOrganizationViewModel
+        currentUserViewModel: userViewModel
 
         onProfileRequested: stackView.replace(null, userViewComponent)
         onOrganizationClicked: function(organizationId) {

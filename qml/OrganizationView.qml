@@ -4,7 +4,6 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    anchors.fill: parent
 
     // Optional context for reusable organization screen.
     // organizationId === null means "create organization" mode.

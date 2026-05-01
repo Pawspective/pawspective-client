@@ -186,13 +186,14 @@ Rectangle {
     }
 
     component ProfileDataField : ColumnLayout {
+        id: fieldRoot
         property string label: ""
         property string value: ""
         Layout.fillWidth: true
         spacing: root.fieldSpacing
 
         Text {
-            text: parent.label
+            text: fieldRoot.label || ""
             font.family: theme.fontName
             font.pixelSize: root.fieldLabelFontSize
             color: theme.textDark
@@ -208,7 +209,7 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.leftMargin: root.fieldLeftMargin
                 anchors.verticalCenter: parent.verticalCenter
-                text: parent.parent.value
+                text: fieldRoot.value || ""
                 font.family: theme.fontName
                 font.pixelSize: root.fieldValueFontSize
                 color: theme.accentPink
@@ -217,6 +218,7 @@ Rectangle {
     }
 
     component SidebarItem : Rectangle {
+        id: sidebarItemRoot
         property string text: ""
         property bool active: false
         Layout.fillWidth: true
@@ -230,19 +232,19 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: root.sidebarItemLeftMargin
-            text: parent.text
+            text: sidebarItemRoot.text || ""
             font.family: theme.fontName
             font.pixelSize: root.sidebarItemFontSize
-            font.bold: active
-            color: active ? "white" : theme.textDark
+            font.bold: sidebarItemRoot.active
+            color: sidebarItemRoot.active ? "white" : theme.textDark
         }
 
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: if (!parent.active) parent.color = theme.accentPink
-            onExited: if (!parent.active) parent.color = "transparent"
-            onClicked: parent.clicked()
+            onEntered: if (!sidebarItemRoot.active) sidebarItemRoot.color = theme.accentPink
+            onExited: if (!sidebarItemRoot.active) sidebarItemRoot.color = "transparent"
+            onClicked: sidebarItemRoot.clicked()
         }
     }
 }
