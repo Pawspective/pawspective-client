@@ -103,6 +103,29 @@ static QByteArray serverErrorJson(const QString& message = "Not found") {
     return QJsonDocument(err).toJson(QJsonDocument::Compact);
 }
 
+static QByteArray validOrgListJson(int page = 1, int limit = 20, int totalCount = 1, int totalPages = 1) {
+    QJsonObject city;
+    city["id"] = 1;
+    city["name"] = "Moscow";
+
+    QJsonObject org;
+    org["id"] = 1;
+    org["name"] = "Test Org";
+    org["city"] = city;
+
+    QJsonArray items;
+    items.append(org);
+
+    QJsonObject root;
+    root["items"] = items;
+    root["page"] = page;
+    root["limit"] = limit;
+    root["total_count"] = totalCount;
+    root["total_pages"] = totalPages;
+
+    return QJsonDocument(root).toJson(QJsonDocument::Compact);
+}
+
 // ---------------------------------------------------------------------------
 
 class TestOrganizationService : public QObject {
@@ -133,6 +156,19 @@ private slots:
     void testUpdateOrganization_NetworkError_EmitsUpdateOrganizationFailed();
     void testUpdateOrganization_InvalidJson_EmitsUpdateOrganizationFailed();
     void testUpdateOrganization_ServerError_DoesNotEmitOtherFailedSignals();
+
+    // OrganizationListDTO tests
+    void testOrganizationListDtoFromJson_ValidObject();
+
+    // findByNameContaining signal tests
+    void testFindByNameContaining_Success_EmitsFindByNameContainingSuccess();
+    void testFindByNameContaining_Success_PaginationFieldsAreCorrect();
+    void testFindByNameContaining_NetworkError_EmitsFindByNameContainingFailed();
+    void testFindByNameContaining_InvalidJson_EmitsFindByNameContainingFailed();
+    void testFindByNameContaining_EmptyName_EmitsFindByNameContainingFailed();
+    void testFindByNameContaining_SendsPageAndLimitInQuery();
+    void testFindByNameContaining_CustomPage_SendsCorrectPage();
+    void testFindByNameContaining_ServerError_DoesNotEmitOtherFailedSignals();
 };
 
 // ---------------------------------------------------------------------------
@@ -461,6 +497,163 @@ void TestOrganizationService::testUpdateOrganization_ServerError_DoesNotEmitOthe
     QCOMPARE(updateFailed.count(), 1);
     QCOMPARE(getFailed.count(), 0);
     QCOMPARE(createFailed.count(), 0);
+}
+
+// ---------------------------------------------------------------------------
+// OrganizationListDTO tests
+
+void TestOrganizationService::testOrganizationListDtoFromJson_ValidObject() {
+    QJsonObject city;
+    city["id"] = 1;
+    city["name"] = "Moscow";
+
+    QJsonObject org;
+    org["id"] = 5;
+    org["name"] = "Happy Paws";
+    org["city"] = city;
+
+    QJsonArray items;
+    items.append(org);
+
+    QJsonObject json;
+    json["items"] = items;
+    json["page"] = 2;
+    json["limit"] = 20;
+    json["total_count"] = 35;
+    json["total_pages"] = 2;
+
+    OrganizationListDTO dto = OrganizationListDTO::fromJson(json);
+
+    QCOMPARE(dto.page, 2);
+    QCOMPARE(dto.limit, 20);
+    QCOMPARE(dto.totalCount, static_cast<qint64>(35));
+    QCOMPARE(dto.totalPages, static_cast<qint64>(2));
+    QCOMPARE(dto.items.size(), 1);
+    QCOMPARE(dto.items.at(0).id, static_cast<qint64>(5));
+    QCOMPARE(dto.items.at(0).name, QString("Happy Paws"));
+}
+
+// ---------------------------------------------------------------------------
+// findByNameContaining signal tests
+
+void TestOrganizationService::testFindByNameContaining_Success_EmitsFindByNameContainingSuccess() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    QSignalSpy successSpy(&service, &OrganizationService::findByNameContainingSuccess);
+    QSignalSpy failedSpy(&service, &OrganizationService::findByNameContainingFailed);
+
+    service.findByNameContaining("Test");
+    QCOMPARE(mock.getCalls.size(), 1);
+
+    mock.triggerSuccess(mock.getCalls, validOrgListJson());
+
+    QCOMPARE(successSpy.count(), 1);
+    QCOMPARE(failedSpy.count(), 0);
+}
+
+void TestOrganizationService::testFindByNameContaining_Success_PaginationFieldsAreCorrect() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    QSignalSpy successSpy(&service, &OrganizationService::findByNameContainingSuccess);
+
+    service.findByNameContaining("Test");
+    mock.triggerSuccess(mock.getCalls, validOrgListJson(2, 20, 35, 2));
+
+    QCOMPARE(successSpy.count(), 1);
+    auto result = qvariant_cast<OrganizationListDTO>(successSpy.at(0).at(0));
+    QCOMPARE(result.page, 2);
+    QCOMPARE(result.limit, 20);
+    QCOMPARE(result.totalCount, static_cast<qint64>(35));
+    QCOMPARE(result.totalPages, static_cast<qint64>(2));
+    QCOMPARE(result.items.size(), 1);
+    QCOMPARE(result.items.at(0).name, QString("Test Org"));
+}
+
+void TestOrganizationService::testFindByNameContaining_NetworkError_EmitsFindByNameContainingFailed() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    QSignalSpy successSpy(&service, &OrganizationService::findByNameContainingSuccess);
+    QSignalSpy failedSpy(&service, &OrganizationService::findByNameContainingFailed);
+
+    service.findByNameContaining("Test");
+    mock.triggerError(mock.getCalls, serverErrorJson("Network error"));
+
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestOrganizationService::testFindByNameContaining_InvalidJson_EmitsFindByNameContainingFailed() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    QSignalSpy successSpy(&service, &OrganizationService::findByNameContainingSuccess);
+    QSignalSpy failedSpy(&service, &OrganizationService::findByNameContainingFailed);
+
+    service.findByNameContaining("Test");
+    mock.triggerSuccess(mock.getCalls, QByteArray("not valid json {{{}"));
+
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestOrganizationService::testFindByNameContaining_EmptyName_EmitsFindByNameContainingFailed() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    QSignalSpy successSpy(&service, &OrganizationService::findByNameContainingSuccess);
+    QSignalSpy failedSpy(&service, &OrganizationService::findByNameContainingFailed);
+
+    service.findByNameContaining("");
+
+    QCOMPARE(mock.getCalls.size(), 0);
+    QCOMPARE(successSpy.count(), 0);
+    QCOMPARE(failedSpy.count(), 1);
+}
+
+void TestOrganizationService::testFindByNameContaining_SendsPageAndLimitInQuery() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    service.findByNameContaining("Test", 1, 20);
+    QCOMPARE(mock.getCalls.size(), 1);
+
+    const QUrlQuery query(mock.getCalls.at(0).endpoint.query());
+    QCOMPARE(query.queryItemValue("name"), QString("Test"));
+    QCOMPARE(query.queryItemValue("page"), QString("1"));
+    QCOMPARE(query.queryItemValue("limit"), QString("20"));
+}
+
+void TestOrganizationService::testFindByNameContaining_CustomPage_SendsCorrectPage() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    service.findByNameContaining("Shelter", 3, 20);
+    QCOMPARE(mock.getCalls.size(), 1);
+
+    const QUrlQuery query(mock.getCalls.at(0).endpoint.query());
+    QCOMPARE(query.queryItemValue("page"), QString("3"));
+    QCOMPARE(query.queryItemValue("name"), QString("Shelter"));
+}
+
+void TestOrganizationService::testFindByNameContaining_ServerError_DoesNotEmitOtherFailedSignals() {
+    MockNetworkClient mock;
+    OrganizationService service(mock);
+
+    QSignalSpy getFailed(&service, &OrganizationService::getOrganizationFailed);
+    QSignalSpy createFailed(&service, &OrganizationService::createOrganizationFailed);
+    QSignalSpy updateFailed(&service, &OrganizationService::updateOrganizationFailed);
+    QSignalSpy findFailed(&service, &OrganizationService::findByNameContainingFailed);
+
+    service.findByNameContaining("Test");
+    mock.triggerError(mock.getCalls, serverErrorJson());
+
+    QCOMPARE(findFailed.count(), 1);
+    QCOMPARE(getFailed.count(), 0);
+    QCOMPARE(createFailed.count(), 0);
+    QCOMPARE(updateFailed.count(), 0);
 }
 
 QTEST_MAIN(TestOrganizationService)

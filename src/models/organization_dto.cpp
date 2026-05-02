@@ -2,6 +2,7 @@
 #include "../include/models/organization_dto.hpp"
 #include <QString>
 #include <optional>
+#include "utils/json.hpp"
 
 namespace pawspective::models {
 
@@ -34,6 +35,20 @@ OrganizationDTO OrganizationDTO::fromJson(const QJsonObject& json) {
     }
     dto.city = CityDTO::fromJson(json["city"].toObject());
 
+    return dto;
+}
+
+OrganizationListDTO OrganizationListDTO::fromJson(const QJsonObject& json) {
+    OrganizationListDTO dto;
+    dto.page = pawspective::utils::json::getRequiredInt32(json, "page");
+    dto.limit = pawspective::utils::json::getRequiredInt32(json, "limit");
+    dto.totalCount = pawspective::utils::json::getRequiredInt64(json, "total_count");
+    dto.totalPages = pawspective::utils::json::getRequiredInt64(json, "total_pages");
+
+    const QJsonArray items = json["items"].toArray();
+    for (const auto& item : items) {
+        dto.items.append(OrganizationDTO::fromJson(item.toObject()));
+    }
     return dto;
 }
 
