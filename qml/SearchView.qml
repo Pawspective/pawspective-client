@@ -131,7 +131,7 @@ readonly property real loaderTopMargin: 10
                     text: "Organization"
                     onClicked: {
                         const rawOrganizationId = root.currentUserViewModel ? root.currentUserViewModel.userData.organizationId : null
-                        root.organizationClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
+                        root.organizationSidebarClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
                     }
                 }
 
