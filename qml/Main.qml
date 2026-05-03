@@ -96,10 +96,17 @@ ApplicationWindow {
         }
 
         const navigationSource = source || "sidebar"
-        stackView.replace(null, organizationViewComponent, {
-            organizationId: resolvedOrganizationId,
-            navigationSource: navigationSource
-        })
+        if (navigationSource == "sidebar") {
+            stackView.replace(null, organizationViewComponent, {
+                organizationId: resolvedOrganizationId,
+                navigationSource: navigationSource
+            })
+        } else {
+            stackView.push(organizationViewComponent, {
+                organizationId: resolvedOrganizationId,
+                navigationSource: navigationSource
+            })
+        }
     }
 
     StackView {
