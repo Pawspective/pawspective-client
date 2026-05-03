@@ -57,7 +57,7 @@ void NetworkClient::sendRequest(
             QByteArray responseData = reply->readAll();
             reply->setProperty("responseData", responseData);
             if (reply->error() != QNetworkReply::NoError) {
-                reply->setProperty("networkError", reply->errorString());
+                reply->setProperty("responseData", "Network error. Check your internet.");
                 if (onError) {
                     onError(*reply);
                 }
