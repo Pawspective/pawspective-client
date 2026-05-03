@@ -101,9 +101,10 @@ void AuthService::clearSession() {
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
     QJsonParseError parseError;
+    
     QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
-
+    qDebug() << "RAW RESPONSE:" << data;
     if (parseError.error != QJsonParseError::NoError) {
         auto error = QSharedPointer<BaseError>(new ClientJsonParseError(
             QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())

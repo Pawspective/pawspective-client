@@ -54,6 +54,8 @@ void NetworkClient::sendRequest(
          reply,
          onSuccess = std::move(onSuccess),
          onError = std::move(onError)]() {
+            QByteArray responseData = reply->readAll();
+            reply->setProperty("responseData", responseData);
             if (reply->error() != QNetworkReply::NoError) {
                 reply->setProperty("networkError", reply->errorString());
                 if (onError) {
@@ -62,8 +64,6 @@ void NetworkClient::sendRequest(
                 reply->deleteLater();
                 return;
             }
-            QByteArray responseData = reply->readAll();
-            reply->setProperty("responseData", responseData);
             if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
                 QSharedPointer<BaseError> error = ErrorFactory::createError(responseData);
                 if (error.dynamicCast<AccessTokenExpiredError>()) {
@@ -81,21 +81,13 @@ void NetworkClient::sendRequest(
                     reply->deleteLater();
                     return;
                 }
+                if (onError) {
+        reply->setProperty("responseData", responseData);
+        onError(*reply);
+    }
+    reply->deleteLater();
+    return;
             }
-            try {
-                if (reply->error() == QNetworkReply::NoError) {
-                    if (onSuccess) {
-                        onSuccess(*reply);
-                    }
-                } else {
-                    if (onError) {
-                        onError(*reply);
-                    }
-                }
-            } catch (const std::exception& e) {
-                qWarning() << "Exception in network reply handler:" << e.what();
-            }
-            reply->deleteLater();
         }
     );
 }
