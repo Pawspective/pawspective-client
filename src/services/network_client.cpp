@@ -88,6 +88,10 @@ void NetworkClient::sendRequest(
                 reply->deleteLater();
                 return;
             }
+            if (onSuccess) {
+                onSuccess(*reply);
+            }
+            reply->deleteLater();
         }
     );
 }
