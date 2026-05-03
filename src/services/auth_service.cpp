@@ -103,8 +103,11 @@ void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPo
     QJsonParseError parseError;
 
     QByteArray data = reply.property("responseData").toByteArray();
+    if (data.startsWith("Network error")) {
+        onError(QSharedPointer<UnknownError>::create(QString::fromUtf8(data)));
+        return;
+    }
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
-    qDebug() << "RAW RESPONSE:" << data;
     if (parseError.error != QJsonParseError::NoError) {
         auto error = QSharedPointer<BaseError>(new ClientJsonParseError(
             QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
