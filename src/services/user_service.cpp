@@ -18,7 +18,7 @@ UserService::UserService(NetworkClient& networkClient, QObject* parent)
 
 void UserService::handleError(QNetworkReply& reply) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (parseError.error != QJsonParseError::NoError) {
@@ -40,7 +40,7 @@ void UserService::handleError(QNetworkReply& reply) {
 
 void UserService::handleSuccess(QNetworkReply& reply, std::function<void(const QJsonObject&)> onSuccess) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 

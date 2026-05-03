@@ -22,7 +22,7 @@ OrganizationService::OrganizationService(INetworkClient& networkClient, QObject*
 
 void OrganizationService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (parseError.error != QJsonParseError::NoError) {
@@ -48,7 +48,7 @@ void OrganizationService::handleSuccess(
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
@@ -121,7 +121,7 @@ void OrganizationService::handleSuccessArray(
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 

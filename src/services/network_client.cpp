@@ -54,8 +54,10 @@ void NetworkClient::sendRequest(
          reply,
          onSuccess = std::move(onSuccess),
          onError = std::move(onError)]() {
+            QByteArray responseData = reply->readAll();
+            reply->setProperty("responseData", responseData);
             if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
-                QSharedPointer<BaseError> error = ErrorFactory::createError(reply->readAll());
+                QSharedPointer<BaseError> error = ErrorFactory::createError(responseData);
                 if (error.dynamicCast<AccessTokenExpiredError>()) {
                     m_pendingRequests.append({method, endpoint, data, onSuccess, onError});
 

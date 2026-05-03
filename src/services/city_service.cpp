@@ -19,7 +19,7 @@ CityService::CityService(INetworkClient& networkClient, QObject* parent)
 
 void CityService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (parseError.error != QJsonParseError::NoError) {
@@ -45,7 +45,7 @@ void CityService::handleSuccess(
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 

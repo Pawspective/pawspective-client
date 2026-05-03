@@ -24,7 +24,7 @@ AnimalService::AnimalService(INetworkClient& networkClient, QObject* parent)
 
 void AnimalService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (parseError.error != QJsonParseError::NoError) {
@@ -50,7 +50,7 @@ void AnimalService::handleSuccess(
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
@@ -75,7 +75,7 @@ void AnimalService::handleSuccessArray(
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
