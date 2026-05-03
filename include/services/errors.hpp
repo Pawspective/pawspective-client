@@ -12,7 +12,17 @@ enum ErrorType : uint8_t {
     UnknownErrorType,
     AccessTokenExpiredErrorType,
     AccessTokenInvalidErrorType,
-    InvalidCredentialsErrorType
+    InvalidCredentialsErrorType,
+    UserNotFoundErrorType,
+    UserAlreadyExistsErrorType,
+    OrganizationNotFoundErrorType,
+    CityNotFoundErrorType,
+    BreedNotFoundErrorType,
+    AnimalNotFoundErrorType,
+    ForbiddenErrorType,
+    RefreshTokenInvalidErrorType,
+    MissingFieldErrorType,
+    InvalidJsonFormatErrorType
 };
 
 class BaseError {
@@ -63,6 +73,66 @@ class InvalidCredentialsError : public BaseError {
 public:
     static constexpr ErrorType code = ErrorType::InvalidCredentialsErrorType;
     explicit InvalidCredentialsError(const QJsonObject& errorResponse);
+};
+
+class UserNotFoundError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::UserNotFoundErrorType;
+    explicit UserNotFoundError(const QString& message) : BaseError(message) {}
+};
+
+class OrganizationNotFoundError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::OrganizationNotFoundErrorType;
+    explicit OrganizationNotFoundError(const QString& message) : BaseError(message) {}
+};
+
+class CityNotFoundError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::CityNotFoundErrorType;
+    explicit CityNotFoundError(const QString& message) : BaseError(message) {}
+};
+
+class BreedNotFoundError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::BreedNotFoundErrorType;
+    explicit BreedNotFoundError(const QString& message) : BaseError(message) {}
+};
+
+class AnimalNotFoundError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::AnimalNotFoundErrorType;
+    explicit AnimalNotFoundError(const QString& message) : BaseError(message) {}
+};
+
+class UserAlreadyExistsError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::UserAlreadyExistsErrorType;
+    explicit UserAlreadyExistsError(const QString& message) : BaseError(message) {}
+};
+
+class ForbiddenError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::ForbiddenErrorType;
+    explicit ForbiddenError(const QString& message) : BaseError(message) {}
+};
+
+class RefreshTokenInvalidError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::RefreshTokenInvalidErrorType;
+    explicit RefreshTokenInvalidError(const QString& message) : BaseError(message) {}
+};
+
+class MissingFieldError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::MissingFieldErrorType;
+    explicit MissingFieldError(const QString& message) : BaseError(message) {}
+};
+
+class InvalidJsonFormatError : public BaseError {
+public:
+    static constexpr ErrorType code = ErrorType::InvalidJsonFormatErrorType;
+    explicit InvalidJsonFormatError(const QString& message) : BaseError(message) {}
 };
 
 class UnknownError : public BaseError {

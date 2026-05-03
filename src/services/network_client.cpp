@@ -54,6 +54,14 @@ void NetworkClient::sendRequest(
          reply,
          onSuccess = std::move(onSuccess),
          onError = std::move(onError)]() {
+            if (reply->error() != QNetworkReply::NoError) {
+                reply->setProperty("networkError", reply->errorString());
+                if (onError) {
+                    onError(*reply);
+                }
+                reply->deleteLater();
+                return;
+            }
             QByteArray responseData = reply->readAll();
             reply->setProperty("responseData", responseData);
             if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
