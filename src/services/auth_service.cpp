@@ -101,7 +101,7 @@ void AuthService::clearSession() {
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
     QJsonParseError parseError;
-    
+
     QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
     qDebug() << "RAW RESPONSE:" << data;

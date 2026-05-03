@@ -82,11 +82,11 @@ void NetworkClient::sendRequest(
                     return;
                 }
                 if (onError) {
-        reply->setProperty("responseData", responseData);
-        onError(*reply);
-    }
-    reply->deleteLater();
-    return;
+                    reply->setProperty("responseData", responseData);
+                    onError(*reply);
+                }
+                reply->deleteLater();
+                return;
             }
         }
     );
