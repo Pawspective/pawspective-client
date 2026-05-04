@@ -21,16 +21,18 @@ BreedService::BreedService(INetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient) {}
 
 void BreedService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
+    QByteArray data = reply.property("responseData").toByteArray();
+
+    if (data.isEmpty()) {
+        onError(QSharedPointer<UnknownError>::create("Empty response"));
+        return;
+    }
+
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (parseError.error != QJsonParseError::NoError) {
-        onError(
-            QSharedPointer<BaseError>(new ClientJsonParseError(
-                QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
-            ))
-        );
+        onError(QSharedPointer<UnknownError>::create(QString::fromUtf8(data)));
         return;
     }
 
@@ -48,7 +50,7 @@ void BreedService::handleSuccess(
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 

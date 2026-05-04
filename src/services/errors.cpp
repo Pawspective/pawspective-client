@@ -10,7 +10,17 @@ ErrorType parseErrorType(const QString& code) {
         {"VALIDATION_ERROR", ErrorType::ValidationErrorType},
         {"ACCESS_TOKEN_EXPIRED", ErrorType::AccessTokenExpiredErrorType},
         {"ACCESS_TOKEN_INVALID", ErrorType::AccessTokenInvalidErrorType},
-        {"INVALID_CREDENTIALS", ErrorType::InvalidCredentialsErrorType}
+        {"INVALID_CREDENTIALS", ErrorType::InvalidCredentialsErrorType},
+        {"USER_NOT_FOUND", ErrorType::UserNotFoundErrorType},
+        {"USER_ALREADY_EXISTS", ErrorType::UserAlreadyExistsErrorType},
+        {"ORGANIZATION_NOT_FOUND", ErrorType::OrganizationNotFoundErrorType},
+        {"CITY_NOT_FOUND", ErrorType::CityNotFoundErrorType},
+        {"BREED_NOT_FOUND", ErrorType::BreedNotFoundErrorType},
+        {"ANIMAL_NOT_FOUND", ErrorType::AnimalNotFoundErrorType},
+        {"FORBIDDEN", ErrorType::ForbiddenErrorType},
+        {"INVALID_JSON_FORMAT", ErrorType::InvalidJsonFormatErrorType},
+        {"MISSING_FIELD", ErrorType::MissingFieldErrorType},
+        {"REFRESH_TOKEN_INVALID", ErrorType::RefreshTokenInvalidErrorType}
     };
     return ErrorMap.contains(code) ? ErrorMap.at(code) : ErrorType::UnknownErrorType;
 }
@@ -32,7 +42,12 @@ ValidationError::ValidationError(const std::vector<FieldError>& errors, std::str
 
 ValidationError::ValidationError(const QJsonObject& errorResponse)
     : BaseError(extractMessage(errorResponse, "Validation error")) {
-    if (errorResponse.contains("details") && errorResponse["details"].isArray()) {
+    if (errorResponse.contains("details") && errorResponse["details"].isObject()) {
+        QJsonObject details = errorResponse["details"].toObject();
+        for (auto it = details.begin(); it != details.end(); ++it) {
+            m_errors.push_back({it.key().toStdString(), it.value().toString().toStdString()});
+        }
+    } else if (errorResponse.contains("details") && errorResponse["details"].isArray()) {
         QJsonArray errorsArray = errorResponse["details"].toArray();
         for (const auto& errorVal : errorsArray) {
             if (errorVal.isObject()) {
@@ -65,6 +80,9 @@ InvalidCredentialsError::InvalidCredentialsError(const QJsonObject& errorRespons
 UnknownError::UnknownError(const QString& message) : BaseError(message) {}
 
 QSharedPointer<BaseError> ErrorFactory::createError(const QByteArray& data) {
+    if (data.isEmpty()) {
+        return QSharedPointer<UnknownError>::create("No response from server. Check your internet connection.");
+    }
     QJsonParseError parseError;
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
@@ -89,6 +107,12 @@ QSharedPointer<BaseError> ErrorFactory::createError(const QJsonObject& errorResp
     if (errorObject.contains("code") && errorObject["code"].isString()) {
         errorCode = parseErrorType(errorObject["code"].toString());
     }
+
+    QString message = errorObject["message"].toString();
+    if (message.isEmpty()) {
+        message = "An error occurred";
+    }
+
     switch (errorCode) {
         case ErrorType::AccessTokenExpiredErrorType:
             return QSharedPointer<AccessTokenExpiredError>::create(errorObject);
@@ -96,8 +120,30 @@ QSharedPointer<BaseError> ErrorFactory::createError(const QJsonObject& errorResp
             return QSharedPointer<AccessTokenInvalidError>::create(errorObject);
         case ErrorType::InvalidCredentialsErrorType:
             return QSharedPointer<InvalidCredentialsError>::create(errorObject);
+        case ErrorType::ValidationErrorType:
+            return QSharedPointer<ValidationError>::create(errorObject);
+        case ErrorType::UserNotFoundErrorType:
+            return QSharedPointer<UserNotFoundError>::create(message);
+        case ErrorType::OrganizationNotFoundErrorType:
+            return QSharedPointer<OrganizationNotFoundError>::create(message);
+        case ErrorType::CityNotFoundErrorType:
+            return QSharedPointer<CityNotFoundError>::create(message);
+        case ErrorType::BreedNotFoundErrorType:
+            return QSharedPointer<BreedNotFoundError>::create(message);
+        case ErrorType::AnimalNotFoundErrorType:
+            return QSharedPointer<AnimalNotFoundError>::create(message);
+        case ErrorType::UserAlreadyExistsErrorType:
+            return QSharedPointer<UserAlreadyExistsError>::create(message);
+        case ErrorType::ForbiddenErrorType:
+            return QSharedPointer<ForbiddenError>::create(message);
+        case ErrorType::RefreshTokenInvalidErrorType:
+            return QSharedPointer<RefreshTokenInvalidError>::create(message);
+        case ErrorType::MissingFieldErrorType:
+            return QSharedPointer<MissingFieldError>::create(message);
+        case ErrorType::InvalidJsonFormatErrorType:
+            return QSharedPointer<InvalidJsonFormatError>::create(message);
         default:
-            return QSharedPointer<UnknownError>::create("Unknown code type in error response");
+            return QSharedPointer<UnknownError>::create(message);
     }
 }
 

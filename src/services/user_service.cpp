@@ -17,16 +17,18 @@ UserService::UserService(NetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient) {}
 
 void UserService::handleError(QNetworkReply& reply) {
+    QByteArray data = reply.property("responseData").toByteArray();
+
+    if (data.isEmpty()) {
+        emit requestFailed(QSharedPointer<UnknownError>::create("Empty response"));
+        return;
+    }
+
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (parseError.error != QJsonParseError::NoError) {
-        emit requestFailed(
-            QSharedPointer<BaseError>(new ClientJsonParseError(
-                QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
-            ))
-        );
+        emit requestFailed(QSharedPointer<UnknownError>::create(QString::fromUtf8(data)));
         return;
     }
 
@@ -40,7 +42,7 @@ void UserService::handleError(QNetworkReply& reply) {
 
 void UserService::handleSuccess(QNetworkReply& reply, std::function<void(const QJsonObject&)> onSuccess) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 

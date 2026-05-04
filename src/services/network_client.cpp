@@ -54,8 +54,22 @@ void NetworkClient::sendRequest(
          reply,
          onSuccess = std::move(onSuccess),
          onError = std::move(onError)]() {
+            QByteArray responseData = reply->readAll();
+            reply->setProperty("responseData", responseData);
+            if (reply->error() != QNetworkReply::NoError) {
+                if (responseData.isEmpty()) {
+                    reply->setProperty("responseData", QByteArray("Network error: ") + reply->errorString().toUtf8());
+                }
+
+                if (onError) {
+                    onError(*reply);
+                }
+
+                reply->deleteLater();
+                return;
+            }
             if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
-                QSharedPointer<BaseError> error = ErrorFactory::createError(reply->readAll());
+                QSharedPointer<BaseError> error = ErrorFactory::createError(responseData);
                 if (error.dynamicCast<AccessTokenExpiredError>()) {
                     m_pendingRequests.append({method, endpoint, data, onSuccess, onError});
 
@@ -71,19 +85,23 @@ void NetworkClient::sendRequest(
                     reply->deleteLater();
                     return;
                 }
-            }
-            try {
-                if (reply->error() == QNetworkReply::NoError) {
-                    if (onSuccess) {
-                        onSuccess(*reply);
-                    }
-                } else {
-                    if (onError) {
-                        onError(*reply);
-                    }
+                reply->setProperty("responseData", responseData);
+                if (onError) {
+                    onError(*reply);
                 }
-            } catch (const std::exception& e) {
-                qWarning() << "Exception in network reply handler:" << e.what();
+                reply->deleteLater();
+                return;
+            }
+            int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+            if (statusCode >= 200 && statusCode < 300) {
+                if (onSuccess) {
+                    onSuccess(*reply);
+                }
+            } else {
+                if (onError) {
+                    onError(*reply);
+                }
             }
             reply->deleteLater();
         }

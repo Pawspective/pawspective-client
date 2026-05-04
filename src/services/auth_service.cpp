@@ -18,7 +18,7 @@
 namespace {
 std::optional<QJsonObject> parseJwtPayload(const QString& token) {
     QStringList parts = token.split('.');
-    if (parts.size() == 3) {
+    if (parts.size() != 3) {
         return std::nullopt;
     }
 
@@ -101,14 +101,15 @@ void AuthService::clearSession() {
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
-    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
+    QByteArray data = reply.property("responseData").toByteArray();
+    if (data.isEmpty()) {
+        onError(QSharedPointer<UnknownError>::create("Empty response"));
+        return;
+    }
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
-        auto error = QSharedPointer<BaseError>(new ClientJsonParseError(
-            QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
-        ));
-        onError(error);
+        onError(QSharedPointer<UnknownError>::create(QString::fromUtf8(data)));
         return;
     }
 
@@ -123,7 +124,7 @@ void AuthService::handleSuccess(
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
     QJsonParseError parseError;
-    QByteArray data = reply.readAll();
+    QByteArray data = reply.property("responseData").toByteArray();
 
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);

@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <functional>
+#include "services/errors.hpp"
 
 namespace pawspective::viewmodels {
 /**
@@ -121,6 +122,8 @@ protected:
      * @see errorOccurred
      */
     void emitError(ErrorType type, const QString& message);
+
+    QString formatValidationError(QSharedPointer<services::BaseError> error);
 
 public slots:
     /**
