@@ -18,21 +18,18 @@ CityService::CityService(INetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient) {}
 
 void CityService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
-    QJsonParseError parseError;
     QByteArray data = reply.property("responseData").toByteArray();
-    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (data.isEmpty()) {
-        onError(QSharedPointer<UnknownError>::create("Network error. Check your internet connection."));
+        onError(QSharedPointer<UnknownError>::create("Empty response"));
         return;
     }
 
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+
     if (parseError.error != QJsonParseError::NoError) {
-        onError(
-            QSharedPointer<BaseError>(new ClientJsonParseError(
-                QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
-            ))
-        );
+        onError(QSharedPointer<UnknownError>::create(QString::fromUtf8(data)));
         return;
     }
 

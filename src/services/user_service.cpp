@@ -17,21 +17,18 @@ UserService::UserService(NetworkClient& networkClient, QObject* parent)
     : QObject(parent), m_networkClient(networkClient) {}
 
 void UserService::handleError(QNetworkReply& reply) {
-    QJsonParseError parseError;
     QByteArray data = reply.property("responseData").toByteArray();
-    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
     if (data.isEmpty()) {
-        emit requestFailed(QSharedPointer<UnknownError>::create("Network error. Check your internet connection."));
+        emit requestFailed(QSharedPointer<UnknownError>::create("Empty response"));
         return;
     }
 
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+
     if (parseError.error != QJsonParseError::NoError) {
-        emit requestFailed(
-            QSharedPointer<BaseError>(new ClientJsonParseError(
-                QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
-            ))
-        );
+        emit requestFailed(QSharedPointer<UnknownError>::create(QString::fromUtf8(data)));
         return;
     }
 
