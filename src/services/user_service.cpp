@@ -21,6 +21,11 @@ void UserService::handleError(QNetworkReply& reply) {
     QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
+    if (data.isEmpty()) {
+        emit requestFailed(QSharedPointer<UnknownError>::create("Network error. Check your internet connection."));
+        return;
+    }
+
     if (parseError.error != QJsonParseError::NoError) {
         emit requestFailed(
             QSharedPointer<BaseError>(new ClientJsonParseError(

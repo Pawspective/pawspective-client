@@ -25,6 +25,11 @@ void OrganizationService::handleError(QNetworkReply& reply, std::function<void(Q
     QByteArray data = reply.property("responseData").toByteArray();
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
+    if (data.isEmpty()) {
+        onError(QSharedPointer<UnknownError>::create("Network error. Check your internet connection."));
+        return;
+    }
+
     if (parseError.error != QJsonParseError::NoError) {
         onError(
             QSharedPointer<BaseError>(new ClientJsonParseError(
