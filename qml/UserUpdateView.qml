@@ -21,10 +21,10 @@ Rectangle {
         readonly property color successColor: "#51cf66"
     }
 
-    property string userEmail: viewModel ? viewModel.email : ""
-    property string userFirstName: viewModel ? viewModel.firstName : ""
-    property string userLastName: viewModel ? viewModel.lastName : ""
-    property bool loading: viewModel ? viewModel.isBusy : false
+    property string userEmail: (viewModel && typeof viewModel.email !== 'undefined' && viewModel.email !== null) ? viewModel.email : ""
+    property string userFirstName: (viewModel && typeof viewModel.firstName !== 'undefined' && viewModel.firstName !== null) ? viewModel.firstName : ""
+    property string userLastName: (viewModel && typeof viewModel.lastName !== 'undefined' && viewModel.lastName !== null) ? viewModel.lastName : ""
+    property bool loading: (viewModel && typeof viewModel.isBusy !== 'undefined' && viewModel.isBusy !== null) ? viewModel.isBusy : false
     property string errorMessage: ""
 
     readonly property real fieldLabelFontSize: root.height * 0.022
