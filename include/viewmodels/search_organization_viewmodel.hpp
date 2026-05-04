@@ -62,7 +62,6 @@ private:
     int m_currentPage = 1;
     qint64 m_totalPages = 0;
     qint64 m_totalCount = 0;
-    int m_pageSize = 10;
 
     void performSearch(int page = 1);
     void updateOrganizationsList(const QList<models::OrganizationDTO>& organizations);

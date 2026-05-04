@@ -87,7 +87,7 @@ void SearchOrganizationViewModel::performSearch(int page) {
 
     setIsBusy(true);
     updateProperty(m_isSearching, true, [this]() { emit isSearchingChanged(); });
-    m_organizationService.findByNameContaining(m_searchQuery, page, m_pageSize);
+    m_organizationService.findByNameContaining(m_searchQuery, page);
 }
 
 void SearchOrganizationViewModel::handleSearchSuccess(const models::OrganizationListDTO& result) {
@@ -97,7 +97,6 @@ void SearchOrganizationViewModel::handleSearchSuccess(const models::Organization
     m_currentPage = result.page;
     m_totalPages = result.totalPages;
     m_totalCount = result.totalCount;
-    m_pageSize = result.limit > 0 ? result.limit : m_pageSize;
     emit paginationChanged();
 
     if (result.items.isEmpty()) {

@@ -166,7 +166,7 @@ private slots:
     void testFindByNameContaining_NetworkError_EmitsFindByNameContainingFailed();
     void testFindByNameContaining_InvalidJson_EmitsFindByNameContainingFailed();
     void testFindByNameContaining_EmptyName_EmitsFindByNameContainingFailed();
-    void testFindByNameContaining_SendsPageAndLimitInQuery();
+    void testFindByNameContaining_SendsPageInQuery();
     void testFindByNameContaining_CustomPage_SendsCorrectPage();
     void testFindByNameContaining_ServerError_DoesNotEmitOtherFailedSignals();
 };
@@ -613,24 +613,24 @@ void TestOrganizationService::testFindByNameContaining_EmptyName_EmitsFindByName
     QCOMPARE(failedSpy.count(), 1);
 }
 
-void TestOrganizationService::testFindByNameContaining_SendsPageAndLimitInQuery() {
+void TestOrganizationService::testFindByNameContaining_SendsPageInQuery() {
     MockNetworkClient mock;
     OrganizationService service(mock);
 
-    service.findByNameContaining("Test", 1, 20);
+    service.findByNameContaining("Test", 1);
     QCOMPARE(mock.getCalls.size(), 1);
 
     const QUrlQuery query(mock.getCalls.at(0).endpoint.query());
     QCOMPARE(query.queryItemValue("name"), QString("Test"));
     QCOMPARE(query.queryItemValue("page"), QString("1"));
-    QCOMPARE(query.queryItemValue("limit"), QString("20"));
+    QVERIFY(!query.hasQueryItem("limit"));
 }
 
 void TestOrganizationService::testFindByNameContaining_CustomPage_SendsCorrectPage() {
     MockNetworkClient mock;
     OrganizationService service(mock);
 
-    service.findByNameContaining("Shelter", 3, 20);
+    service.findByNameContaining("Shelter", 3);
     QCOMPARE(mock.getCalls.size(), 1);
 
     const QUrlQuery query(mock.getCalls.at(0).endpoint.query());
@@ -659,4 +659,3 @@ void TestOrganizationService::testFindByNameContaining_ServerError_DoesNotEmitOt
 QTEST_MAIN(TestOrganizationService)
 
 #include "organization_service_test.moc"
-

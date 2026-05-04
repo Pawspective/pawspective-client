@@ -22,7 +22,7 @@ public:
     void getOrganization(qint64 id);
     void createOrganization(const models::OrganizationRegisterDTO& dto);
     void updateOrganization(qint64 id, const models::OrganizationUpdateDTO& dto);
-    void findByNameContaining(const QString& name, int page = 1, int limit = 20);
+    void findByNameContaining(const QString& name, int page = 1);
 
 signals:
     void getOrganizationSuccess(const models::OrganizationDTO& organization);

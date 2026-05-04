@@ -145,7 +145,7 @@ void OrganizationService::handleSuccessArray(
     }
 }
 
-void OrganizationService::findByNameContaining(const QString& name, int page, int limit) {
+void OrganizationService::findByNameContaining(const QString& name, int page) {
     utils::Validator validator;
     validator.field("name", name.toStdString()).notBlank();
     if (auto error = validator.getValidationError()) {
@@ -157,7 +157,6 @@ void OrganizationService::findByNameContaining(const QString& name, int page, in
     QUrlQuery query;
     query.addQueryItem("name", name);
     query.addQueryItem("page", QString::number(page));
-    query.addQueryItem("limit", QString::number(limit));
     url.setQuery(query);
 
     m_networkClient.get(
