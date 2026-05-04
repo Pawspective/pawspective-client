@@ -16,7 +16,7 @@ QString BaseViewModel::formatValidationError(QSharedPointer<services::BaseError>
         return "Unknown error";
     }
 
-    if (auto* validationError = dynamic_cast<services::ValidationError*>(error.data())) {
+    if (auto* validationError = dynamic_cast<const services::ValidationError*>(error.data())) {
         QStringList messages;
         for (const auto& fieldError : validationError->getErrors()) {
             messages
