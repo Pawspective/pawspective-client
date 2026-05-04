@@ -479,10 +479,10 @@ Rectangle {
             
             property bool initialized: false
             property var lastLoadedOrgId: -1
-            readonly property bool hasPagination: animalListViewModel && animalListViewModel.totalPages > 1
+            readonly property bool hasPagination: (typeof animalListViewModel !== 'undefined') && animalListViewModel.totalPages > 1
             
             function reloadAnimals() {
-                if (animalListViewModel && organizationViewModel) {
+                if (typeof animalListViewModel !== 'undefined' && animalListViewModel && organizationViewModel) {
                     var orgId = organizationViewModel.currentOrganizationId
                     if (orgId > 0 && orgId !== lastLoadedOrgId) {
                         lastLoadedOrgId = orgId
@@ -492,7 +492,7 @@ Rectangle {
             }
 
             function buildPageWindow() {
-                if (!animalListViewModel || animalListViewModel.totalPages <= 1) return []
+                if (typeof animalListViewModel === 'undefined' || !animalListViewModel || animalListViewModel.totalPages <= 1) return []
                 const cur = animalListViewModel.currentPage
                 const last = animalListViewModel.totalPages
                 const window = 2
@@ -515,7 +515,7 @@ Rectangle {
             }
             
             Component.onCompleted: {
-                if (animalListViewModel && !initialized) {
+                if (typeof animalListViewModel !== 'undefined' && animalListViewModel && !initialized) {
                     animalListViewModel.initialize()
                     initialized = true
                 }
@@ -528,7 +528,7 @@ Rectangle {
             }
             
             Component.onDestruction: {
-                if (animalListViewModel) {
+                if (typeof animalListViewModel !== 'undefined' && animalListViewModel) {
                     animalListViewModel.cleanup()
                     initialized = false
                 }
