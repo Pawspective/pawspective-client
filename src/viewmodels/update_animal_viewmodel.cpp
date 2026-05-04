@@ -385,10 +385,7 @@ void UpdateAnimalViewModel::handleUpdateFailed(QSharedPointer<services::BaseErro
 
     QString message;
     if (const auto& validationError = error.dynamicCast<services::ValidationError>()) {
-        message =
-            validationError->getErrors().empty()
-                ? "Please check the entered data."
-                : QString::fromStdString(validationError->getErrors()[0].errorMessage);
+        message = formatValidationError(validationError);
         emitError(ErrorType::ValidationError, message);
     } else {
         message = error->getMessage();

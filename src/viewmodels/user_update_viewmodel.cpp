@@ -159,10 +159,15 @@ void UserUpdateViewModel::handleUpdateSuccess(const models::UserDTO& user) {
 void UserUpdateViewModel::handleRequestFailed(QSharedPointer<services::BaseError> error) {
     setIsBusy(false);
 
-    QString errorMessage = error ? error->getMessage() : "Unknown error";
-    ;
+    QString errorMessage;
+    if (error.dynamicCast<services::ValidationError>()) {
+        errorMessage = formatValidationError(error);
+        emitError(ErrorType::ValidationError, errorMessage);
+    } else {
+        errorMessage = error ? error->getMessage() : "An unexpected error occurred.";
+        emitError(ErrorType::NetworkError, errorMessage);
+    }
     emit saveFailed(errorMessage);
-    emitError(ErrorType::NetworkError, errorMessage);
 }
 
 void UserUpdateViewModel::handleTokenRefreshFailed(QSharedPointer<services::BaseError> error) {

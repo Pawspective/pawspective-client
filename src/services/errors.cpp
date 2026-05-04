@@ -42,7 +42,12 @@ ValidationError::ValidationError(const std::vector<FieldError>& errors, std::str
 
 ValidationError::ValidationError(const QJsonObject& errorResponse)
     : BaseError(extractMessage(errorResponse, "Validation error")) {
-    if (errorResponse.contains("details") && errorResponse["details"].isArray()) {
+    if (errorResponse.contains("details") && errorResponse["details"].isObject()) {
+        QJsonObject details = errorResponse["details"].toObject();
+        for (auto it = details.begin(); it != details.end(); ++it) {
+            m_errors.push_back({it.key().toStdString(), it.value().toString().toStdString()});
+        }
+    } else if (errorResponse.contains("details") && errorResponse["details"].isArray()) {
         QJsonArray errorsArray = errorResponse["details"].toArray();
         for (const auto& errorVal : errorsArray) {
             if (errorVal.isObject()) {

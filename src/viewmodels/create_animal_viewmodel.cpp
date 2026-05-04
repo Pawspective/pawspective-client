@@ -191,12 +191,7 @@ void CreateAnimalViewModel::onError(QSharedPointer<services::BaseError> error) {
     setIsBusy(false);
 
     if (const auto& validationError = error.dynamicCast<services::ValidationError>()) {
-        emitError(
-            ValidationError,
-            validationError->getErrors().empty()
-                ? validationError->getMessage()
-                : QString::fromStdString(validationError->getErrors()[0].errorMessage)
-        );
+        emitError(ValidationError, formatValidationError(validationError));
     } else {
         emitError(NetworkError, error->getMessage());
     }

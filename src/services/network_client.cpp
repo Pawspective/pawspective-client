@@ -57,10 +57,14 @@ void NetworkClient::sendRequest(
             QByteArray responseData = reply->readAll();
             reply->setProperty("responseData", responseData);
             if (reply->error() != QNetworkReply::NoError) {
-                reply->setProperty("responseData", "Network error. Check your internet.");
+                if (responseData.isEmpty()) {
+                    reply->setProperty("responseData", QByteArray("Network error: ") + reply->errorString().toUtf8());
+                }
+
                 if (onError) {
                     onError(*reply);
                 }
+
                 reply->deleteLater();
                 return;
             }
@@ -81,15 +85,23 @@ void NetworkClient::sendRequest(
                     reply->deleteLater();
                     return;
                 }
+                reply->setProperty("responseData", responseData);
                 if (onError) {
-                    reply->setProperty("responseData", responseData);
                     onError(*reply);
                 }
                 reply->deleteLater();
                 return;
             }
-            if (onSuccess) {
-                onSuccess(*reply);
+            int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+            if (statusCode >= 200 && statusCode < 300) {
+                if (onSuccess) {
+                    onSuccess(*reply);
+                }
+            } else {
+                if (onError) {
+                    onError(*reply);
+                }
             }
             reply->deleteLater();
         }
