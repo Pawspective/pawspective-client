@@ -4,7 +4,6 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    anchors.fill: parent
 
     // Optional context for reusable organization screen.
     // organizationId === null means "create organization" mode.
@@ -145,7 +144,7 @@ Rectangle {
                 height: root.height * 0.04
                 color: backArea.containsMouse ? theme.accentPink : theme.purple
                 // TODO: This should be change when we change stack logic
-                visible: stackView.depth > 1 && root.hasOrganization && !root.canUpdateOrganization
+                visible: stackView.depth > 1 && navigationSource != "sidebar"
                 z: 10
 
                 Text {

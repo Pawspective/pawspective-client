@@ -4,10 +4,9 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    anchors.fill: parent
 
     property var searchOrganizationViewModel: null
-    property var userViewModel: null
+    property var currentUserViewModel: null
     
     signal profileRequested()
     signal organizationClicked(var organizationId)
@@ -131,7 +130,7 @@ readonly property real loaderTopMargin: 10
                 SidebarItem {
                     text: "Organization"
                     onClicked: {
-                        const rawOrganizationId = root.userViewModel ? root.userViewModel.userData.organizationId : null
+                        const rawOrganizationId = root.currentUserViewModel ? root.currentUserViewModel.userData.organizationId : null
                         root.organizationSidebarClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
                     }
                 }
@@ -366,7 +365,7 @@ readonly property real loaderTopMargin: 10
                         }
 
                         ColumnLayout {
-                            anchors.centerIn: parent
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                             spacing: root.height * 0.015
                             visible: organizationsListView.count === 0 &&
                                      root.searchOrganizationViewModel &&

@@ -31,7 +31,7 @@ Rectangle {
             }
         }
         function onErrorOccurred(type, message) {
-            errorMessageLabel.text = message
+            root.errorMessage = message
         }
     }
 
@@ -124,7 +124,7 @@ Rectangle {
                 enabled: !loginViewModel.isBusy
                 
                 onClicked: {
-                    errorMessageLabel.text = ""
+                    root.errorMessage = ""
                     loginViewModel.login()
                 } 
             }
@@ -148,7 +148,7 @@ Rectangle {
 
             Label {
                 id: errorMessageLabel
-                text: loginViewModel.errorMessage
+                text: root.errorMessage
                 color: theme.textError
                 font.family: theme.fontName
                 visible: text.length > 0

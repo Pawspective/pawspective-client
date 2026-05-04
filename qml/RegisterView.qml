@@ -35,7 +35,7 @@ Rectangle {
         }
         function onErrorOccurred(type, message) {
             root.loading = false
-            errorMessageLabel.text = message
+            root.errorMessage = message
         }
     }
     Rectangle {
@@ -176,7 +176,7 @@ Rectangle {
                 
                 onClicked: {
                     root.loading = true
-                    errorMessageLabel.text = ""
+                    root.errorMessage = ""
                     registerViewModel.registerUser()
                 }
             }
@@ -189,7 +189,7 @@ Rectangle {
 
             Label {
                 id: errorMessageLabel
-                text: registerViewModel.errorMessage
+                text: root.errorMessage
                 color: theme.textError
                 font.family: theme.fontName
                 visible: text.length > 0
