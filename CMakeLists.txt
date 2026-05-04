@@ -130,6 +130,7 @@ enable_testing()
 add_executable(organization_service_test
     tests/organization_service_test.cpp
     include/services/organization_service.hpp
+    src/utils/json.cpp
     src/utils/validator.cpp
     src/models/organization_dto.cpp
     src/models/organization_register_dto.cpp

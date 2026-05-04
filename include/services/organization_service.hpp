@@ -22,13 +22,13 @@ public:
     void getOrganization(qint64 id);
     void createOrganization(const models::OrganizationRegisterDTO& dto);
     void updateOrganization(qint64 id, const models::OrganizationUpdateDTO& dto);
-    void findByNameContaining(const QString& name);
+    void findByNameContaining(const QString& name, int page = 1);
 
 signals:
     void getOrganizationSuccess(const models::OrganizationDTO& organization);
     void createOrganizationSuccess(const models::OrganizationDTO& organization);
     void updateOrganizationSuccess(const models::OrganizationDTO& organization);
-    void findByNameContainingSuccess(const QList<models::OrganizationDTO>& organizations);
+    void findByNameContainingSuccess(const models::OrganizationListDTO& result);
 
     void getOrganizationFailed(QSharedPointer<services::BaseError> error);
     void createOrganizationFailed(QSharedPointer<services::BaseError> error);

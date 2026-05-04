@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QJsonObject>
+#include <QList>
+#include <QMetaType>
 #include <QString>
 #include <optional>
 #include "city_dto.hpp"
@@ -18,4 +20,16 @@ struct OrganizationDTO {
     static OrganizationDTO fromJson(const QJsonObject& json);
 };
 
+struct OrganizationListDTO {
+    QList<OrganizationDTO> items;
+    int page{};
+    int limit{};
+    qint64 totalCount{};
+    qint64 totalPages{};
+
+    static OrganizationListDTO fromJson(const QJsonObject& json);
+};
+
 }  // namespace pawspective::models
+
+Q_DECLARE_METATYPE(pawspective::models::OrganizationListDTO)

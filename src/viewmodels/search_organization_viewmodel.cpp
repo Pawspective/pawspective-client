@@ -48,33 +48,61 @@ void SearchOrganizationViewModel::setSearchQuery(const QString& query) {
 
 void SearchOrganizationViewModel::searchOrganizations() {
     if (m_searchQuery.length() >= 1 && !isBusy()) {
-        performSearch();
+        performSearch(1);
     }
 }
 
 void SearchOrganizationViewModel::clearResults() {
     clearOrganizationsList();
+    m_currentPage = 1;
+    m_totalPages = 0;
+    m_totalCount = 0;
+    emit paginationChanged();
     updateProperty(m_isSearching, false, [this]() { emit isSearchingChanged(); });
 }
 
-void SearchOrganizationViewModel::performSearch() {
+void SearchOrganizationViewModel::goToPage(int page) {
+    if (page < 1 || page > m_totalPages || isBusy()) {
+        return;
+    }
+    performSearch(page);
+}
+
+void SearchOrganizationViewModel::nextPage() {
+    if (m_currentPage < m_totalPages) {
+        goToPage(m_currentPage + 1);
+    }
+}
+
+void SearchOrganizationViewModel::prevPage() {
+    if (m_currentPage > 1) {
+        goToPage(m_currentPage - 1);
+    }
+}
+
+void SearchOrganizationViewModel::performSearch(int page) {
     if (isBusy()) {
         return;
     }
 
     setIsBusy(true);
     updateProperty(m_isSearching, true, [this]() { emit isSearchingChanged(); });
-    m_organizationService.findByNameContaining(m_searchQuery);
+    m_organizationService.findByNameContaining(m_searchQuery, page);
 }
 
-void SearchOrganizationViewModel::handleSearchSuccess(const QList<models::OrganizationDTO>& organizations) {
+void SearchOrganizationViewModel::handleSearchSuccess(const models::OrganizationListDTO& result) {
     setIsBusy(false);
     updateProperty(m_isSearching, false, [this]() { emit isSearchingChanged(); });
 
-    if (organizations.isEmpty()) {
+    m_currentPage = result.page;
+    m_totalPages = result.totalPages;
+    m_totalCount = result.totalCount;
+    emit paginationChanged();
+
+    if (result.items.isEmpty()) {
         clearOrganizationsList();
     } else {
-        updateOrganizationsList(organizations);
+        updateOrganizationsList(result.items);
     }
 }
 

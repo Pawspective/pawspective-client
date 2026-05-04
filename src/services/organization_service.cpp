@@ -145,7 +145,7 @@ void OrganizationService::handleSuccessArray(
     }
 }
 
-void OrganizationService::findByNameContaining(const QString& name) {
+void OrganizationService::findByNameContaining(const QString& name, int page) {
     utils::Validator validator;
     validator.field("name", name.toStdString()).notBlank();
     if (auto error = validator.getValidationError()) {
@@ -156,19 +156,16 @@ void OrganizationService::findByNameContaining(const QString& name) {
     QUrl url("/orgs");
     QUrlQuery query;
     query.addQueryItem("name", name);
+    query.addQueryItem("page", QString::number(page));
     url.setQuery(query);
 
     m_networkClient.get(
         url,
         [this](QNetworkReply& reply) {
-            handleSuccessArray(
+            handleSuccess(
                 reply,
-                [this](const QJsonArray& arr) {
-                    QList<models::OrganizationDTO> organizations;
-                    for (const auto& item : arr) {
-                        organizations.append(models::OrganizationDTO::fromJson(item.toObject()));
-                    }
-                    emit findByNameContainingSuccess(organizations);
+                [this](const QJsonObject& obj) {
+                    emit findByNameContainingSuccess(models::OrganizationListDTO::fromJson(obj));
                 },
                 [this](QSharedPointer<BaseError> error) { emit findByNameContainingFailed(error); }
             );

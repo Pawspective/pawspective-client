@@ -300,9 +300,9 @@ readonly property real loaderTopMargin: 10
                             Layout.preferredHeight: root.height * 0.045
                             radius: 8
                             color: theme.pageBg
-                            visible: root.searchOrganizationViewModel && 
+                            visible: root.searchOrganizationViewModel &&
                                      (root.searchOrganizationViewModel.isSearching ||
-                                      (root.searchOrganizationViewModel.searchQuery.length > 0 && 
+                                      (root.searchOrganizationViewModel.searchQuery.length > 0 &&
                                        root.searchOrganizationViewModel.organizationsCount > 0))
 
                             Text {
@@ -313,7 +313,7 @@ readonly property real loaderTopMargin: 10
                                         return "Searching..."
                                     }
                                     if (root.searchOrganizationViewModel.organizationsCount > 0) {
-                                        return "Found: " + root.searchOrganizationViewModel.organizationsCount
+                                        return "Found: " + root.searchOrganizationViewModel.totalCount
                                     }
                                     return ""
                                 }
@@ -331,69 +331,170 @@ readonly property real loaderTopMargin: 10
                             Layout.fillHeight: true
                             clip: true
                             spacing: root.height * 0.012
-                            
-                            model: (root.searchOrganizationViewModel && 
-                                   root.searchOrganizationViewModel.organizationsCount > 0) 
+
+                            model: (root.searchOrganizationViewModel &&
+                                   root.searchOrganizationViewModel.organizationsCount > 0)
                                    ? root.searchOrganizationViewModel.organizations : []
-                            
+
                             delegate: OrganizationCardView {
                                 width: organizationsListView.width
                                 organizationId: modelData.organizationId
                                 organizationName: modelData.name
                                 organizationCity: modelData.city
                                 organizationDescription: modelData.description || ""
-                                
+
                                 onClicked: function(id) {
                                     root.organizationClicked(id)
                                 }
                             }
-                            
+
                             ScrollBar.vertical: ScrollBar {
                                 policy: ScrollBar.AlwaysOn
                             }
                         }
 
                         LoaderSpinner {
-    Layout.fillWidth: true
-    Layout.preferredHeight: root.loaderSize
-    Layout.maximumHeight: root.loaderSize
-    Layout.minimumHeight: root.loaderSize
-    Layout.alignment: Qt.AlignHCenter
-    Layout.topMargin: root.loaderTopMargin
-    Layout.bottomMargin: root.contentSpacing
-    running: root.searchOrganizationViewModel ? root.searchOrganizationViewModel.isSearching : false
-    visible: root.searchOrganizationViewModel ? root.searchOrganizationViewModel.isSearching : false
-}
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.loaderSize
+                            Layout.maximumHeight: root.loaderSize
+                            Layout.minimumHeight: root.loaderSize
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: root.loaderTopMargin
+                            Layout.bottomMargin: root.contentSpacing
+                            running: root.searchOrganizationViewModel ? root.searchOrganizationViewModel.isSearching : false
+                            visible: root.searchOrganizationViewModel ? root.searchOrganizationViewModel.isSearching : false
+                        }
 
                         ColumnLayout {
                             anchors.centerIn: parent
                             spacing: root.height * 0.015
-                            visible: organizationsListView.count === 0 && 
-                                     root.searchOrganizationViewModel && 
-                                     root.searchOrganizationViewModel.searchQuery.length > 0 && 
+                            visible: organizationsListView.count === 0 &&
+                                     root.searchOrganizationViewModel &&
+                                     root.searchOrganizationViewModel.searchQuery.length > 0 &&
                                      !root.searchOrganizationViewModel.isSearching
 
-                                Image {
-                                    source: "../resources/sad_cat.png"
-                                    fillMode: Image.PreserveAspectFit
-                                    smooth: true
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.preferredWidth: root.width * 0.25
-                                    Layout.preferredHeight: root.height * 0.25
-                                }
-
-                                Text {
-                                    text: "Nothing found\nfor \"" + (root.searchOrganizationViewModel ? root.searchOrganizationViewModel.searchQuery : "") + "\""
-                                    font.family: theme.fontName
-                                    font.pixelSize: root.height * 0.024
-                                    font.bold: true
-                                    color: theme.textDark
-                                    horizontalAlignment: Text.AlignHCenter
-                                    opacity: 0.8
-                                    Layout.alignment: Qt.AlignHCenter
-                                }
-                                
+                            Image {
+                                source: "../resources/sad_cat.png"
+                                fillMode: Image.PreserveAspectFit
+                                smooth: true
+                                Layout.alignment: Qt.AlignHCenter
+                                Layout.preferredWidth: root.width * 0.25
+                                Layout.preferredHeight: root.height * 0.25
                             }
+
+                            Text {
+                                text: "Nothing found\nfor \"" + (root.searchOrganizationViewModel ? root.searchOrganizationViewModel.searchQuery : "") + "\""
+                                font.family: theme.fontName
+                                font.pixelSize: root.height * 0.024
+                                font.bold: true
+                                color: theme.textDark
+                                horizontalAlignment: Text.AlignHCenter
+                                opacity: 0.8
+                                Layout.alignment: Qt.AlignHCenter
+                            }
+                        }
+
+                        // Pagination
+                        Row {
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: root.width * 0.01
+                            visible: root.searchOrganizationViewModel
+                                     && root.searchOrganizationViewModel.totalPages > 1
+
+                            function buildPageWindow() {
+                                if (!root.searchOrganizationViewModel) return []
+                                const cur = root.searchOrganizationViewModel.currentPage
+                                const last = root.searchOrganizationViewModel.totalPages
+                                const window = 2
+                                let pages = []
+                                pages.push(1)
+                                const winStart = Math.max(2, cur - window)
+                                const winEnd = Math.min(last - 1, cur + window)
+                                if (winStart > 2) pages.push(-1)
+                                for (let p = winStart; p <= winEnd; p++) pages.push(p)
+                                if (winEnd < last - 1) pages.push(-1)
+                                if (last > 1) pages.push(last)
+                                return pages
+                            }
+
+                            CustomButton {
+                                id: orgPrevBtn
+                                text: "<"
+                                enabled: root.searchOrganizationViewModel
+                                         && root.searchOrganizationViewModel.currentPage > 1
+                                         && !root.searchOrganizationViewModel.isSearching
+                                onClicked: root.searchOrganizationViewModel.prevPage()
+                                implicitWidth: Math.min(root.width, root.height) * 0.09
+                                implicitHeight: Math.min(root.width, root.height) * 0.07
+                                fontSize: Math.min(root.width, root.height) * 0.035
+                                baseColor: orgPrevBtn.enabled ? "#8572af" : "#c4b8e0"
+                                hoverColor: "#7060a0"
+                                clickColor: "#5a4a8a"
+                                textColor: "white"
+                                radius: 6
+                            }
+
+                            Repeater {
+                                model: parent.buildPageWindow()
+
+                                delegate: Item {
+                                    implicitWidth: modelData === -1
+                                        ? Math.min(root.width, root.height) * 0.05
+                                        : Math.min(root.width, root.height) * 0.09
+                                    implicitHeight: Math.min(root.width, root.height) * 0.07
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        visible: modelData === -1
+                                        text: "..."
+                                        font.family: theme.fontName
+                                        font.pixelSize: Math.min(root.width, root.height) * 0.035
+                                        color: theme.textDark
+                                    }
+
+                                    CustomButton {
+                                        id: orgPageBtn
+                                        anchors.fill: parent
+                                        visible: modelData !== -1
+                                        enabled: !root.searchOrganizationViewModel.isSearching
+                                                 && modelData !== root.searchOrganizationViewModel.currentPage
+                                        onClicked: root.searchOrganizationViewModel.goToPage(modelData)
+
+                                        readonly property bool isCurrent: modelData === (root.searchOrganizationViewModel ? root.searchOrganizationViewModel.currentPage : -1)
+
+                                        text: modelData !== -1 ? String(modelData) : ""
+                                        fontSize: Math.min(root.width, root.height) * 0.032
+                                        baseColor: "#00f0ecf9"
+                                        hoverColor: "#f0ecf9"
+                                        clickColor: "#e0d8f5"
+                                        textColor: orgPageBtn.isCurrent ? "#5a4a8a"
+                                                 : orgPageBtn.enabled   ? "#8572af"
+                                                 :                        "#c4b8e0"
+                                        border.color: orgPageBtn.isCurrent ? "#5a4a8a" : "transparent"
+                                        border.width: orgPageBtn.isCurrent ? 2 : 0
+                                        radius: 6
+                                    }
+                                }
+                            }
+
+                            CustomButton {
+                                id: orgNextBtn
+                                text: ">"
+                                enabled: root.searchOrganizationViewModel
+                                         && root.searchOrganizationViewModel.currentPage < root.searchOrganizationViewModel.totalPages
+                                         && !root.searchOrganizationViewModel.isSearching
+                                onClicked: root.searchOrganizationViewModel.nextPage()
+                                implicitWidth: Math.min(root.width, root.height) * 0.09
+                                implicitHeight: Math.min(root.width, root.height) * 0.07
+                                fontSize: Math.min(root.width, root.height) * 0.035
+                                baseColor: orgNextBtn.enabled ? "#8572af" : "#c4b8e0"
+                                hoverColor: "#7060a0"
+                                clickColor: "#5a4a8a"
+                                textColor: "white"
+                                radius: 6
+                            }
+                        }
                     }
                 }
             }
