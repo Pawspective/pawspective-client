@@ -4,7 +4,8 @@ import QtQuick.Layouts 1.15
 
 Item {
     id: root
-    anchors.fill: parent
+    width: parent ? parent.width : implicitWidth
+    height: parent ? parent.height : implicitHeight
 
     // If viewModel is not passed, use global animalListViewModel
     property var viewModel: typeof animalListViewModel !== 'undefined' ? animalListViewModel : null
@@ -48,7 +49,8 @@ Item {
             }
         }
 
-        footer: (animalListView.count === 0 || root.viewModel?.isLoading) ? emptyOrLoadingFooter : null
+        footer: (root.viewModel && (root.viewModel.isLoading || (typeof root.viewModel.listModel !== 'undefined' && root.viewModel.listModel.count === 0)))
+            ? emptyOrLoadingFooter : null
         
         Component {
             id: emptyOrLoadingFooter
