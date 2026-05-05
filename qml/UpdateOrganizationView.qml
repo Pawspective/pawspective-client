@@ -284,7 +284,7 @@ Rectangle {
             leftPadding: root.fieldLeftMargin
             enabled: !viewModel.isBusy
             background: Rectangle { color: theme.fieldBg; radius: 10 }
-            onTextChanged: if(focus) parent.inputFinished(text)
+            onTextChanged: if (focus) inputFinished(text)
         }
     }
 }

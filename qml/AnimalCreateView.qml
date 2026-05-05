@@ -314,7 +314,7 @@ Rectangle {
             Layout.preferredHeight: root.fieldHeight
             leftPadding: 10
             background: Rectangle { color: theme.fieldBg; radius: 10 }
-            onTextChanged: if(focus) parent.inputFinished(text)
+            onTextChanged: if (focus) inputFinished(text)
         }
     }
 
