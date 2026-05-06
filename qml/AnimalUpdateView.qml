@@ -335,7 +335,7 @@ Rectangle {
             leftPadding: 10
             enabled: viewModel && !viewModel.isBusy
             background: Rectangle { color: theme.fieldBg; radius: 10 }
-            onTextChanged: if(focus) parent.inputFinished(text)
+            onTextChanged: if (focus) inputFinished(text)
         }
     }
 

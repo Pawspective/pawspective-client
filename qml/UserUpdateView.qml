@@ -21,10 +21,10 @@ Rectangle {
         readonly property color successColor: "#51cf66"
     }
 
-    property string userEmail: viewModel ? viewModel.email : ""
-    property string userFirstName: viewModel ? viewModel.firstName : ""
-    property string userLastName: viewModel ? viewModel.lastName : ""
-    property bool loading: viewModel ? viewModel.isBusy : false
+    property string userEmail: (viewModel && typeof viewModel.email !== 'undefined' && viewModel.email !== null) ? viewModel.email : ""
+    property string userFirstName: (viewModel && typeof viewModel.firstName !== 'undefined' && viewModel.firstName !== null) ? viewModel.firstName : ""
+    property string userLastName: (viewModel && typeof viewModel.lastName !== 'undefined' && viewModel.lastName !== null) ? viewModel.lastName : ""
+    property bool loading: (viewModel && typeof viewModel.isBusy !== 'undefined' && viewModel.isBusy !== null) ? viewModel.isBusy : false
     property string errorMessage: ""
 
     readonly property real fieldLabelFontSize: root.height * 0.022
@@ -56,7 +56,8 @@ Rectangle {
     }
 
     Connections {
-        target: authService
+        target: (typeof authService !== 'undefined') ? authService : null
+        enabled: (typeof authService !== 'undefined')
         function onSessionEnded() {
             errorMessage = "Session expired. Please log in again."
             closeTimer.start()
@@ -70,8 +71,12 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        if (viewModel) {
-            viewModel.initialize()
+        try {
+            if (viewModel && typeof viewModel.initialize === 'function') {
+                viewModel.initialize()
+            }
+        } catch (e) {
+            console.warn("UserUpdateView: initialize() threw:", e)
         }
     }
 
@@ -104,19 +109,19 @@ Rectangle {
                 ProfileDataField {
                     label: "Email"
                     value: (viewModel && viewModel.email) ? viewModel.email : ""
-                    onInputFinished: if (viewModel) viewModel.email = newValue
+                    onInputFinished: function(newValue) { try { if (viewModel) viewModel.email = newValue } catch (e) { console.warn("UserUpdateView:onInputFinished(email):", e) } }
                 }
 
                 ProfileDataField {
                     label: "First Name"
                     value: (viewModel && viewModel.firstName) ? viewModel.firstName : ""
-                    onInputFinished: if (viewModel) viewModel.firstName = newValue
+                    onInputFinished: function(newValue) { try { if (viewModel) viewModel.firstName = newValue } catch (e) { console.warn("UserUpdateView:onInputFinished(firstName):", e) } }
                 }
 
                 ProfileDataField {
                     label: "Last Name"
                     value: (viewModel && viewModel.lastName) ? viewModel.lastName : ""
-                    onInputFinished: if (viewModel) viewModel.lastName = newValue
+                    onInputFinished: function(newValue) { try { if (viewModel) viewModel.lastName = newValue } catch (e) { console.warn("UserUpdateView:onInputFinished(lastName):", e) } }
                 }
 
                 ColumnLayout {
@@ -171,7 +176,11 @@ Rectangle {
                         enabled: !root.loading && viewModel && viewModel.isDirty
 
                         onClicked: {
-                            if (viewModel) viewModel.saveChanges()
+                            try {
+                                if (viewModel && typeof viewModel.saveChanges === 'function') viewModel.saveChanges()
+                            } catch (e) {
+                                console.warn("UserUpdateView: saveChanges() threw:", e)
+                            }
                         }
                     }
 
@@ -186,8 +195,12 @@ Rectangle {
                         enabled: !root.loading
 
                         onClicked: {
-                            if (viewModel) viewModel.discardChanges()
-                            root.discard()
+                            try {
+                                if (viewModel && typeof viewModel.discardChanges === 'function') viewModel.discardChanges()
+                            } catch (e) {
+                                console.warn("UserUpdateView: discardChanges() threw:", e)
+                            }
+                            try { root.discard() } catch (e) { console.warn("UserUpdateView: root.discard() threw:", e) }
                         }
                     }
                 }
@@ -254,7 +267,11 @@ Rectangle {
             }
 
             onTextChanged: {
-                parent.inputFinished(text)
+                try {
+                    inputFinished(text)
+                } catch (e) {
+                    console.warn("ProfileDataField: inputFinished handler threw:", e)
+                }
             }
         }
     }

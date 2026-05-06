@@ -173,7 +173,6 @@ ApplicationWindow {
             }
 
             onEditProfileClicked: {
-                userUpdateViewModel.initialize()
                 stackView.push(userUpdateViewComponent)
             }
 
