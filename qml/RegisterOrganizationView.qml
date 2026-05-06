@@ -21,6 +21,7 @@ Rectangle {
     }
 
     property string photoUrl: ""
+        property string errorMessage: ""
 
     signal backClicked()
     signal registerSuccess()
@@ -35,7 +36,7 @@ Rectangle {
             }
         }
         function onErrorOccurred(type, message) {
-            errorMessageLabel.text = message
+                root.errorMessage = message
         }
     }
 
@@ -234,7 +235,7 @@ Rectangle {
                 Layout.topMargin: 4
                 enabled: !registerOrganizationViewModel.isBusy
                 onClicked: {
-                    errorMessageLabel.text = ""
+                        root.errorMessage = ""
                     registerOrganizationViewModel.registerOrganization()
                 }
             }
@@ -258,7 +259,7 @@ Rectangle {
 
             Label {
                 id: errorMessageLabel
-                text: registerOrganizationViewModel.errorMessage
+                    text: root.errorMessage
                 color: theme.textError
                 font.family: theme.fontName
                 visible: text.length > 0
