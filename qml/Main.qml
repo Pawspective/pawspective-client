@@ -12,10 +12,15 @@ ApplicationWindow {
     property var organizationRefreshHandler: null
     property var organizationRefreshFailHandler: null
 
+    Component.onCompleted: {
+        console.log("[Main::Component::onCompleted] APPLICATION STARTED - Main window initialized")
+    }
+
     // Session end handling
     Connections {
         target: authService
         function onSessionEnded() {
+            console.warn("[Main::authService::onSessionEnded] SESSION ENDED - User logged out")
             if (stackView.depth > 1) {
                 stackView.pop()
             }
@@ -113,6 +118,10 @@ ApplicationWindow {
         id: stackView
         anchors.fill: parent
         initialItem: loginViewComponent
+        
+        onCurrentItemChanged: {
+            console.debug("[Main::StackView::onCurrentItemChanged] Navigating to:", currentItem ? currentItem.toString() : "null")
+        }
     }
 
     // Session expired dialog
@@ -146,9 +155,21 @@ ApplicationWindow {
         id: loginViewComponent
         LoginView {
             onRegisterRequested: stackView.push(registerViewComponent)
-            onLoginSuccess: stackView.replace(userViewComponent)
-            Component.onDestruction: loginViewModel.cleanup()
+            onLoginSuccess: {
+                console.log("[Main::loginViewComponent::onLoginSuccess] SUCCESS - User logged in, loading UserView")
+                try {
+                    stackView.replace(userViewComponent)
+                    console.debug("[Main::loginViewComponent::onLoginSuccess] StackView.replace() executed")
+                } catch (error) {
+                    console.error("[Main::loginViewComponent::onLoginSuccess] EXCEPTION during stackView.replace():", error)
+                }
+            }
+            Component.onDestruction: {
+                console.debug("[Main::loginViewComponent::onDestruction] Cleaning up LoginView")
+                loginViewModel.cleanup()
+            }
         }
+        
     }
 
     Component {
@@ -168,27 +189,39 @@ ApplicationWindow {
             viewModel: userViewModel
 
             onLogoutClicked: {
+                console.log("[Main::userViewComponent::onLogoutClicked] LOGOUT clicked")
                 userViewModel.logout()
                 stackView.replace(loginViewComponent)
             }
 
             onEditProfileClicked: {
+                console.debug("[Main::userViewComponent::onEditProfileClicked] Pushing UserUpdateView")
                 stackView.push(userUpdateViewComponent)
             }
 
             onRegisterOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onOrganizationClicked: function(organizationId) {
+                console.debug("[Main::userViewComponent::onOrganizationClicked] Organization clicked:", organizationId)
                 window.openOrganizationView(organizationId, "sidebar")
             }
             onSearchClicked: {
+                console.debug("[Main::userViewComponent::onSearchClicked] Pushing SearchView")
                 stackView.replace(null, searchViewComponent, {
                 searchOrganizationViewModel: searchOrganizationViewModel
             })
             }
 
             Component.onCompleted: {
+                console.log("[Main::userViewComponent::Component.onCompleted] UserView LOADED successfully")
                 if (viewModel && viewModel.isAuthenticated) {
-                    viewModel.refreshUserData()
+                    console.log("[Main::userViewComponent::Component.onCompleted] User authenticated, refreshing user data")
+                    try {
+                        viewModel.refreshUserData()
+                    } catch (error) {
+                        console.error("[Main::userViewComponent::Component.onCompleted] EXCEPTION during refreshUserData(): " + error)
+                    }
+                } else {
+                    console.warn("[Main::userViewComponent::Component.onCompleted] WARNING - viewModel not authenticated or null")
                 }
             }
         }

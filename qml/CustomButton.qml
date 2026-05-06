@@ -42,6 +42,13 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        onClicked: root.clicked()
+        onClicked: {
+            console.log("[CustomButton::MouseArea::onClicked] Button clicked:", root.text)
+            try {
+                root.clicked()
+            } catch (error) {
+                console.error("[CustomButton::MouseArea::onClicked] EXCEPTION in clicked signal:", error)
+            }
+        }
     }
 }
