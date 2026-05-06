@@ -155,7 +155,7 @@ Rectangle {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: root.viewModel && root.viewModel.animalType.length > 0
+                                text: (root.viewModel && root.viewModel.animalType && root.viewModel.animalType.length > 0)
                                     ? root.viewModel.animalType[0].toUpperCase() : "?"
                                 font.family: theme.fontName
                                 font.pixelSize: parent.width * 0.4
@@ -180,8 +180,8 @@ Rectangle {
                             }
 
                             Text {
-                                visible: root.viewModel && root.viewModel.description.length > 0
-                                text: root.viewModel ? root.viewModel.description : ""
+                                visible: root.viewModel && root.viewModel.description ? root.viewModel.description.length > 0 : false
+                                text: root.viewModel && root.viewModel.description ? root.viewModel.description : ""
                                 font.family: theme.fontName
                                 font.pixelSize: root.height * 0.028
                                 color: theme.textDark
@@ -233,11 +233,14 @@ Rectangle {
 
             // Organization card (shown if user is NOT from this org)
             OrganizationCardView {
-                visible: !root.isOwnOrganization && root.viewModel && root.viewModel.organizationId > 0
-                organizationId: root.viewModel ? root.viewModel.organizationId : 0
-                organizationName: root.viewModel ? root.viewModel.organizationName : ""
-                organizationCity: root.viewModel ? root.viewModel.organizationCity : ""
-                organizationDescription: root.viewModel ? root.viewModel.organizationDescription : ""
+                visible: !root.isOwnOrganization && root.viewModel && (typeof root.viewModel.organizationId !== 'undefined')
+                    && root.viewModel.organizationId > 0
+                organizationId: (root.viewModel && typeof root.viewModel.organizationId !== 'undefined')
+                    ? root.viewModel.organizationId : 0
+                organizationName: (root.viewModel && root.viewModel.organizationName) ? root.viewModel.organizationName : ""
+                organizationCity: (root.viewModel && root.viewModel.organizationCity) ? root.viewModel.organizationCity : ""
+                organizationDescription: (root.viewModel && root.viewModel.organizationDescription)
+                    ? root.viewModel.organizationDescription : ""
                 Layout.fillWidth: true
                 Layout.leftMargin: root.sideMargin
                 Layout.rightMargin: root.sideMargin
@@ -292,7 +295,7 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                text: parent.parent.value
+                text: parent.parent.value ? parent.parent.value : ""
                 font.family: theme.fontName
                 font.pixelSize: root.fieldValueSize
                 color: theme.accentPink
