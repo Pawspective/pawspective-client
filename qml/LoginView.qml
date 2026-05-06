@@ -27,10 +27,14 @@ Rectangle {
         target: loginViewModel
         function onLoginFinished(success) {
             if (success) {
+                console.log("[LoginView::onLoginFinished] SUCCESS - Emitting loginSuccess signal")
                 root.loginSuccess()
+            } else {
+                console.warn("[LoginView::onLoginFinished] FAILED - Login did not succeed")
             }
         }
         function onErrorOccurred(type, message) {
+            console.error("[LoginView::onErrorOccurred] ERROR - Type:", type, "Message:", message)
             root.errorMessage = message
         }
     }
@@ -81,7 +85,10 @@ Rectangle {
                 id: emailField
                 placeholderText: "Email"
                 text: loginViewModel.email
-                onTextChanged: loginViewModel.email = text
+                onTextChanged: {
+                    console.debug("[LoginView::emailField] Text changed to:", text)
+                    loginViewModel.email = text
+                }
                 font.pointSize : 13
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
@@ -99,7 +106,10 @@ Rectangle {
                 height: 60
                 placeholderText: "Password"
                 text: loginViewModel.password
-                onTextChanged: loginViewModel.password = text
+                onTextChanged: {
+                    console.debug("[LoginView::passwordField] Text changed, length:", text.length)
+                    loginViewModel.password = text
+                }
                 font.pointSize : 13
                 placeholderTextColor: theme.accentPink
                 color: theme.accentPink
@@ -124,8 +134,15 @@ Rectangle {
                 enabled: !loginViewModel.isBusy
                 
                 onClicked: {
+                    console.log("[LoginView::loginButton] CLICKED - Email:", emailField.text)
+                    console.debug("[LoginView::loginButton] Password length:", passwordField.text.length)
                     root.errorMessage = ""
-                    loginViewModel.login()
+                    try {
+                        loginViewModel.login()
+                        console.debug("[LoginView::loginButton] loginViewModel.login() called successfully")
+                    } catch (error) {
+                        console.error("[LoginView::loginButton] EXCEPTION when calling login():", error)
+                    }
                 } 
             }
 

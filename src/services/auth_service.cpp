@@ -11,6 +11,7 @@
 #include <QString>
 #include <QUrl>
 #include <optional>
+#include "utils/logger.hpp"
 #include "services/errors.hpp"
 #include "services/network_client.hpp"
 #include "validator.hpp"
@@ -90,6 +91,7 @@ AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
 }
 
 void AuthService::clearSession() {
+    DEBUG_LOG("AuthService::clearSession", "Clearing session");
     m_isRefreshing = false;
     m_accessToken.clear();
     m_refreshToken.clear();
@@ -100,21 +102,26 @@ void AuthService::clearSession() {
 }
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
+    DEBUG_LOG("AuthService::handleError", "Called");
     QJsonParseError parseError;
 
     QByteArray data = reply.property("responseData").toByteArray();
+    DEBUG_LOG("AuthService::handleError", "Response data:" << data);
     if (data.isEmpty()) {
+        DEBUG_LOG("AuthService::handleError", "Empty response, creating UnknownError");
         onError(QSharedPointer<UnknownError>::create("Empty response"));
         return;
     }
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
     if (parseError.error != QJsonParseError::NoError) {
+        DEBUG_LOG("AuthService::handleError", "JSON parse error:" << parseError.errorString());
         onError(QSharedPointer<UnknownError>::create(QString::fromUtf8(data)));
         return;
     }
 
     if (doc.isObject()) {
         auto error = ErrorFactory::createError(doc.object());
+        DEBUG_LOG("AuthService::handleError", "Error created:" << error->getMessage());
         onError(error);
     }
 }
@@ -123,13 +130,16 @@ void AuthService::handleSuccess(
     std::function<void(const QJsonObject&)> onSuccess,
     std::function<void(QSharedPointer<BaseError>)> onError
 ) {
+    DEBUG_LOG("AuthService::handleSuccess", "Called");
     QJsonParseError parseError;
     QByteArray data = reply.property("responseData").toByteArray();
+    DEBUG_LOG("AuthService::handleSuccess", "Response data:" << data);
 
     try {
         QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
         if (parseError.error != QJsonParseError::NoError) {
+            DEBUG_LOG("AuthService::handleSuccess", "JSON parse error:" << parseError.errorString());
             auto error = QSharedPointer<BaseError>(new ClientJsonParseError(
                 QString("JSON parse error at %1: %2").arg(parseError.offset).arg(parseError.errorString())
             ));
@@ -137,19 +147,23 @@ void AuthService::handleSuccess(
             return;
         }
 
+        DEBUG_LOG("AuthService::handleSuccess", "Calling onSuccess callback");
         onSuccess(doc.object());
     } catch (const std::exception& e) {
+        DEBUG_LOG("AuthService::handleSuccess", "Exception caught:" << e.what());
         auto error = QSharedPointer<BaseError>(new ClientJsonParseError(QString(e.what())));
         onError(error);
     }
 }
 
 void AuthService::login(const QString& email, const QString& password) {
+    DEBUG_LOG("AuthService::login", "Called with email:" << email);
     pawspective::utils::Validator validator;
     validator.field("email", email.toStdString()).validateEmail();
     validator.field("password", password.toStdString()).notBlank();
 
     if (auto validationError = validator.getValidationError()) {
+        DEBUG_LOG("AuthService::login", "Validation failed");
         emit loginFailed(QSharedPointer<BaseError>(new ValidationError(std::move(*validationError))));
         return;
     }
@@ -160,15 +174,19 @@ void AuthService::login(const QString& email, const QString& password) {
     json["password"] = password;
 
     QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
+    DEBUG_LOG("AuthService::login", "Sending login request to:" << url.toString());
 
     m_networkClient.post(
         url,
         data,
         [this](QNetworkReply& reply) {
+            DEBUG_LOG("AuthService::login::successCallback", "Called");
             handleSuccess(
                 reply,
                 [this](const QJsonObject& obj) {
+                    DEBUG_LOG("AuthService::login::onSuccess", "Called");
                     auto [accessToken, refreshToken, tokenType] = parseTokenResponse(obj);
+                    DEBUG_LOG("AuthService::login::onSuccess", "Tokens parsed successfully");
 
                     m_accessToken = accessToken;
                     m_refreshToken = refreshToken;
@@ -176,17 +194,26 @@ void AuthService::login(const QString& email, const QString& password) {
                     auto userId = extractUserIdFromToken(accessToken);
                     if (userId.has_value()) {
                         uint64_t id = userId.value();
+                        DEBUG_LOG("AuthService::login::onSuccess", "User ID extracted:" << id);
                         m_userId = id;
                         m_networkClient.setUserId(id);
                     }
 
+                    DEBUG_LOG("AuthService::login::onSuccess", "Emitting loginSuccess signal");
                     emit loginSuccess(accessToken, refreshToken, tokenType, userId.value_or(0));
                 },
-                [this](QSharedPointer<BaseError> error) { emit loginFailed(error); }
+                [this](QSharedPointer<BaseError> error) {
+                    DEBUG_LOG("AuthService::login::onError", "Called with error:" << error->getMessage());
+                    emit loginFailed(error);
+                }
             );
         },
         [this](QNetworkReply& reply) {
-            handleError(reply, [this](QSharedPointer<BaseError> error) { emit loginFailed(error); });
+            DEBUG_LOG("AuthService::login::errorCallback", "Called");
+            handleError(reply, [this](QSharedPointer<BaseError> error) { 
+                DEBUG_LOG("AuthService::login::errorCallback::onError", "Emitting loginFailed with error:" << error->getMessage());
+                emit loginFailed(error); 
+            });
         }
     );
 }
@@ -303,18 +330,24 @@ void AuthService::getCurrentUser() {
 }
 
 void AuthService::handleUnauthorizedAccess() {
+    DEBUG_LOG("AuthService::handleUnauthorizedAccess", "Called");
     if (!m_refreshToken.isEmpty() && !m_isRefreshing) {
+        DEBUG_LOG("AuthService::handleUnauthorizedAccess", "Attempting to refresh token");
         refreshToken(m_refreshToken);
+    } else {
+        DEBUG_LOG("AuthService::handleUnauthorizedAccess", "Cannot refresh: empty refresh token or already refreshing");
     }
 }
 
 bool AuthService::isAuthenticated() const {
     if (m_accessToken.isEmpty()) {
+        DEBUG_LOG("AuthService::isAuthenticated", "Access token is empty");
         return false;
     }
 
     auto expiresIn = extractTokenExpiration(m_accessToken);
     if (!expiresIn.has_value() || expiresIn.value() <= 0) {
+        DEBUG_LOG("AuthService::isAuthenticated", "Token expired or cannot extract expiration");
         return false;
     }
 
