@@ -200,7 +200,8 @@ def cppcheck_lint(files=None):
 
         if files:
             for f in files:
-                cmd.append(f"--file-filter={f}")
+                # * is required to match against absolute paths in compile_commands.json
+                cmd.append(f"--file-filter=*{f.replace(os.sep, '/')}")
         else:
             cmd.extend(["--file-filter=src/*", "--file-filter=include/*"])
 
