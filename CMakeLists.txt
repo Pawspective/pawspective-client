@@ -72,6 +72,9 @@ add_executable(pawspective-client
     src/models/animal_register_dto.cpp
     src/models/animal_update_dto.cpp
     src/models/animal_filter_dto.cpp
+    src/models/review_dto.cpp
+    src/models/review_create_dto.cpp
+    src/models/review_update_dto.cpp
     src/utils/json.cpp
     src/viewmodels/organization_view_model.cpp
 	${PROJECT_HEADERS}
