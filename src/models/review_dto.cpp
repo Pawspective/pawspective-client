@@ -3,7 +3,6 @@
 #include <QDateTime>
 #include <QJsonArray>
 
-
 #include "utils/json.hpp"
 
 namespace pawspective::models {
