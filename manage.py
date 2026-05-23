@@ -200,7 +200,6 @@ def cppcheck_lint(files=None):
 
         if files:
             for f in files:
-                # * is required to match against absolute paths in compile_commands.json
                 cmd.append(f"--file-filter=*{f.replace(os.sep, '/')}")
         else:
             cmd.extend(["--file-filter=src/*", "--file-filter=include/*"])
@@ -245,11 +244,14 @@ def tidy_lint(files=None):
                ]
 
         if files:
-            # run-clang-tidy positional arg is a regex matched against file paths
-            pattern = '|'.join(re.escape(f.replace('\\', '/')) for f in files)
-            cmd.append(pattern)
-
-        run_command(cmd)
+            cpp_files = [f for f in files if f.endswith('.cpp')]
+            if not cpp_files:
+                print("No .cpp files to analyze with clang-tidy, skipping.")
+                return
+            for f in cpp_files:
+                run_command(cmd + [re.escape(f.replace('\\', '/'))])
+        else:
+            run_command(cmd)
     finally:
         restore_compile_commands()
 
