@@ -27,8 +27,8 @@ public:
     }
 
     bool operator==(const UserDTO& other) const {
-        return id == other.id && email == other.email && firstName == other.firstName
-               && lastName == other.lastName && organizationId == other.organizationId;
+        return id == other.id && email == other.email && firstName == other.firstName && lastName == other.lastName &&
+               organizationId == other.organizationId;
     }
 
     QJsonObject toJson() const;
