@@ -16,6 +16,7 @@ Rectangle {
         readonly property color accentPink: "#f4a7b9"
         readonly property color textDark: "#8572af"
         readonly property color buttonText: "#e7ebf5"
+        readonly property color errorColor: "#6c63ff"
     }
 
     property string userEmail: (viewModel && typeof viewModel.email !== 'undefined' && viewModel.email !== null) ? viewModel.email : ""
