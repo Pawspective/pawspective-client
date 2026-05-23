@@ -38,10 +38,12 @@ ApplicationWindow {
     }
     signal animalCreated()
     signal animalUpdated()
+    signal animalDeleted()
 
-    function openOrganizationView(organizationId, source, allowRefresh) {
+    function openOrganizationView(organizationId, source, allowRefresh, ignoreFallback) {
         let resolvedOrganizationId = null
         const shouldRefresh = allowRefresh === undefined ? true : allowRefresh
+        const skipCache = ignoreFallback === undefined ? false : ignoreFallback
 
         if (organizationId !== null && organizationId !== undefined) {
             const normalizedOrganizationId = Number(organizationId)
@@ -50,7 +52,7 @@ ApplicationWindow {
                                    : null
         }
 
-        if (resolvedOrganizationId === null && userViewModel && userViewModel.userData) {
+        if (resolvedOrganizationId === null && userViewModel && userViewModel.userData && !skipCache) {
             const fallbackOrgId = Number(userViewModel.userData.organizationId)
             if (Number.isFinite(fallbackOrgId) && fallbackOrgId > 0) {
                 resolvedOrganizationId = fallbackOrgId
@@ -287,6 +289,15 @@ ApplicationWindow {
                     }
                 }
             }
+            function onAnimalDeleted() {
+                    if (organizationViewModel) {
+                        var orgId = organizationViewModel.currentOrganizationId
+                        if (orgId > 0 && animalListViewModel) {
+                            console.log("Animal deleted, reloading animals for org:", orgId)
+                            animalListViewModel.loadAnimalsForOrganization(orgId)
+                        }
+                    }
+                }
         }
         }
     }
@@ -302,6 +313,10 @@ ApplicationWindow {
             onSubmit: {
                 userUpdateViewModel.saveChanges()
             }
+            onAccountDeleted: {
+            userUpdateViewModel.cleanup()
+            stackView.replace(loginViewComponent) 
+        }
         }
     }
 
@@ -313,10 +328,15 @@ ApplicationWindow {
             updateOrganizationViewModel.cleanup()
             stackView.pop()
         }
+        onOrganizationDeleted: {
+            updateOrganizationViewModel.cleanup()
+            stackView.pop()
+            window.openOrganizationView(null, "sidebar", true, true) 
+        }
         Component.onCompleted: {
             updateOrganizationViewModel.initialize()
         }
-        }
+    }
     }
 
     Component {
@@ -330,6 +350,10 @@ ApplicationWindow {
             updateAnimalViewModel.setAnimalId(animalId)
             stackView.push(animalUpdateViewComponent)
         }
+            onAnimalDeleted: function() {
+                stackView.pop()
+                window.animalDeleted() 
+            }
         }
     }
 

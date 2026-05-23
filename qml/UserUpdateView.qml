@@ -4,7 +4,6 @@ import QtQuick.Layouts 2.15
 
 Rectangle {
     id: root
-    //anchors.fill: parent
 
     property var viewModel: null
 
@@ -17,8 +16,6 @@ Rectangle {
         readonly property color accentPink: "#f4a7b9"
         readonly property color textDark: "#8572af"
         readonly property color buttonText: "#e7ebf5"
-        readonly property color errorColor: "#ff6b6b"
-        readonly property color successColor: "#51cf66"
     }
 
     property string userEmail: (viewModel && typeof viewModel.email !== 'undefined' && viewModel.email !== null) ? viewModel.email : ""
@@ -45,12 +42,21 @@ Rectangle {
 
     signal submit()
     signal discard()
-
+    signal accountDeleted() 
     color: theme.pageBg
 
     Connections {
         target: viewModel
         function onSaveFailed(message) {
+            errorMessage = message
+        }
+        function onUserDeleted() {
+            console.log("User deleted, navigating to login screen")
+            root.accountDeleted() 
+        }
+        
+        function onDeleteUserFailed(message) {
+            console.log("Delete failed:", message)
             errorMessage = message
         }
     }
@@ -203,6 +209,20 @@ Rectangle {
                             try { root.discard() } catch (e) { console.warn("UserUpdateView: root.discard() threw:", e) }
                         }
                     }
+
+                    CustomButton {
+                        text: "Delete Account"
+                        baseColor: "#ff6b6b"
+                        hoverColor: "#ff4444"
+                        textColor: theme.buttonText
+                        fontSize: root.buttonFontSize
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: root.buttonHeight
+                        enabled: !root.loading
+                        onClicked: {
+                            deleteConfirmDialog.open()
+                        }
+                    }
                 }
 
                 LoaderSpinner {
@@ -230,6 +250,30 @@ Rectangle {
 
                 Item { Layout.fillHeight: true }
             }
+        }
+    }
+
+    Dialog {
+        id: deleteConfirmDialog
+        modal: true
+        parent: ApplicationWindow.overlay
+        anchors.centerIn: parent
+        width: parent.width * 0.8
+        title: "Delete Account"
+        standardButtons: Dialog.Yes | Dialog.No
+        
+        onAccepted: {
+            if (viewModel) viewModel.deleteUser()
+        }
+        
+        contentItem: Text {
+            text: "Are you sure you want to delete your account? This action cannot be undone."
+            wrapMode: Text.WordWrap
+            anchors.fill: parent
+            anchors.margins: 20
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 14
         }
     }
 

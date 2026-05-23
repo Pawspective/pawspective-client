@@ -41,6 +41,7 @@ public:
     Q_INVOKABLE void cleanup() override;
     Q_INVOKABLE void saveChanges();
     Q_INVOKABLE void discardChanges();
+    Q_INVOKABLE void deleteUser();
 
 signals:
     void emailChanged();
@@ -52,12 +53,17 @@ signals:
     void saveFailed(const QString& errorMessage);
     void saveStarted();
     void sessionExpired();
+    void deleteUserSuccess();
+    void deleteUserFailed(const QString& message);
+    void userDeleted();
 
 private slots:
     void handleUpdateSuccess(const models::UserDTO& user);
     void handleRequestFailed(QSharedPointer<services::BaseError> error);
     void handleGetCurrentUserSuccess(const models::UserDTO& user);
     void handleTokenRefreshFailed(QSharedPointer<services::BaseError> error);
+    void handleDeleteSuccess();
+    void handleDeleteFailed(QSharedPointer<services::BaseError> error);
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private:

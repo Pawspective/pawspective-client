@@ -39,6 +39,18 @@ UpdateOrganizationViewModel::UpdateOrganizationViewModel(
         this,
         &UpdateOrganizationViewModel::handleUpdateFailed
     );
+    connect(
+        &m_organizationService,
+        &services::OrganizationService::deleteOrganizationSuccess,
+        this,
+        &UpdateOrganizationViewModel::handleDeleteSuccess
+    );
+    connect(
+        &m_organizationService,
+        &services::OrganizationService::deleteOrganizationFailed,
+        this,
+        &UpdateOrganizationViewModel::handleDeleteFailed
+    );
 
     // CityService connections
     connect(
@@ -233,6 +245,26 @@ void UpdateOrganizationViewModel::notifyAllChanged() {
     emit descriptionChanged();
     emit cityIdChanged();
     emit currentCityIndexChanged();
+}
+
+void UpdateOrganizationViewModel::deleteOrganization() {
+    if (m_originalData.id == 0) {
+        emit deleteFailed("No organization to delete");
+        return;
+    }
+    setIsBusy(true);
+    m_organizationService.deleteOrganization(m_originalData.id);
+}
+
+void UpdateOrganizationViewModel::handleDeleteSuccess() {
+    setIsBusy(false);
+    emit deleteCompleted();
+}
+
+void UpdateOrganizationViewModel::handleDeleteFailed(QSharedPointer<services::BaseError> error) {
+    setIsBusy(false);
+    QString msg = error ? error->getMessage() : "Failed to delete organization";
+    emit deleteFailed(msg);
 }
 
 }  // namespace pawspective::viewmodels

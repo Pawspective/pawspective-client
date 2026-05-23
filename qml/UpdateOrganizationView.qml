@@ -11,6 +11,7 @@ Rectangle {
 
     signal saveCompleted()
     signal discard()
+    signal organizationDeleted()
 
     QtObject {
         id: theme
@@ -45,6 +46,13 @@ Rectangle {
         function onSaveCompleted() {
             root.errorMessage = ""
             stackView.pop()
+        }
+        function onDeleteCompleted() {
+            root.errorMessage = ""
+            root.organizationDeleted()
+        }
+        function onDeleteFailed(message) {
+            root.errorMessage = message
         }
     }
 
@@ -233,6 +241,20 @@ Rectangle {
                         root.discard();
                     }
                 }
+                
+                CustomButton {
+                    text: "Delete Organization"
+                    baseColor: "#ff6b6b"
+                    hoverColor: "#ff4444"
+                    textColor: theme.buttonText
+                    fontSize: root.buttonFontSize
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.buttonHeight
+                    enabled: !viewModel.isBusy
+                    onClicked: {
+                        deleteConfirmDialog.open() 
+                    }
+                }
             }
 
             LoaderSpinner {
@@ -260,7 +282,7 @@ Rectangle {
 
             Item { Layout.fillHeight: true }
         }
-    }
+    } 
 
     component ProfileDataField : ColumnLayout {
         property string label: ""
@@ -285,6 +307,30 @@ Rectangle {
             enabled: !viewModel.isBusy
             background: Rectangle { color: theme.fieldBg; radius: 10 }
             onTextChanged: if (focus) inputFinished(text)
+        }
+    }
+
+    Dialog {
+        id: deleteConfirmDialog
+        modal: true
+        parent: ApplicationWindow.overlay
+        anchors.centerIn: parent
+        width: parent.width * 0.8
+        title: "Delete Organization"
+        standardButtons: Dialog.Yes | Dialog.No
+        
+        onAccepted: {
+            if (viewModel) viewModel.deleteOrganization() 
+        }
+        
+        contentItem: Text {
+            text: "Are you sure you want to delete this organization? This action cannot be undone."
+            wrapMode: Text.WordWrap
+            anchors.fill: parent
+            anchors.margins: 20
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 14
         }
     }
 }

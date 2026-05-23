@@ -27,6 +27,8 @@ UserUpdateViewModel::UserUpdateViewModel(
         this,
         &UserUpdateViewModel::handleTokenRefreshFailed
     );
+    connect(&m_userService, &services::UserService::deleteUserSuccess, this, &UserUpdateViewModel::handleDeleteSuccess);
+    connect(&m_userService, &services::UserService::deleteUserFailed, this, &UserUpdateViewModel::handleDeleteFailed);
 }
 
 void UserUpdateViewModel::initialize() {
@@ -184,6 +186,28 @@ void UserUpdateViewModel::notifyAllChanged() {
     emit firstNameChanged();
     emit lastNameChanged();
     emit newPasswordChanged();
+}
+
+void UserUpdateViewModel::deleteUser() {
+    if (m_originalData.id == 0) {
+        emit deleteUserFailed("User not loaded");
+        return;
+    }
+    setIsBusy(true);
+    m_userService.deleteUser();
+}
+
+void UserUpdateViewModel::handleDeleteSuccess() {
+    setIsBusy(false);
+    emit userDeleted();
+    emit deleteUserSuccess();
+}
+
+void UserUpdateViewModel::handleDeleteFailed(QSharedPointer<services::BaseError> error) {
+    setIsBusy(false);
+    QString message = error ? error->getMessage() : "Failed to delete user";
+    emit deleteUserFailed(message);
+    emitError(ErrorType::NetworkError, message);
 }
 
 }  // namespace pawspective::viewmodels

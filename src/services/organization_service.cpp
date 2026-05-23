@@ -207,4 +207,14 @@ void OrganizationService::updateOrganization(qint64 id, const models::Organizati
     );
 }
 
+void OrganizationService::deleteOrganization(qint64 id) {
+    m_networkClient.deleteResource(
+        QUrl(QString("/orgs/%1").arg(id)),
+        [this](QNetworkReply& /*reply*/) { emit deleteOrganizationSuccess(); },
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit deleteOrganizationFailed(error); });
+        }
+    );
+}
+
 }  // namespace pawspective::services

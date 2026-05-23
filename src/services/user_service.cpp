@@ -124,4 +124,18 @@ void UserService::registerUser(const models::UserRegisterDTO& dto) {
     );
 }
 
+void UserService::deleteUser() {
+    if (!m_networkClient.getUserId()) {
+        qWarning() << "User ID is not set in NetworkClient.";
+        emit deleteUserFailed(QSharedPointer<BaseError>(new UnknownError("User ID is not set")));
+        return;
+    }
+
+    m_networkClient.deleteResource(
+        QUrl(QString("/user/%1").arg(*m_networkClient.getUserId())),
+        [this](QNetworkReply& /*reply*/) { emit deleteUserSuccess(); },
+        [this](QNetworkReply& reply) { handleError(reply); }
+    );
+}
+
 }  // namespace pawspective::services
