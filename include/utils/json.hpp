@@ -11,6 +11,8 @@ QString getRequiredString(const QJsonObject& json, std::string_view key);
 qint64 getRequiredInt64(const QJsonObject& json, std::string_view key);
 qint32 getRequiredInt32(const QJsonObject& json, std::string_view key);
 QJsonObject getRequiredObject(const QJsonObject& json, std::string_view key);
+bool getRequiredBool(const QJsonObject& json, std::string_view key);
+QDateTime getRequiredDateTime(const QJsonObject& json, std::string_view key);
 
 std::optional<QString> getOptionalString(const QJsonObject& json, std::string_view key);
 std::optional<qint64> getOptionalInt64(const QJsonObject& json, std::string_view key);

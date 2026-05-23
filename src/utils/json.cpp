@@ -29,6 +29,26 @@ qint32 getRequiredInt32(const QJsonObject& json, std::string_view key) {
     return json[qkey].toInt();
 }
 
+bool getRequiredBool(const QJsonObject& json, std::string_view key) {
+    const QString qkey = QString::fromUtf8(key.data(), key.size());
+    if (!json.contains(qkey) || json[qkey].isNull() || !json[qkey].isBool()) {
+        throw std::invalid_argument(std::format("Invalid or missing {} field", key));
+    }
+    return json[qkey].toBool();
+}
+
+QDateTime getRequiredDateTime(const QJsonObject& json, std::string_view key) {
+    const QString qkey = QString::fromUtf8(key.data(), key.size());
+    if (!json.contains(qkey) || json[qkey].isNull() || !json[qkey].isString()) {
+        throw std::invalid_argument(std::format("Invalid or missing {} field", key));
+    }
+    const QDateTime dateTime = QDateTime::fromString(json[qkey].toString(), Qt::ISODate);
+    if (!dateTime.isValid()) {
+        throw std::invalid_argument(std::format("Invalid {} field: invalid date format", key));
+    }
+    return dateTime;
+}
+
 QJsonObject getRequiredObject(const QJsonObject& json, std::string_view key) {
     QString qkey = QString::fromUtf8(key.data(), key.size());
     if (!json.contains(qkey) || json[qkey].isNull() || !json[qkey].isObject()) {
