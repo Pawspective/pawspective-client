@@ -5,6 +5,7 @@ import shutil
 import pathlib
 import multiprocessing
 import json
+import re
 
 PROJECT_NAME = "pawspective-client"
 
@@ -12,7 +13,7 @@ CONFIG = {
     "NPROCS": multiprocessing.cpu_count()
 }
 
-try: 
+try:
     import local_config
     for key in CONFIG:
         if hasattr(local_config, key):
@@ -26,27 +27,27 @@ def run_command(command, cwd=None, env=None):
     custom_env = os.environ.copy()
     if env:
         custom_env.update(env)
-    
+
     custom_env["CLICOLOR_FORCE"] = "1"
     custom_env["GTEST_COLOR"] = "1"
     custom_env["PYTEST_ADDOPTS"] = "--color=yes"
     custom_env["CMAKE_COLOR_DIAGNOSTICS"] = "ON"
 
-    print(f"\033[94m--> Running: {' '.join(command)}\033[0m") 
-    
+    print(f"\033[94m--> Running: {' '.join(command)}\033[0m")
+
     try:
         process = subprocess.Popen(
-            command, 
-            cwd=cwd, 
-            env=custom_env, 
+            command,
+            cwd=cwd,
+            env=custom_env,
             shell=(os.name == 'nt')
         )
         process.wait()
-        
+
         if process.returncode != 0:
             print(f"\033[91mError: Command failed with exit code {process.returncode}\033[0m")
             sys.exit(process.returncode)
-            
+
     except Exception as e:
         print(f"\033[91mUnexpected error: {e}\033[0m")
         sys.exit(1)
@@ -61,21 +62,37 @@ def get_cpp_files():
                     files.append(str(p.as_posix()))
     return files
 
+def get_changed_files(base_ref="HEAD~1"):
+    """Get changed .cpp/.hpp files compared to base_ref using git diff."""
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--name-only", "--diff-filter=ACMR", base_ref, "HEAD"],
+            capture_output=True, text=True, check=True
+        )
+        files = [
+            f for f in result.stdout.splitlines()
+            if f.endswith(('.cpp', '.hpp')) and (f.startswith('src/') or f.startswith('include/'))
+        ]
+        return files
+    except subprocess.CalledProcessError:
+        print("[WARN] Could not get changed files from git, falling back to all files")
+        return get_cpp_files()
+
 def filter_compile_commands(preset="debug"):
     """Remove MOC files from compile_commands.json while creating a backup."""
     compile_commands_path = pathlib.Path(f"build-{preset}/compile_commands.json")
     backup_path = pathlib.Path(f"build-{preset}/compile_commands.json.backup")
-    
+
     if not compile_commands_path.exists():
         return
-    
+
     if not backup_path.exists():
         with open(compile_commands_path, 'r', encoding='utf-8') as f:
             commands = json.load(f)
-        
+
         with open(backup_path, 'w', encoding='utf-8') as f:
             json.dump(commands, f, indent=2)
-        
+
         filtered = [
             cmd for cmd in commands
             if not any(pattern in cmd['file'] for pattern in [
@@ -90,17 +107,17 @@ def filter_compile_commands(preset="debug"):
                 '\\tests\\',
             ])
         ]
-        
+
         with open(compile_commands_path, 'w', encoding='utf-8') as f:
             json.dump(filtered, f, indent=2)
-        
+
         print(f"[OK] Filtered compile_commands.json: {len(commands)} -> {len(filtered)} entries")
 
 def restore_compile_commands(preset="debug"):
     """Restore the original compile_commands.json from the backup."""
     compile_commands_path = pathlib.Path(f"build-{preset}/compile_commands.json")
     backup_path = pathlib.Path(f"build-{preset}/compile_commands.json.backup")
-    
+
     if backup_path.exists():
         shutil.copy(backup_path, compile_commands_path)
         backup_path.unlink()
@@ -120,14 +137,14 @@ def run(preset="debug"):
     """Run the application."""
     ext = ".exe" if os.name == 'nt' else ""
     exe_path = pathlib.Path(f"build-{preset}") / f"{PROJECT_NAME}{ext}"
-    
+
     if not exe_path.exists():
         print(f"Binary not found at {exe_path}. Building first...")
         build(preset)
 
     if os.name == 'nt':
         run_command(["windeployqt", str(exe_path)])
-        
+
     run_command([str(exe_path)])
 
 def clean():
@@ -137,7 +154,7 @@ def clean():
         if d.is_dir():
             print(f"Removing {d}...")
             shutil.rmtree(d, ignore_errors=True)
-    
+
     file_to_remove = pathlib.Path("compile_commands.json")
     if file_to_remove.exists():
         file_to_remove.unlink()
@@ -151,24 +168,25 @@ def format_code():
     print("Formatting C++ files with clang-format...")
     run_command(["clang-format", "-i"] + files)
 
-def format_check():
+def format_check(files=None):
     """Check code formatting without changes."""
-    files = get_cpp_files()
+    if files is None:
+        files = get_cpp_files()
     if not files:
         print("No files found to check.")
         return
-    print("Checking C++ code formatting...")
+    print(f"Checking formatting of {len(files)} file(s)...")
     run_command(["clang-format", "--dry-run", "--Werror"] + files)
 
-def cppcheck_lint():
+def cppcheck_lint(files=None):
     """Run cppcheck for static analysis."""
     if not pathlib.Path("build-debug/compile_commands.json").exists():
         print("compile_commands.json not found. Building first...")
         build()
-    
+
     try:
         filter_compile_commands()
-        
+
         print("Running cppcheck...")
         cmd = [
             "cppcheck",
@@ -177,24 +195,28 @@ def cppcheck_lint():
             "--error-exitcode=1",
             "--check-level=exhaustive",
             "--project=build-debug/compile_commands.json",
-            "--file-filter=src/*",
-            "--file-filter=include/*",
             "--library=std",
         ]
-        
+
+        if files:
+            for f in files:
+                cmd.append(f"--file-filter={f}")
+        else:
+            cmd.extend(["--file-filter=src/*", "--file-filter=include/*"])
+
         if pathlib.Path(".cppcheck_suppressions").exists():
             cmd.extend(["--suppressions-list=.cppcheck_suppressions"])
-        
+
         run_command(cmd)
     finally:
         restore_compile_commands()
 
-def tidy_lint():
+def tidy_lint(files=None):
     """Run clang-tidy."""
     if not pathlib.Path("build-debug/compile_commands.json").exists():
         print("compile_commands.json not found. Building first...")
         build()
-    
+
     run_clang_tidy_path = shutil.which("run-clang-tidy")
     if not run_clang_tidy_path and os.name == 'nt':
         paths = os.environ.get("PATH", "").split(os.pathsep)
@@ -206,13 +228,13 @@ def tidy_lint():
     if not run_clang_tidy_path:
         print("run-clang-tidy not found in PATH.")
         sys.exit(1)
-    
+
     try:
         filter_compile_commands()
-        
+
         print(f"Running clang-tidy via {run_clang_tidy_path}...")
         cmd = [sys.executable, run_clang_tidy_path,
-               "-p", str(pathlib.Path("build-debug").resolve()), 
+               "-p", str(pathlib.Path("build-debug").resolve()),
                "-j", str(NPROCS),
                f"-config-file={pathlib.Path('.clang-tidy').resolve()}",
                "-header-filter=/src/.*",
@@ -220,54 +242,91 @@ def tidy_lint():
                '-extra-arg=-std=c++20',
                "-extra-arg=--target=x86_64-w64-windows-gnu",
                ]
-        
+
+        if files:
+            # run-clang-tidy positional arg is a regex matched against file paths
+            pattern = '|'.join(re.escape(f.replace('\\', '/')) for f in files)
+            cmd.append(pattern)
+
         run_command(cmd)
     finally:
         restore_compile_commands()
 
-def lint(steps="all"):
-    """Run all linters."""
+def lint(steps="all", files=None):
+    """Run linters. Reads CHANGED_FILES env var if files not provided."""
+    if files is None:
+        changed_env = os.environ.get("CHANGED_FILES", "").strip()
+        if changed_env:
+            files = changed_env.split()
+
     lint_steps = ["format-check", "cppcheck", "tidy"] if steps == "all" else steps.split(",")
-    
+
     for step in lint_steps:
         step = step.strip()
         if step == "format-check":
-            format_check()
+            format_check(files)
         elif step == "cppcheck":
-            cppcheck_lint()
+            cppcheck_lint(files)
         elif step == "tidy":
-            tidy_lint()
-    
+            tidy_lint(files)
+
     print("\n\033[92m[OK] All lint checks passed!\033[0m")
+
+def lint_changed(base_ref="HEAD~1", steps="all"):
+    """Run lint only on files changed relative to base_ref.
+
+    Reads CHANGED_FILES env var if set (used in CI), otherwise uses git diff.
+    """
+    changed_env = os.environ.get("CHANGED_FILES", "").strip()
+    if changed_env:
+        files = changed_env.split()
+    else:
+        files = get_changed_files(base_ref)
+
+    if not files:
+        print("No changed C++ files found. Skipping lint.")
+        return
+
+    print(f"Linting {len(files)} changed file(s):")
+    for f in files:
+        print(f"  {f}")
+
+    lint(steps=steps, files=files)
 
 def main():
     if len(sys.argv) < 2:
         print(
             "Usage: python manage.py <command> [options]\n"
             "\nCommands:\n"
-            "  build [preset]           - Build project (debug/release, default: debug)\n"
-            "  run [preset]             - Run application (default: debug)\n"
-            "  clean                    - Clean build artifacts\n"
-            "  test [preset]            - Build and run tests (default: debug)\n"
-            "  format                   - Format code with clang-format\n"
-            "  format-check             - Check code formatting without changes\n"
-            "  cppcheck                 - Run cppcheck static analysis\n"
-            "  tidy                     - Run clang-tidy analysis\n"
-            "  lint [steps]             - Run all linters (format-check, cppcheck, tidy)\n"
-            "                             Optional: specify steps separated by comma\n"
+            "  build [preset]             - Build project (debug/release, default: debug)\n"
+            "  run [preset]               - Run application (default: debug)\n"
+            "  clean                      - Clean build artifacts\n"
+            "  test [preset]              - Build and run tests (default: debug)\n"
+            "  format                     - Format code with clang-format\n"
+            "  format-check               - Check code formatting without changes\n"
+            "  cppcheck                   - Run cppcheck static analysis\n"
+            "  tidy                       - Run clang-tidy analysis\n"
+            "  lint [steps]               - Run all linters (format-check, cppcheck, tidy)\n"
+            "                               Optional: specify steps separated by comma\n"
+            "                               Reads CHANGED_FILES env var if set\n"
+            "  lint-changed [base_ref]    - Run lint only on changed files (default: HEAD~1)\n"
+            "    [steps]                    Optional: specify steps (default: all)\n"
+            "                               Reads CHANGED_FILES env var if set\n"
         )
         sys.exit(1)
 
     cmd = sys.argv[1]
-    preset = sys.argv[2] if len(sys.argv) > 2 else "debug"
 
     if cmd == "build":
+        preset = sys.argv[2] if len(sys.argv) > 2 else "debug"
         build(preset)
     elif cmd == "run":
+        preset = sys.argv[2] if len(sys.argv) > 2 else "debug"
         run(preset)
     elif cmd == "clean":
         clean()
     elif cmd == "test":
+        preset = sys.argv[2] if len(sys.argv) > 2 else "debug"
         test(preset)
     elif cmd == "format":
         format_code()
@@ -280,6 +339,10 @@ def main():
     elif cmd == "lint":
         steps = sys.argv[2] if len(sys.argv) > 2 else "all"
         lint(steps)
+    elif cmd == "lint-changed":
+        base_ref = sys.argv[2] if len(sys.argv) > 2 else "HEAD~1"
+        steps = sys.argv[3] if len(sys.argv) > 3 else "all"
+        lint_changed(base_ref, steps)
     else:
         print(f"Unknown command: {cmd}")
         sys.exit(1)
