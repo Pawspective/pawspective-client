@@ -2,7 +2,11 @@ name: Qt Client CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - '**'
 
 env:
   PYTHON_VERSION: "3.14"
@@ -14,16 +18,63 @@ env:
   CPPCHECK_VERSION: 2.19.0
 
 jobs:
-  # Job 1: Linting (Clang-Format, Tidy, Cppcheck)
-  lint:
+  format-check:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          allow-prereleases: true
+
+      - name: Install LLVM
+        uses: egor-tensin/setup-clang@v1
+        with:
+          version: ${{ env.LLVM_VERSION }}
+          platform: x64
+
+      - name: Get changed C++ files
+        id: changed-files
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          $files = git diff --name-only --diff-filter=ACMR "origin/${{ github.event.pull_request.base.ref }}" HEAD |
+            Where-Object { $_ -match '\.(cpp|hpp)$' } |
+            Where-Object { $_ -match '^(src|include)/' }
+          $filesStr = ($files -join ' ').Trim()
+          echo "files=$filesStr" >> $env:GITHUB_OUTPUT
+
+      - name: Run format check (all files)
+        if: github.event_name != 'pull_request'
+        run: python manage.py format-check
+
+      - name: Run format check (changed files only)
+        if: github.event_name == 'pull_request' && steps.changed-files.outputs.files != ''
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+        run: python manage.py lint format-check
+
+      - name: No C++ files changed
+        if: github.event_name == 'pull_request' && steps.changed-files.outputs.files == ''
+        run: echo "No C++ files changed, skipping format check"
+
+  static-analysis:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          allow-prereleases: true
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
@@ -55,28 +106,71 @@ jobs:
           version: ${{ env.LLVM_VERSION }}
           platform: x64
 
+      - name: Cache CPPCheck
+        id: cache-cppcheck
+        uses: actions/cache@v4
+        with:
+          path: ~\scoop\apps\cppcheck
+          key: scoop-cppcheck-${{ env.CPPCHECK_VERSION }}
+
       - name: Install CPPCheck
+        if: steps.cache-cppcheck.outputs.cache-hit != 'true'
         run: |
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
           Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-          
           scoop install cppcheck
-          
+
+      - name: Add CPPCheck to PATH
+        run: |
           $scoopPath = Join-Path $env:USERPROFILE "scoop\apps\cppcheck\current"
           echo $scoopPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           echo "CPPCHECK_DATA_DIR=$scoopPath\cfg" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: run linting
+      - name: Cache Build
+        uses: actions/cache@v4
+        with:
+          path: build-debug
+          key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-lint-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-qt-${{ env.QT_VERSION }}-lint-
+
+      - name: Get changed C++ files
+        id: changed-files
+        if: github.event_name == 'pull_request'
+        shell: pwsh
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          $files = git diff --name-only --diff-filter=ACMR "origin/${{ github.event.pull_request.base.ref }}" HEAD |
+            Where-Object { $_ -match '\.(cpp|hpp)$' } |
+            Where-Object { $_ -match '^(src|include)/' }
+          $filesStr = ($files -join ' ').Trim()
+          echo "files=$filesStr" >> $env:GITHUB_OUTPUT
+
+      - name: Run static analysis (all files)
+        if: github.event_name != 'pull_request'
         run: |
           $env:QT_DIR = "${{ env.Qt6_DIR }}"
           python manage.py build debug
-          python manage.py lint
+          python manage.py lint cppcheck,tidy
+
+      - name: Run static analysis (changed files only)
+        if: github.event_name == 'pull_request' && steps.changed-files.outputs.files != ''
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+        run: |
+          $env:QT_DIR = "${{ env.Qt6_DIR }}"
+          python manage.py build debug
+          python manage.py lint cppcheck,tidy
+
+      - name: No C++ files changed
+        if: github.event_name == 'pull_request' && steps.changed-files.outputs.files == ''
+        run: echo "No C++ files changed, skipping static analysis"
 
   build:
     runs-on: windows-latest
     strategy:
       matrix:
-        build_type: [debug, release]
+        build_type: ${{ github.event_name == 'pull_request' && fromJson('["debug"]') || fromJson('["debug", "release"]') }}
       fail-fast: false
 
     steps:
@@ -88,6 +182,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          allow-prereleases: true
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
@@ -118,9 +213,10 @@ jobs:
         with:
           path: build-${{ matrix.build_type }}
           key: ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ matrix.build_type }}-v2-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-qt-${{ env.QT_VERSION }}-${{ matrix.build_type }}-v2-
 
       - name: Build
         run: |
           $env:QT_DIR = "${{ env.Qt6_DIR }}"
           python manage.py build ${{ matrix.build_type }}
-
