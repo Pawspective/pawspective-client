@@ -52,6 +52,7 @@ public:
     const QString& organizationDescription() const { return m_organizationDescription; }
 
     Q_INVOKABLE void loadAnimal(qint64 id);
+    Q_INVOKABLE void deleteAnimal();
     void initialize() override {}
     void cleanup() override {}
 
@@ -71,7 +72,14 @@ signals:
     void organizationNameChanged();
     void organizationCityChanged();
     void organizationDescriptionChanged();
+    void deleteSuccess();
+    void deleteFailed(const QString& message);
 
+private slots:
+    void handleDeleteSuccess();
+    void handleDeleteFailed(QSharedPointer<services::BaseError> error);
+
+    // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private:
     void setFromDTO(const models::AnimalDTO& dto);
     void setFromOrgDTO(const models::OrganizationDTO& dto);
@@ -79,6 +87,7 @@ private:
     services::AnimalService& m_animalService;
     services::OrganizationService& m_organizationService;
 
+    qint64 m_currentAnimalId = 0;
     QString m_name;
     QString m_animalType;
     QString m_breedName;

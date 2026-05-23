@@ -18,18 +18,15 @@ public:
 
     void updateUserProfile(const models::UserUpdateDTO& dto);
     void registerUser(const models::UserRegisterDTO& dto);
+    void deleteUser();
 
-    // TODO: implement these methods when api endpoints are ready
-    // void canCreateOrganization();
-    // void getUserOrganizations();
 signals:
     void updateUserProfileSuccess(const models::UserDTO& user);
     void registerUserSuccess(const models::UserDTO& user);
+    void deleteUserSuccess();
+    void deleteUserFailed(QSharedPointer<services::BaseError> error);
     void requestFailed(QSharedPointer<services::BaseError> error);
 
-    // TODO: implement these signals when api endpoints are ready
-    // void canCreateOrganizationResult(bool canCreate);
-    // void userOrganizationsReceived(const QList<models::OrganizationDTO>& organizations);
 private:
     void handleError(QNetworkReply& reply);
     void handleSuccess(QNetworkReply& reply, std::function<void(const QJsonObject&)> onSuccess);

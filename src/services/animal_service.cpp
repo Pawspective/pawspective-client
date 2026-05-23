@@ -297,4 +297,14 @@ void AnimalService::getAnimalsByOrganization(qint64 organizationId, int page, in
     );
 }
 
+void AnimalService::deleteAnimal(qint64 id) {
+    m_networkClient.deleteResource(
+        QUrl(QString("/animals/%1").arg(id)),
+        [this](QNetworkReply& /*reply*/) { emit deleteAnimalSuccess(); },
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit deleteAnimalFailed(error); });
+        }
+    );
+}
+
 }  // namespace pawspective::services

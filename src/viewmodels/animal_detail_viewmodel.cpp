@@ -55,14 +55,28 @@ AnimalDetailViewModel::AnimalDetailViewModel(
             emitError(NetworkError, error->getMessage());
         }
     );
+    connect(
+        &m_animalService,
+        &services::AnimalService::deleteAnimalSuccess,
+        this,
+        &AnimalDetailViewModel::handleDeleteSuccess
+    );
+    connect(
+        &m_animalService,
+        &services::AnimalService::deleteAnimalFailed,
+        this,
+        &AnimalDetailViewModel::handleDeleteFailed
+    );
 }
 
 void AnimalDetailViewModel::loadAnimal(qint64 id) {
+    m_currentAnimalId = id;
     setIsBusy(true);
     m_animalService.getAnimal(id);
 }
 
 void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
+    m_currentAnimalId = dto.id;
     if (m_name != dto.name) {
         m_name = dto.name;
         emit nameChanged();
@@ -156,6 +170,22 @@ void AnimalDetailViewModel::setFromOrgDTO(const models::OrganizationDTO& dto) {
         m_organizationDescription = desc;
         emit organizationDescriptionChanged();
     }
+}
+
+void AnimalDetailViewModel::deleteAnimal() {
+    if (m_currentAnimalId == 0) {
+        emit deleteFailed("No animal selected");
+        return;
+    }
+    m_animalService.deleteAnimal(m_currentAnimalId);
+}
+
+void AnimalDetailViewModel::handleDeleteSuccess() { emit deleteSuccess(); }
+
+void AnimalDetailViewModel::handleDeleteFailed(QSharedPointer<services::BaseError> error) {
+    QString message = error ? error->getMessage() : "Failed to delete animal";
+    emit deleteFailed(message);
+    emitError(ErrorType::NetworkError, message);
 }
 
 }  // namespace pawspective::viewmodels

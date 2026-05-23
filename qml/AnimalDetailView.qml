@@ -12,10 +12,19 @@ Rectangle {
     signal backClicked()
     signal organizationRequested(int organizationId)
     signal updateAnimalRequested(int animalId)
+    signal animalDeleted() 
 
     Connections {
         target: root.viewModel
         function onErrorOccurred(type, message) {
+            errorText.text = message
+        }
+
+        function onDeleteSuccess() {
+            errorText.text = ""
+            root.animalDeleted()
+        }
+        function onDeleteFailed(message) {
             errorText.text = message
         }
     }
@@ -44,6 +53,7 @@ Rectangle {
         readonly property color buttonText: "#e7ebf5"
         readonly property color chipBg: "#e8d8cb"
         readonly property color border: "#b8abd7"
+        readonly property color deleteRed: "#e26d5c" 
     }
 
     readonly property real fieldLabelSize: root.height * 0.022
@@ -59,7 +69,6 @@ Rectangle {
         var animalOrgId = Number(viewModel.organizationId)
         return userOrgId > 0 && animalOrgId > 0 && userOrgId === animalOrgId
     }
-
     Rectangle {
         id: backButton
         z: 10
@@ -119,7 +128,6 @@ Rectangle {
 
             Item { Layout.preferredHeight: root.height * 0.09 }
 
-            // Header card
             Rectangle {
                 Layout.fillWidth: true
                 Layout.leftMargin: root.sideMargin
@@ -193,7 +201,6 @@ Rectangle {
                 }
             }
 
-            // Info fields
             DetailField {
                 label: "Type"
                 value: root.viewModel ? root.viewModel.animalType : ""
@@ -231,7 +238,6 @@ Rectangle {
                 value: root.viewModel ? root.viewModel.status : ""
             }
 
-            // Organization card (shown if user is NOT from this org)
             OrganizationCardView {
                 visible: !root.isOwnOrganization && root.viewModel && (typeof root.viewModel.organizationId !== 'undefined')
                     && root.viewModel.organizationId > 0
@@ -247,21 +253,40 @@ Rectangle {
                 onClicked: function(id) { root.organizationRequested(id) }
             }
 
-            // Update button (shown if user IS from this org)
-            CustomButton {
+            RowLayout {
                 visible: root.isOwnOrganization
-                text: "Update Animal"
-                baseColor: theme.purple
-                hoverColor: theme.accentPink
-                textColor: theme.buttonText
-                fontSize: root.height * 0.025
                 Layout.fillWidth: true
                 Layout.leftMargin: root.sideMargin
                 Layout.rightMargin: root.sideMargin
                 Layout.preferredHeight: root.height * 0.08
-                onClicked: {
-                    console.log("Update animal clicked, id:", root.animalId)
-                    root.updateAnimalRequested(root.animalId)
+                spacing: root.width * 0.03 
+
+                CustomButton {
+                    text: "Update Animal"
+                    baseColor: theme.purple
+                    hoverColor: theme.accentPink
+                    textColor: theme.buttonText
+                    fontSize: root.height * 0.025
+                    Layout.fillWidth: true 
+                    Layout.fillHeight: true
+                    onClicked: {
+                        console.log("Update animal clicked, id:", root.animalId)
+                        root.updateAnimalRequested(root.animalId)
+                    }
+                }
+
+                CustomButton {
+                    text: "Delete Animal"
+                    baseColor: theme.deleteRed       
+                    hoverColor: theme.accentPink
+                    textColor: theme.buttonText
+                    fontSize: root.height * 0.025
+                    Layout.fillWidth: true 
+                    Layout.fillHeight: true
+                    onClicked: {
+                        console.log("Delete animal clicked, id:", root.animalId)
+                        deleteConfirmDialog.open()
+                    }
                 }
             }
 
@@ -300,6 +325,29 @@ Rectangle {
                 font.pixelSize: root.fieldValueSize
                 color: theme.accentPink
             }
+        }
+    }
+Dialog {
+        id: deleteConfirmDialog
+        modal: true
+        parent: ApplicationWindow.overlay
+        anchors.centerIn: parent
+        width: parent.width * 0.8
+        title: "Delete Animal Profile"
+        standardButtons: Dialog.Yes | Dialog.No
+        
+        onAccepted: {
+            if (viewModel) viewModel.deleteAnimal()
+        }
+        
+        contentItem: Text {
+            text: "Are you sure you want to permanently delete this animal?"
+            wrapMode: Text.WordWrap
+            anchors.fill: parent
+            anchors.margins: 20
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 14
         }
     }
 }

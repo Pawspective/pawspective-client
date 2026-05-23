@@ -43,6 +43,7 @@ public:
     Q_INVOKABLE void cleanup() override;
     Q_INVOKABLE void saveChanges();
     Q_INVOKABLE void discardChanges();
+    Q_INVOKABLE void deleteOrganization();
 
 signals:
     void nameChanged();
@@ -56,16 +57,20 @@ signals:
     void loadFailed(const QString& errorMessage);
     void saveCompleted();
     void saveFailed(const QString& errorMessage);
+    void deleteCompleted();
+    void deleteFailed(const QString& errorMessage);
 
 private slots:
     void handleGetSuccess(const models::OrganizationDTO& organization);
     void handleUpdateSuccess(const models::OrganizationDTO& organization);
     void handleCitiesSuccess(const QList<models::CityDTO>& cities);
     void handleGetCurrentUserSuccess(const models::UserDTO& user);
+    void handleDeleteSuccess();
     void handleGetFailed(QSharedPointer<services::BaseError> error);
     void handleUpdateFailed(QSharedPointer<services::BaseError> error);
     void handleCitiesFailed(QSharedPointer<services::BaseError> error);
     void handleGetCurrentUserFailed(QSharedPointer<services::BaseError> error);
+    void handleDeleteFailed(QSharedPointer<services::BaseError> error);
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private:
