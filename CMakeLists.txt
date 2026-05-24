@@ -76,6 +76,9 @@ add_executable(pawspective-client
     src/models/review_create_dto.cpp
     src/models/review_update_dto.cpp
     src/models/adopt_request_dto.cpp
+    src/models/post_dto.cpp
+    src/models/post_create_dto.cpp
+    src/models/post_update_dto.cpp
     src/utils/json.cpp
     src/viewmodels/organization_view_model.cpp
 	${PROJECT_HEADERS}
