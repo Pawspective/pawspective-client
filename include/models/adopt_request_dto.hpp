@@ -2,6 +2,7 @@
 
 #include <QJsonObject>
 #include <QList>
+#include <QMetaType>
 #include <QString>
 
 #include "animal_dto.hpp"
@@ -28,3 +29,6 @@ struct AdoptRequestListDTO {
 };
 
 }  // namespace pawspective::models
+
+Q_DECLARE_METATYPE(pawspective::models::AdoptRequestDTO)
+Q_DECLARE_METATYPE(pawspective::models::AdoptRequestListDTO)
