@@ -49,6 +49,7 @@ add_executable(pawspective-client
     src/services/animal_service.cpp
     src/services/adopt_request_service.cpp
     src/services/errors.cpp
+    src/services/review_service.cpp
     src/viewmodels/base.cpp
     src/viewmodels/user_viewmodel.cpp
     src/viewmodels/user_update_viewmodel.cpp
