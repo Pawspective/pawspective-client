@@ -228,3 +228,25 @@ target_link_libraries(breed_service_test PRIVATE
 
 add_test(NAME breed_service_test COMMAND breed_service_test)
 
+add_executable(review_service_test
+    tests/review_service_test.cpp
+    include/services/review_service.hpp
+    src/models/review_dto.cpp
+    src/models/review_create_dto.cpp
+    src/models/review_update_dto.cpp
+    src/services/review_service.cpp
+    src/services/errors.cpp
+    src/utils/json.cpp
+    src/utils/validator.cpp
+)
+
+target_include_directories(review_service_test PRIVATE include)
+
+target_link_libraries(review_service_test PRIVATE
+    Qt6::Core
+    Qt6::Network
+    Qt6::Test
+)
+
+add_test(NAME review_service_test COMMAND review_service_test)
+
