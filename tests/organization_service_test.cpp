@@ -22,6 +22,7 @@ class FakeNetworkReply : public QNetworkReply {
 public:
     explicit FakeNetworkReply(const QByteArray& data, QObject* parent = nullptr)
         : QNetworkReply(parent), m_data(data) {
+        setProperty("responseData", data);
         open(QIODevice::ReadOnly);
     }
     void abort() override {}

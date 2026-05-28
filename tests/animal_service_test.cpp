@@ -24,6 +24,7 @@ class FakeNetworkReply : public QNetworkReply {
 public:
     explicit FakeNetworkReply(const QByteArray& data, QObject* parent = nullptr)
         : QNetworkReply(parent), m_data(data) {
+        setProperty("responseData", data);
         open(QIODevice::ReadOnly);
     }
     void abort() override {}
@@ -243,8 +244,8 @@ private slots:
     void testCreateAnimal_InvalidJson_EmitsCreateAnimalFailed();
     void testCreateAnimal_ServerError_DoesNotEmitOtherSignals();
     void testCreateAnimal_EmptyName_EmitsCreateAnimalFailed_NoNetworkCall();
-    void testCreateAnimal_ZeroOrganizationId_EmitsCreateAnimalFailed_NoNetworkCall();
-    void testCreateAnimal_ZeroBreedId_EmitsCreateAnimalFailed_NoNetworkCall();
+    void testCreateAnimal_ZeroOrganizationId_SendsRequest();
+    void testCreateAnimal_ZeroBreedId_SendsRequest();
     void testCreateAnimal_ValidationError_ContainsFieldName();
 
     // updateAnimal signal tests
@@ -467,15 +468,19 @@ void TestAnimalService::testGetAnimals_Success_EmitsGetAnimalsSuccess() {
     service.getAnimals(AnimalFilterDTO{});
     QCOMPARE(mock.getCalls.size(), 1);
 
-    mock.triggerSuccess(mock.getCalls, validAnimalArrayJson());
+    mock.triggerSuccess(mock.getCalls, validAnimalListJson());
 
     QCOMPARE(successSpy.count(), 1);
     QCOMPARE(failedSpy.count(), 0);
 
-    auto animals = qvariant_cast<QList<AnimalDTO>>(successSpy.at(0).at(0));
-    QCOMPARE(animals.size(), 2);
-    QCOMPARE(animals[0].name, QString("Buddy"));
-    QCOMPARE(animals[1].name, QString("Whiskers"));
+    auto result = qvariant_cast<AnimalListDTO>(successSpy.at(0).at(0));
+    QCOMPARE(result.items.size(), 2);
+    QCOMPARE(result.items[0].name, QString("Buddy"));
+    QCOMPARE(result.items[1].name, QString("Whiskers"));
+    QCOMPARE(result.page, 1);
+    QCOMPARE(result.limit, 10);
+    QCOMPARE(result.totalPages, static_cast<qint64>(1));
+    QCOMPARE(result.totalCount, static_cast<qint64>(2));
 }
 
 void TestAnimalService::testGetAnimals_NetworkError_EmitsGetAnimalsFailed() {
@@ -536,11 +541,11 @@ void TestAnimalService::testGetAnimals_WithFilter_BuildsQueryParams() {
 
     QCOMPARE(mock.getCalls.size(), 1);
     QString query = mock.getCalls[0].endpoint.query();
-    QVERIFY(query.contains("size=small"));
-    QVERIFY(query.contains("size=medium"));
-    QVERIFY(query.contains("gender=female"));
-    QVERIFY(query.contains("ageGte=1"));
-    QVERIFY(query.contains("ageLte=5"));
+    QVERIFY(query.contains("sizes=small"));
+    QVERIFY(query.contains("sizes=medium"));
+    QVERIFY(query.contains("genders=female"));
+    QVERIFY(query.contains("age_gte=1"));
+    QVERIFY(query.contains("age_lte=5"));
 }
 
 // ---------------------------------------------------------------------------
@@ -995,7 +1000,7 @@ void TestAnimalService::testCreateAnimal_EmptyName_EmitsCreateAnimalFailed_NoNet
     QCOMPARE(failedSpy.count(), 1);
 }
 
-void TestAnimalService::testCreateAnimal_ZeroOrganizationId_EmitsCreateAnimalFailed_NoNetworkCall() {
+void TestAnimalService::testCreateAnimal_ZeroOrganizationId_SendsRequest() {
     MockNetworkClient mock;
     AnimalService service(mock);
 
@@ -1007,12 +1012,12 @@ void TestAnimalService::testCreateAnimal_ZeroOrganizationId_EmitsCreateAnimalFai
 
     service.createAnimal(dto);
 
-    QCOMPARE(mock.postCalls.size(), 0);
+    QCOMPARE(mock.postCalls.size(), 1);
     QCOMPARE(successSpy.count(), 0);
-    QCOMPARE(failedSpy.count(), 1);
+    QCOMPARE(failedSpy.count(), 0);
 }
 
-void TestAnimalService::testCreateAnimal_ZeroBreedId_EmitsCreateAnimalFailed_NoNetworkCall() {
+void TestAnimalService::testCreateAnimal_ZeroBreedId_SendsRequest() {
     MockNetworkClient mock;
     AnimalService service(mock);
 
@@ -1024,9 +1029,9 @@ void TestAnimalService::testCreateAnimal_ZeroBreedId_EmitsCreateAnimalFailed_NoN
 
     service.createAnimal(dto);
 
-    QCOMPARE(mock.postCalls.size(), 0);
+    QCOMPARE(mock.postCalls.size(), 1);
     QCOMPARE(successSpy.count(), 0);
-    QCOMPARE(failedSpy.count(), 1);
+    QCOMPARE(failedSpy.count(), 0);
 }
 
 void TestAnimalService::testCreateAnimal_ValidationError_ContainsFieldName() {
