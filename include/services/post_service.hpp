@@ -14,7 +14,7 @@ class PostService : public QObject {
 public:
     explicit PostService(INetworkClient& networkClient, QObject* parent = nullptr);
 
-    void getByOrganizationId(qint64 id);
+    void getByOrganizationId(qint64 id, int page = 1, int limit = 20);
     void createPost(const models::PostCreateDTO& dto);
     void updatePost(qint64 id, const models::PostUpdateDTO& dto);
     void deletePost(qint64 id);

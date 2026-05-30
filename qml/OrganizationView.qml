@@ -701,25 +701,177 @@ Rectangle {
         id: postsContent
         Item {
             anchors.fill: parent
-            CustomButton {
-                text: "+ Create Post"
-                baseColor: theme.purple
-                hoverColor: theme.accentPink
-                textColor: theme.buttonText
-                fontSize: root.height * 0.025
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.topMargin: root.height * 0.02
-                anchors.rightMargin: root.height * 0.02
-                width: root.width * 0.15
-                height: root.height * 0.06
-                visible: canUpdateOrganization
-                onClicked: {
-                    if (createPostViewModel && organizationViewModel) {
-                        var orgId = organizationViewModel.currentOrganizationId
-                        createPostViewModel.setOrganizationId(orgId)
+            
+            property bool initialized: false
+            readonly property bool hasPagination: typeof postListViewModel !== 'undefined' && postListViewModel && postListViewModel.totalPages > 1
+            
+            function reloadPosts() {
+                if (typeof postListViewModel !== 'undefined' && postListViewModel && organizationViewModel) {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0) {
+                        postListViewModel.loadPostsForOrganization(orgId)
                     }
-                    root.createPostRequested()
+                }
+            }
+            
+            function buildPageWindow() {
+                if (typeof postListViewModel === 'undefined' || !postListViewModel || postListViewModel.totalPages <= 1) return []
+                const cur = postListViewModel.currentPage
+                const last = postListViewModel.totalPages
+                const window = 2
+                let pages = []
+
+                pages.push(1)
+
+                const winStart = Math.max(2, cur - window)
+                const winEnd = Math.min(last - 1, cur + window)
+
+                if (winStart > 2) pages.push(-1)
+
+                for (let p = winStart; p <= winEnd; p++) pages.push(p)
+
+                if (winEnd < last - 1) pages.push(-1)
+
+                if (last > 1) pages.push(last)
+
+                return pages
+            }
+            
+            Component.onCompleted: {
+                if (typeof postListViewModel !== 'undefined' && postListViewModel && !initialized) {
+                    postListViewModel.initialize()
+                    initialized = true
+                }
+                reloadPosts()
+                if (organizationViewModel) {
+                    organizationViewModel.currentOrganizationIdChanged.connect(reloadPosts)
+                }
+            }
+            
+            Component.onDestruction: {
+                if (typeof postListViewModel !== 'undefined' && postListViewModel) {
+                    postListViewModel.cleanup()
+                    initialized = false
+                }
+            }
+            
+            Component {
+                id: createPostButtonComponent
+                CustomButton {
+                    text: "+ Create Post"
+                    baseColor: theme.purple
+                    hoverColor: theme.accentPink
+                    textColor: theme.buttonText
+                    fontSize: root.height * 0.025
+                    Layout.alignment: Qt.AlignRight
+                    Layout.preferredWidth: root.width * 0.15
+                    Layout.preferredHeight: root.height * 0.06
+                    Layout.rightMargin: root.height * 0.02
+                    Layout.topMargin: root.height * 0.02
+                    onClicked: {
+                        if (createPostViewModel && organizationViewModel) {
+                            var orgId = organizationViewModel.currentOrganizationId
+                            createPostViewModel.setOrganizationId(orgId)
+                        }
+                        root.createPostRequested()
+                    }
+                }
+            }
+        
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: root.height * 0.01
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    PostListView {
+                        id: organizationPostList
+                        anchors.fill: parent
+                        headerComponent: canUpdateOrganization ? createPostButtonComponent : null
+                        viewModel: typeof postListViewModel !== 'undefined' ? postListViewModel : null
+                        showPaginationControls: false   
+                    }
+                }
+                Row {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: root.height * 0.01
+                    spacing: root.width * 0.01
+                    visible: hasPagination
+
+                    CustomButton {
+                        id: prevButton
+                        text: "<"
+                        enabled: typeof postListViewModel !== 'undefined' && postListViewModel && postListViewModel.currentPage > 1 && !postListViewModel.isLoading
+                        onClicked: postListViewModel.prevPage()
+                        implicitWidth: Math.min(root.width, root.height) * 0.09
+                        implicitHeight: Math.min(root.width, root.height) * 0.07
+                        fontSize: Math.min(root.width, root.height) * 0.035
+                        baseColor: prevButton.enabled ? "#8572af" : "#c4b8e0"
+                        hoverColor: "#7060a0"
+                        clickColor: "#5a4a8a"
+                        textColor: "white"
+                        radius: 6
+                    }
+
+                    Repeater {
+                        model: buildPageWindow()
+
+                        delegate: Item {
+                            implicitWidth: modelData === -1
+                                ? Math.min(root.width, root.height) * 0.05
+                                : Math.min(root.width, root.height) * 0.09
+                            implicitHeight: Math.min(root.width, root.height) * 0.07
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Text {
+                                anchors.centerIn: parent
+                                visible: modelData === -1
+                                text: "..."
+                                font.family: theme.fontName
+                                font.pixelSize: Math.min(root.width, root.height) * 0.035
+                                color: theme.textDark
+                            }
+
+                            CustomButton {
+                                id: pageBtn
+                                anchors.fill: parent
+                                visible: modelData !== -1
+                                enabled: typeof postListViewModel !== 'undefined' && postListViewModel && !postListViewModel.isLoading && modelData !== postListViewModel.currentPage
+                                onClicked: postListViewModel.goToPage(modelData)
+
+                                readonly property bool isCurrent: modelData === (typeof postListViewModel !== 'undefined' && postListViewModel ? postListViewModel.currentPage : -1)
+
+                                text: modelData !== -1 ? String(modelData) : ""
+                                fontSize: Math.min(root.width, root.height) * 0.032
+                                baseColor: "#00f0ecf9"
+                                hoverColor: "#f0ecf9"
+                                clickColor: "#e0d8f5"
+                                textColor: pageBtn.isCurrent ? "#5a4a8a"
+                                        : pageBtn.enabled   ? "#8572af"
+                                        :                    "#c4b8e0"
+                                border.color: pageBtn.isCurrent ? "#5a4a8a" : "transparent"
+                                border.width: pageBtn.isCurrent ? 2 : 0
+                                radius: 6
+                            }
+                        }
+                    }
+
+                    CustomButton {
+                        id: nextButton
+                        text: ">"
+                        enabled: typeof postListViewModel !== 'undefined' && postListViewModel && postListViewModel.currentPage < postListViewModel.totalPages && !postListViewModel.isLoading
+                        onClicked: postListViewModel.nextPage()
+                        implicitWidth: Math.min(root.width, root.height) * 0.09
+                        implicitHeight: Math.min(root.width, root.height) * 0.07
+                        fontSize: Math.min(root.width, root.height) * 0.035
+                        baseColor: nextButton.enabled ? "#8572af" : "#c4b8e0"
+                        hoverColor: "#7060a0"
+                        clickColor: "#5a4a8a"
+                        textColor: "white"
+                        radius: 6
+                    }
                 }
             }
         }

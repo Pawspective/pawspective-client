@@ -21,6 +21,8 @@
 #include "viewmodels/login_view_model.hpp"
 #include "viewmodels/organization_card_viewmodel.hpp"
 #include "viewmodels/organization_view_model.hpp"
+#include "viewmodels/post_card_viewmodel.hpp"
+#include "viewmodels/post_list_viewmodel.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
 #include "viewmodels/register_view_model.hpp"
 #include "viewmodels/review_list_viewmodel.hpp"
@@ -79,6 +81,8 @@ int main(int argc, char* argv[]) {
     );
     auto createPostViewModel = new pawspective::viewmodels::CreatePostViewModel(postService, &app);
     auto reviewListViewModel = new pawspective::viewmodels::ReviewListViewModel(reviewService, &app);
+    auto postListViewModel = new pawspective::viewmodels::PostListViewModel(postService, &app);
+    auto postCardViewModel = new pawspective::viewmodels::PostCardViewModel(&app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -97,6 +101,8 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("createPostViewModel", createPostViewModel);
     engine.rootContext()->setContextProperty("reviewListViewModel", reviewListViewModel);
 
+    engine.rootContext()->setContextProperty("postListViewModel", postListViewModel);
+    engine.rootContext()->setContextProperty("postCardViewModel", postCardViewModel);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,

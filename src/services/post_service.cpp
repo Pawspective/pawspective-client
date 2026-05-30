@@ -61,9 +61,11 @@ void PostService::handleSuccess(
     }
 }
 
-void PostService::getByOrganizationId(qint64 id) {
+void PostService::getByOrganizationId(qint64 id, int page, int limit) {
     QUrlQuery query;
     query.addQueryItem("org_id", QString::number(id));
+    query.addQueryItem("page", QString::number(page));
+    query.addQueryItem("limit", QString::number(limit));
 
     QUrl url("/posts");
     url.setQuery(query);
