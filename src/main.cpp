@@ -12,6 +12,7 @@
 #include "services/city_service.hpp"
 #include "services/organization_service.hpp"
 #include "services/post_service.hpp"
+#include "services/review_service.hpp"
 #include "services/user_service.hpp"
 #include "viewmodels/animal_detail_viewmodel.hpp"
 #include "viewmodels/animal_list_viewmodel.hpp"
@@ -22,6 +23,7 @@
 #include "viewmodels/organization_view_model.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
 #include "viewmodels/register_view_model.hpp"
+#include "viewmodels/review_list_viewmodel.hpp"
 #include "viewmodels/search_organization_viewmodel.hpp"
 #include "viewmodels/update_animal_viewmodel.hpp"
 #include "viewmodels/update_organization_viewmodel.hpp"
@@ -38,9 +40,9 @@ int main(int argc, char* argv[]) {
 
     const QUrl url(QStringLiteral("qrc:/pawspective/qml/Main.qml"));
     QDirIterator it(":", QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        qDebug() << "Resource file:" << it.next();
-    }
+    // while (it.hasNext()) {
+    //     qDebug() << "Resource file:" << it.next();
+    // }
 
     pawspective::services::NetworkClient networkClient(&app);
     pawspective::services::AuthService authService(networkClient);
@@ -50,6 +52,7 @@ int main(int argc, char* argv[]) {
     pawspective::services::AnimalService animalService(networkClient);
     pawspective::services::BreedService breedService(networkClient);
     pawspective::services::PostService postService(networkClient);
+    pawspective::services::ReviewService reviewService(networkClient);
     auto loginViewModel = new pawspective::viewmodels::LoginViewModel(authService, &app);
     auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
     auto registerOrganizationViewModel =
@@ -75,6 +78,7 @@ int main(int argc, char* argv[]) {
         &app
     );
     auto createPostViewModel = new pawspective::viewmodels::CreatePostViewModel(postService, &app);
+    auto reviewListViewModel = new pawspective::viewmodels::ReviewListViewModel(reviewService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -91,6 +95,8 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("updateAnimalViewModel", updateAnimalViewModel);
     engine.rootContext()->setContextProperty("animalListViewModel", animalListViewModel);
     engine.rootContext()->setContextProperty("createPostViewModel", createPostViewModel);
+    engine.rootContext()->setContextProperty("reviewListViewModel", reviewListViewModel);
+
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,
