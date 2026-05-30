@@ -661,34 +661,34 @@ Rectangle {
         }
     }
 
-// Post tab
-Component {
-    id: postsContent
-    Item {
-        anchors.fill: parent
-        CustomButton {
-            text: "+ Create Post"
-            baseColor: theme.purple
-            hoverColor: theme.accentPink
-            textColor: theme.buttonText
-            fontSize: root.height * 0.025
-            anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.topMargin: root.height * 0.02
-            anchors.rightMargin: root.height * 0.02
-            width: root.width * 0.15
-            height: root.height * 0.06
-            visible: canUpdateOrganization
-            onClicked: {
-                if (createPostViewModel && organizationViewModel) {
-                    var orgId = organizationViewModel.currentOrganizationId
-                    createPostViewModel.setOrganizationId(orgId)
+    // Post tab
+    Component {
+        id: postsContent
+        Item {
+            anchors.fill: parent
+            CustomButton {
+                text: "+ Create Post"
+                baseColor: theme.purple
+                hoverColor: theme.accentPink
+                textColor: theme.buttonText
+                fontSize: root.height * 0.025
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.topMargin: root.height * 0.02
+                anchors.rightMargin: root.height * 0.02
+                width: root.width * 0.15
+                height: root.height * 0.06
+                visible: canUpdateOrganization
+                onClicked: {
+                    if (createPostViewModel && organizationViewModel) {
+                        var orgId = organizationViewModel.currentOrganizationId
+                        createPostViewModel.setOrganizationId(orgId)
+                    }
+                    root.createPostRequested()
                 }
-                root.createPostRequested()
             }
         }
     }
-}
 
     component SidebarItem : Rectangle {
         property string text: ""

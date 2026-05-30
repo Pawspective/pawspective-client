@@ -265,13 +265,13 @@ ApplicationWindow {
                 stackView.push(animalCreateViewComponent)
             }
             onCreatePostRequested: {   
-    var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
-    console.log("Creating post for organization ID:", orgId)
-    if (orgId > 0) {
-        createPostViewModel.setOrganizationId(orgId)
-    }
-    stackView.push(postCreateViewComponent)
-}
+                var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
+                console.log("Creating post for organization ID:", orgId)
+                if (orgId > 0) {
+                    createPostViewModel.setOrganizationId(orgId)
+                }
+                stackView.push(postCreateViewComponent)
+            }
             onAnimalDetailRequested: function(animalId) {
                 stackView.push(animalDetailViewComponent, { animalId: animalId, currentUserViewModel: userViewModel })
             }
@@ -395,34 +395,34 @@ ApplicationWindow {
         }
     }
 
-Component {
-    id: postCreateViewComponent
-    PostCreateView {
-        viewModel: createPostViewModel
-        
-        onBackClicked: {
-            createPostViewModel.cleanup()
-            stackView.pop()
-        }
-        
-        onCreateSuccess: {
-            createPostViewModel.cleanup()
-            stackView.pop()
-            // TODO: Refresh posts list when implemented
-        }
-        
-        Component.onCompleted: {
-            if (createPostViewModel) {
-                createPostViewModel.initialize()
-            }
-        }
-        Component.onDestruction: {
-            if (createPostViewModel) {
+    Component {
+        id: postCreateViewComponent
+        PostCreateView {
+            viewModel: createPostViewModel
+            
+            onBackClicked: {
                 createPostViewModel.cleanup()
+                stackView.pop()
+            }
+            
+            onCreateSuccess: {
+                createPostViewModel.cleanup()
+                stackView.pop()
+                // TODO: Refresh posts list when implemented
+            }
+            
+            Component.onCompleted: {
+                if (createPostViewModel) {
+                    createPostViewModel.initialize()
+                }
+            }
+            Component.onDestruction: {
+                if (createPostViewModel) {
+                    createPostViewModel.cleanup()
+                }
             }
         }
     }
-}
 
     Component {
     id: animalUpdateViewComponent
