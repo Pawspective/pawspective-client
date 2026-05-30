@@ -37,6 +37,7 @@ Rectangle {
     signal createOrganizationClicked()
     signal updateOrganizationClicked()
     signal createAnimalRequested()
+    signal createPostRequested()
     signal animalDetailRequested(int animalId)
     signal backClicked()
 
@@ -663,12 +664,29 @@ Rectangle {
     // Post tab
     Component {
         id: postsContent
-
-        Text {
-            text: "Posts section placeholder"
-            font.family: theme.fontName
-            font.pixelSize: root.height * 0.03
-            color: theme.textDark
+        Item {
+            anchors.fill: parent
+            CustomButton {
+                text: "+ Create Post"
+                baseColor: theme.purple
+                hoverColor: theme.accentPink
+                textColor: theme.buttonText
+                fontSize: root.height * 0.025
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.topMargin: root.height * 0.02
+                anchors.rightMargin: root.height * 0.02
+                width: root.width * 0.15
+                height: root.height * 0.06
+                visible: canUpdateOrganization
+                onClicked: {
+                    if (createPostViewModel && organizationViewModel) {
+                        var orgId = organizationViewModel.currentOrganizationId
+                        createPostViewModel.setOrganizationId(orgId)
+                    }
+                    root.createPostRequested()
+                }
+            }
         }
     }
 
