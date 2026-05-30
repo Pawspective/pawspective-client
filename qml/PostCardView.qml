@@ -1,0 +1,157 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+
+Rectangle {
+    id: root
+
+    QtObject {
+        id: theme
+        readonly property string fontName: "Comic Sans MS"
+        readonly property color pageBg: "#e8d8cb"
+        readonly property color purple: "#b8abd7"
+        readonly property color fieldBg: "#fdfdfd"
+        readonly property color accentPink: "#f4a7b9"
+        readonly property color textDark: "#8572af"
+        readonly property color buttonText: "#e7ebf5"
+        readonly property color postText: "#f4a7b9"
+    }
+
+    property int postId: -1
+    property string postText: ""
+    property var postCreatedAt: null
+    property bool isExpanded: false
+    property int previewLimit: 220
+
+    readonly property real padV: root.width * 0.025
+    readonly property real padH: root.width * 0.06
+    readonly property real titleSize: root.width * 0.022
+    readonly property real subtitleSize: root.width * 0.018
+    readonly property real descSize: root.width * 0.018
+    readonly property bool isExpandable: root.postText.length > root.previewLimit
+    readonly property string displayText: buildDisplayText()
+
+    readonly property string createdAtText: formatCreatedAt(root.postCreatedAt)
+
+    radius: root.width * 0.015
+    color: theme.purple
+
+    implicitHeight: contentLayout.implicitHeight + padV * 2
+
+    ColumnLayout {
+        id: contentLayout
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            leftMargin: root.padH
+            rightMargin: root.padH
+            topMargin: root.padV
+        }
+        spacing: root.padV * 0.5
+        z: 1
+
+        Rectangle {
+            Layout.fillWidth: true
+            radius: root.width * 0.012
+            color: theme.fieldBg
+            border.color: theme.fieldBg
+            border.width: 1
+            visible: root.postText.length > 0
+            implicitHeight: postTextColumn.implicitHeight + root.padV * 1.2
+
+            ColumnLayout {
+                id: postTextColumn
+                anchors.fill: parent
+                anchors.margins: root.padV * 0.6
+                spacing: root.padV * 0.3
+
+                Text {
+                    id: postBodyText
+                    text: root.displayText
+                    textFormat: Text.PlainText
+                    font.family: theme.fontName
+                    font.pixelSize: root.descSize
+                    color: theme.postText
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    Layout.fillWidth: true
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: toggleText.implicitHeight
+                    visible: root.isExpandable
+
+                    Text {
+                        id: toggleText
+                        text: root.isExpanded ? "Show less" : "Show more"
+                        font.family: theme.fontName
+                        font.pixelSize: root.descSize
+                        color: theme.textDark
+                        font.underline: toggleArea.containsMouse
+                    }
+
+                    MouseArea {
+                        id: toggleArea
+                        anchors.fill: toggleText
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.isExpanded = !root.isExpanded
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: root.padH * 0.3
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            Text {
+                visible: root.createdAtText.length > 0
+                text: root.createdAtText
+                font.family: theme.fontName
+                font.pixelSize: root.subtitleSize
+                color: theme.fieldBg
+                elide: Text.ElideRight
+                Layout.alignment: Qt.AlignRight | Qt.AlignTop
+            }
+        }
+    }
+
+    function formatCreatedAt(value) {
+        if (!value) {
+            return ""
+        }
+        if (value instanceof Date) {
+            return Qt.formatDateTime(value, "yyyy-MM-dd")
+        }
+        if (typeof value === "string") {
+            return value
+        }
+        if (value.toString) {
+            return value.toString()
+        }
+        return ""
+    }
+
+    function buildDisplayText() {
+        var rawText = root.postText || ""
+        if (!root.isExpandable) {
+            return rawText
+        }
+
+        if (root.isExpanded) {
+            return rawText
+        }
+
+        var preview = rawText.slice(0, root.previewLimit).trim()
+        if (preview.length === 0) {
+            return rawText
+        }
+        return preview + "..."
+    }
+}
