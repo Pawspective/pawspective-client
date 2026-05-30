@@ -756,7 +756,7 @@ Rectangle {
                         anchors.fill: parent
                         headerComponent: canUpdateOrganization ? createPostButtonComponent : null
                         viewModel: typeof postListViewModel !== 'undefined' ? postListViewModel : null
-                        showPaginationControls: false   // false, пагинация снаружи
+                        showPaginationControls: false   
                     }
                 }
                 Row {
