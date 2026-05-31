@@ -64,10 +64,7 @@ class AdoptRequestListViewModel : public BaseViewModel {
     Q_PROPERTY(int pageSize READ pageSize NOTIFY paginationChanged)
 
 public:
-    explicit AdoptRequestListViewModel(
-        services::AdoptRequestService& adoptRequestService,
-        QObject* parent = nullptr
-    );
+    explicit AdoptRequestListViewModel(services::AdoptRequestService& adoptRequestService, QObject* parent = nullptr);
     ~AdoptRequestListViewModel() override = default;
 
     QAbstractListModel* listModel();

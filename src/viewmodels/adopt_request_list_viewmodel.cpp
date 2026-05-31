@@ -90,9 +90,9 @@ AdoptRequestListViewModel::AdoptRequestListViewModel(
     services::AdoptRequestService& adoptRequestService,
     QObject* parent
 )
-    : BaseViewModel(parent)
-    , m_listModel(new detail::AdoptRequestListInternalModel(this))
-    , m_adoptRequestService(adoptRequestService) {
+    : BaseViewModel(parent),
+      m_listModel(new detail::AdoptRequestListInternalModel(this)),
+      m_adoptRequestService(adoptRequestService) {
     connect(
         &m_adoptRequestService,
         &services::AdoptRequestService::getAdoptRequestsSuccess,
@@ -199,8 +199,9 @@ void AdoptRequestListViewModel::reloadCurrentPage() {
 
 void AdoptRequestListViewModel::handleGetRequestsSuccess(const models::AdoptRequestListDTO& result) {
     if (auto internalModel = qobject_cast<detail::AdoptRequestListInternalModel*>(m_listModel)) {
-        qDebug() << "Received" << result.items.size() << "adopt requests (page" << result.page << "of"
-                 << result.totalPages << ")";
+        qDebug()
+            << "Received" << result.items.size() << "adopt requests (page" << result.page << "of" << result.totalPages
+            << ")";
         internalModel->update(result.items);
     }
     m_currentPage = result.page;
