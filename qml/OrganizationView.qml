@@ -40,6 +40,7 @@ Rectangle {
     signal createAnimalRequested()
     signal createPostRequested()
     signal createReviewRequested()
+    signal reviewEditRequested(int reviewId, string reviewText)
     signal animalDetailRequested(int animalId)
     signal backClicked()
 
@@ -643,6 +644,7 @@ Rectangle {
             ReviewListView {
                 anchors.fill: parent
                 headerComponent: createReviewButtonComponent
+                onEditRequested: function(reviewId, reviewText) { root.reviewEditRequested(reviewId, reviewText) }
                 onAnimalRequested: function(animalId) { root.animalDetailRequested(animalId) }
             }
         }
