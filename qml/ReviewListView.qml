@@ -10,8 +10,6 @@ Item {
     property var viewModel: typeof reviewListViewModel !== 'undefined' ? reviewListViewModel : null
     property var model: null
     property Component headerComponent: null
-    property bool showEmptyImage: false
-    property string emptyText: "No review"
     property bool showPaginationControls: true
     property real paginationScale: Math.min(root.width, root.height) * 1.75
 
@@ -34,7 +32,6 @@ Item {
         }
         return -1
     }
-    readonly property bool showEmptyState: !root.isLoading && root.modelCount === 0
 
     ListView {
         id: reviewListView
@@ -67,13 +64,13 @@ Item {
             }
         }
 
-        footer: (root.isLoading || root.showEmptyState) ? emptyOrLoadingFooter : null
+        footer: root.isLoading ? loadingFooter : null
 
         Component {
-            id: emptyOrLoadingFooter
+            id: loadingFooter
             Item {
                 width: reviewListView.width - reviewListView.scrollBarMargin
-                implicitHeight: Math.max(columnContent.implicitHeight + Math.min(root.width, root.height) * 0.04, Math.min(root.width, root.height) * 0.2)
+                implicitHeight: Math.min(root.width, root.height) * 0.2
 
                 LoaderSpinner {
                     anchors.centerIn: parent
@@ -81,33 +78,6 @@ Item {
                     height: width
                     running: root.isLoading
                     visible: running
-                }
-
-                ColumnLayout {
-                    id: columnContent
-                    anchors.centerIn: parent
-                    spacing: Math.min(root.width, root.height) * 0.005
-                    visible: !root.isLoading
-
-                    Image {
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: Math.min(root.width, root.height) * 0.6
-                        Layout.preferredHeight: Math.min(root.width, root.height) * 0.6
-                        Layout.bottomMargin: -Math.min(root.width, root.height) * 0.12
-                        source: "../resources/sad_cat.png"
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-                        visible: root.showEmptyImage
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: Math.min(root.width, root.height) * 0.01
-                        text: root.emptyText
-                        font.family: root.fontName
-                        font.pixelSize: Math.min(root.width, root.height) * 0.04
-                        color: root.textDark
-                    }
                 }
             }
         }

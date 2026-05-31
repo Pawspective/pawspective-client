@@ -501,7 +501,6 @@ Rectangle {
 
             ReviewListView {
                 anchors.fill: parent
-                emptyText: "No reviews"
                 onAnimalRequested: function(animalId) { root.animalDetailRequested(animalId) }
             }
         }
