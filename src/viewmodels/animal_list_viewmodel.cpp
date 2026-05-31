@@ -38,6 +38,8 @@ QVariant AnimalListInternalModel::data(const QModelIndex& index, int role) const
             return item.age;
         case AnimalTypeRole:
             return item.animalType;
+        case CanBeAdoptedRole:
+            return item.canBeAdopted;
         default:
             return QVariant();
     }
@@ -50,6 +52,7 @@ QHash<int, QByteArray> AnimalListInternalModel::roleNames() const {
     roles[DescriptionRole] = "animalDescription";
     roles[AgeRole] = "animalAge";
     roles[AnimalTypeRole] = "animalType";
+    roles[CanBeAdoptedRole] = "canBeAdopted";
     return roles;
 }
 
@@ -75,6 +78,7 @@ void AnimalListInternalModel::update(const QList<models::AnimalDTO>& dtos) {
                 default:
                     item.animalType = "Other";
             }
+            item.canBeAdopted = dto.canBeAdopted;
             m_items.append(item);
         }
         endInsertRows();

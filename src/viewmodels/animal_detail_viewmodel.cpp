@@ -8,14 +8,21 @@ namespace pawspective::viewmodels {
 AnimalDetailViewModel::AnimalDetailViewModel(
     services::AnimalService& animalService,
     services::OrganizationService& organizationService,
+    services::AdoptRequestService& adoptRequestService,
     QObject* parent
 )
-    : BaseViewModel(parent), m_animalService(animalService), m_organizationService(organizationService) {
+    : BaseViewModel(parent),
+      m_animalService(animalService),
+      m_organizationService(organizationService),
+      m_adoptRequestService(adoptRequestService) {
     connect(
         &m_animalService,
         &services::AnimalService::getAnimalSuccess,
         this,
         [this](const models::AnimalDTO& animal) {
+            if (animal.id != m_currentAnimalId) {
+                return;
+            }
             setFromDTO(animal);
             if (m_organizationId > 0) {
                 m_organizationService.getOrganization(m_organizationId);
@@ -67,6 +74,28 @@ AnimalDetailViewModel::AnimalDetailViewModel(
         this,
         &AnimalDetailViewModel::handleDeleteFailed
     );
+    connect(
+        &m_adoptRequestService,
+        &services::AdoptRequestService::createAdoptRequestSuccess,
+        this,
+        [this](const models::AdoptRequestDTO&) {
+            if (m_canBeAdopted) {
+                m_canBeAdopted = false;
+                emit canBeAdoptedChanged();
+            }
+            emit adoptSuccess();
+        }
+    );
+    connect(
+        &m_adoptRequestService,
+        &services::AdoptRequestService::createAdoptRequestFailed,
+        this,
+        [this](QSharedPointer<services::BaseError> error) {
+            QString message = error ? error->getMessage() : "Failed to send adoption request";
+            emit adoptFailed(message);
+            emitError(ErrorType::NetworkError, message);
+        }
+    );
 }
 
 void AnimalDetailViewModel::loadAnimal(qint64 id) {
@@ -76,7 +105,6 @@ void AnimalDetailViewModel::loadAnimal(qint64 id) {
 }
 
 void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
-    m_currentAnimalId = dto.id;
     if (m_name != dto.name) {
         m_name = dto.name;
         emit nameChanged();
@@ -140,6 +168,11 @@ void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
         emit descriptionChanged();
     }
 
+    if (m_canBeAdopted != dto.canBeAdopted) {
+        m_canBeAdopted = dto.canBeAdopted;
+        emit canBeAdoptedChanged();
+    }
+
     if (m_organizationId != dto.organizationId) {
         m_organizationId = dto.organizationId;
         emit organizationIdChanged();
@@ -178,6 +211,14 @@ void AnimalDetailViewModel::deleteAnimal() {
         return;
     }
     m_animalService.deleteAnimal(m_currentAnimalId);
+}
+
+void AnimalDetailViewModel::adoptAnimal() {
+    if (m_currentAnimalId == 0) {
+        emit adoptFailed("No animal selected");
+        return;
+    }
+    m_adoptRequestService.createAdoptRequest(m_currentAnimalId);
 }
 
 void AnimalDetailViewModel::handleDeleteSuccess() { emit deleteSuccess(); }

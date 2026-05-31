@@ -24,6 +24,7 @@ struct AnimalDTO {
     qint32 age = 0;
     std::optional<QString> description;
     AnimalStatus status;
+    bool canBeAdopted = false;
 
     QJsonObject toJson() const;
     static AnimalDTO fromJson(const QJsonObject& json);

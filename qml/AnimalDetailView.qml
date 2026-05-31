@@ -12,7 +12,9 @@ Rectangle {
     signal backClicked()
     signal organizationRequested(int organizationId)
     signal updateAnimalRequested(int animalId)
-    signal animalDeleted() 
+    signal animalDeleted()
+
+    property bool requestJustSent: false
 
     Connections {
         target: root.viewModel
@@ -25,6 +27,13 @@ Rectangle {
             root.animalDeleted()
         }
         function onDeleteFailed(message) {
+            errorText.text = message
+        }
+        function onAdoptSuccess() {
+            errorText.text = ""
+            root.requestJustSent = true
+        }
+        function onAdoptFailed(message) {
             errorText.text = message
         }
     }
@@ -53,7 +62,7 @@ Rectangle {
         readonly property color buttonText: "#e7ebf5"
         readonly property color chipBg: "#e8d8cb"
         readonly property color border: "#b8abd7"
-        readonly property color deleteRed: "#e26d5c" 
+        readonly property color deleteRed: "#e26d5c"
     }
 
     readonly property real fieldLabelSize: root.height * 0.022
@@ -69,6 +78,7 @@ Rectangle {
         var animalOrgId = Number(viewModel.organizationId)
         return userOrgId > 0 && animalOrgId > 0 && userOrgId === animalOrgId
     }
+
     Rectangle {
         id: backButton
         z: 10
@@ -254,12 +264,44 @@ Rectangle {
             }
 
             RowLayout {
+                visible: !root.isOwnOrganization && root.viewModel && !root.viewModel.isBusy
+                Layout.fillWidth: true
+                Layout.leftMargin: root.sideMargin
+                Layout.rightMargin: root.sideMargin
+                Layout.preferredHeight: root.height * 0.08
+
+                CustomButton {
+                    readonly property bool canAdopt: root.viewModel && root.viewModel.canBeAdopted
+                    readonly property string disabledReason: {
+                        if (!root.viewModel) return ""
+                        var s = root.viewModel.status
+                        if (s === "adopted") return "already adopted"
+                        return "request already sent or animal is unavailable"
+                    }
+
+                    text: root.requestJustSent ? "Request sent"
+                        : canAdopt ? "Adopt"
+                        : "You can't adopt now (" + disabledReason + ")"
+                    enabled: canAdopt && !root.requestJustSent
+                    baseColor: (canAdopt && !root.requestJustSent) ? theme.purple : "#b0b0b0"
+                    hoverColor: (canAdopt && !root.requestJustSent) ? theme.accentPink : "#b0b0b0"
+                    textColor: theme.buttonText
+                    fontSize: root.height * 0.025
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    onClicked: {
+                        if (root.viewModel) root.viewModel.adoptAnimal()
+                    }
+                }
+            }
+
+            RowLayout {
                 visible: root.isOwnOrganization
                 Layout.fillWidth: true
                 Layout.leftMargin: root.sideMargin
                 Layout.rightMargin: root.sideMargin
                 Layout.preferredHeight: root.height * 0.08
-                spacing: root.width * 0.03 
+                spacing: root.width * 0.03
 
                 CustomButton {
                     text: "Update Animal"
@@ -267,7 +309,7 @@ Rectangle {
                     hoverColor: theme.accentPink
                     textColor: theme.buttonText
                     fontSize: root.height * 0.025
-                    Layout.fillWidth: true 
+                    Layout.fillWidth: true
                     Layout.fillHeight: true
                     onClicked: {
                         console.log("Update animal clicked, id:", root.animalId)
@@ -277,11 +319,11 @@ Rectangle {
 
                 CustomButton {
                     text: "Delete Animal"
-                    baseColor: theme.deleteRed       
+                    baseColor: theme.deleteRed
                     hoverColor: theme.accentPink
                     textColor: theme.buttonText
                     fontSize: root.height * 0.025
-                    Layout.fillWidth: true 
+                    Layout.fillWidth: true
                     Layout.fillHeight: true
                     onClicked: {
                         console.log("Delete animal clicked, id:", root.animalId)
@@ -327,7 +369,8 @@ Rectangle {
             }
         }
     }
-Dialog {
+
+    Dialog {
         id: deleteConfirmDialog
         modal: true
         parent: ApplicationWindow.overlay
@@ -335,11 +378,11 @@ Dialog {
         width: parent.width * 0.8
         title: "Delete Animal Profile"
         standardButtons: Dialog.Yes | Dialog.No
-        
+
         onAccepted: {
             if (viewModel) viewModel.deleteAnimal()
         }
-        
+
         contentItem: Text {
             text: "Are you sure you want to permanently delete this animal?"
             wrapMode: Text.WordWrap
@@ -350,4 +393,5 @@ Dialog {
             font.pixelSize: 14
         }
     }
+
 }

@@ -10,6 +10,7 @@ Rectangle {
     property int animalAge: 0
     property string animalDescription: ""
     property int animalId: 0
+    property bool canBeAdopted: false
 
     signal clicked(int animalId)
 
@@ -32,6 +33,29 @@ Rectangle {
         onEntered: root.color = "#f4a7b9"
         onExited: root.color = "#b8abd7"
         onClicked: root.clicked(root.animalId)
+    }
+
+    Rectangle {
+        visible: root.canBeAdopted
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.topMargin: root.padV
+        anchors.rightMargin: root.padH * 0.5
+        width: adoptBadgeText.implicitWidth + root.padH * 0.6
+        height: root.width * 0.038
+        radius: height / 2
+        color: "#f4a7b9"
+        z: 1
+
+        Text {
+            id: adoptBadgeText
+            anchors.centerIn: parent
+            text: "Adoptable"
+            font.family: "Comic Sans MS"
+            font.pixelSize: root.width * 0.018
+            font.bold: true
+            color: "#fdfdfd"
+        }
     }
 
     ColumnLayout {

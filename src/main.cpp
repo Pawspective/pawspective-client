@@ -6,6 +6,7 @@
 #include <QUrl>
 
 #include "mainwindow.hpp"
+#include "services/adopt_request_service.hpp"
 #include "services/animal_service.hpp"
 #include "services/auth_service.hpp"
 #include "services/breed_service.hpp"
@@ -51,6 +52,7 @@ int main(int argc, char* argv[]) {
     pawspective::services::CityService cityService(networkClient);
     pawspective::services::AnimalService animalService(networkClient);
     pawspective::services::BreedService breedService(networkClient);
+    pawspective::services::AdoptRequestService adoptRequestService(networkClient);
     pawspective::services::PostService postService(networkClient);
     auto loginViewModel = new pawspective::viewmodels::LoginViewModel(authService, &app);
     auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
@@ -64,8 +66,12 @@ int main(int argc, char* argv[]) {
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
     auto createAnimalViewModel = new pawspective::viewmodels::CreateAnimalViewModel(animalService, breedService, &app);
     auto organizationCardViewModel = new pawspective::viewmodels::OrganizationCardViewModel(&app);
-    auto animalDetailViewModel =
-        new pawspective::viewmodels::AnimalDetailViewModel(animalService, organizationService, &app);
+    auto animalDetailViewModel = new pawspective::viewmodels::AnimalDetailViewModel(
+        animalService,
+        organizationService,
+        adoptRequestService,
+        &app
+    );
     auto searchOrganizationViewModel =
         new pawspective::viewmodels::SearchOrganizationViewModel(organizationService, &app);
     auto updateAnimalViewModel = new pawspective::viewmodels::UpdateAnimalViewModel(animalService, breedService, &app);
