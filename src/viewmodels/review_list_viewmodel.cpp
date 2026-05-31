@@ -89,6 +89,18 @@ ReviewListViewModel::ReviewListViewModel(services::ReviewService& reviewService,
         this,
         &ReviewListViewModel::handleGetReviewsFailed
     );
+    connect(
+        &m_reviewService,
+        &services::ReviewService::deleteReviewSuccess,
+        this,
+        &ReviewListViewModel::handleDeleteSuccess
+    );
+    connect(
+        &m_reviewService,
+        &services::ReviewService::deleteReviewFailed,
+        this,
+        &ReviewListViewModel::handleDeleteFailed
+    );
 }
 
 QAbstractListModel* ReviewListViewModel::listModel() { return m_listModel; }
@@ -156,6 +168,16 @@ void ReviewListViewModel::prevPage() {
     }
 }
 
+void ReviewListViewModel::deleteReview(qint64 id) {
+    qDebug() << "Deleting review with ID:" << id;
+    if (id <= 0) {
+        emit deleteFailed("No review selected");
+        return;
+    }
+    setIsBusy(true);
+    m_reviewService.deleteReview(id);
+}
+
 void ReviewListViewModel::handleGetReviewsSuccess(const models::ReviewListDTO& result) {
     if (auto internalModel = qobject_cast<detail::ReviewListInternalModel*>(m_listModel)) {
         qDebug()
@@ -181,6 +203,20 @@ void ReviewListViewModel::handleGetReviewsFailed(QSharedPointer<services::BaseEr
             << "Failed to load reviews for organization" << m_currentOrganizationId << ":" << error->getMessage();
         emitError(ErrorType::NetworkError, error->getMessage());
     }
+}
+
+void ReviewListViewModel::handleDeleteSuccess() {
+    updateProperty(m_isLoading, true, [this]() { emit isLoadingChanged(); });
+    setIsBusy(true);
+    m_reviewService.getByOrganizationId(m_currentOrganizationId, m_currentPage, m_pageSize);
+    emit deleteSuccess();
+}
+
+void ReviewListViewModel::handleDeleteFailed(QSharedPointer<services::BaseError> error) {
+    setIsBusy(false);
+    QString message = error ? error->getMessage() : "Failed to delete review";
+    emit deleteFailed(message);
+    emitError(ErrorType::NetworkError, message);
 }
 
 }  // namespace pawspective::viewmodels

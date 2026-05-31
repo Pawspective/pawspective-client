@@ -14,7 +14,6 @@ Item {
     property real paginationScale: Math.min(root.width, root.height) * 1.75
 
     signal editRequested(int reviewId)
-    signal deleteRequested(int reviewId)
     signal animalRequested(int animalId)
 
     readonly property color textDark: "#8572af"
@@ -94,7 +93,7 @@ Item {
                 ? model.canEdit
                 : (model.can_edit !== undefined ? model.can_edit : false)
             onEditRequested: function(reviewId) { root.editRequested(reviewId) }
-            onDeleteRequested: function(reviewId) { root.deleteRequested(reviewId) }
+            onDeleteRequested: function(reviewId) { deleteConfirmDialog.reviewId = reviewId; deleteConfirmDialog.open() }
             onAnimalClicked: function(animalId) { root.animalRequested(animalId) }
         }
 
@@ -104,6 +103,40 @@ Item {
         }
 
         model: root.model ? root.model : (root.viewModel ? root.viewModel.listModel : null)
+    }
+
+    Dialog {
+        id: deleteConfirmDialog
+        property int reviewId: -1
+        modal: true
+        parent: Window.window ? Window.window.overlay : Overlay.overlay
+        
+        // Задаем ширину (80% от ширины всего окна приложения)
+        width: Window.window ? Window.window.width * 0.8 : 300
+        
+        // Математическое выравнивание строго по центру родителя (оверлея окна)
+        x: parent ? (parent.width - width) / 2 : 0
+        y: parent ? (parent.height - height) / 2 : 0
+        title: "Delete Review"
+        standardButtons: Dialog.Yes | Dialog.No
+
+        onAccepted: {
+            if (root.viewModel && deleteConfirmDialog.reviewId > 0) {
+                var id = deleteConfirmDialog.reviewId
+                root.viewModel.deleteReview(id)
+                deleteConfirmDialog.reviewId = -1
+            }
+        }
+
+        contentItem: Text {
+            text: "Are you sure you want to delete this review? This action cannot be undone."
+            wrapMode: Text.WordWrap
+            anchors.fill: parent
+            anchors.margins: 20
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 14
+        }
     }
 
     // Builds the list of page buttons to display:

@@ -73,10 +73,13 @@ public:
     Q_INVOKABLE void goToPage(int page);
     Q_INVOKABLE void nextPage();
     Q_INVOKABLE void prevPage();
+    Q_INVOKABLE void deleteReview(qint64 id);
 
 signals:
     void isLoadingChanged();
     void paginationChanged();
+    void deleteSuccess();
+    void deleteFailed(const QString& message);
 
 private:
     QAbstractListModel* m_listModel;
@@ -92,6 +95,8 @@ private:
 private slots:
     void handleGetReviewsSuccess(const models::ReviewListDTO& result);
     void handleGetReviewsFailed(QSharedPointer<services::BaseError> error);
+    void handleDeleteSuccess();
+    void handleDeleteFailed(QSharedPointer<services::BaseError> error);
 };
 
 }  // namespace pawspective::viewmodels
