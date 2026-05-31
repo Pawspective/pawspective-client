@@ -441,6 +441,16 @@ Rectangle {
                         }
                     }
                 }
+                TabButton {
+                    visible: root.canUpdateOrganization
+                    text: "Requests"
+                    active: root.currentTab === 3
+                    onClicked: {
+                        if (organizationViewModel) {
+                            organizationViewModel.currentTab = 3
+                        }
+                    }
+                }
             }
 
             Rectangle {
@@ -454,7 +464,9 @@ Rectangle {
                     anchors.margins: root.height * 0.02
                     sourceComponent: root.currentTab === 0
                                      ? reviewsContent
-                                     : (root.currentTab === 1 ? animalsContent : postsContent)
+                                     : (root.currentTab === 1
+                                        ? animalsContent
+                                        : (root.currentTab === 2 ? postsContent : requestsContent))
                 }
             }
         }
@@ -832,6 +844,176 @@ Rectangle {
                         implicitHeight: Math.min(root.width, root.height) * 0.07
                         fontSize: Math.min(root.width, root.height) * 0.035
                         baseColor: nextButton.enabled ? "#8572af" : "#c4b8e0"
+                        hoverColor: "#7060a0"
+                        clickColor: "#5a4a8a"
+                        textColor: "white"
+                        radius: 6
+                    }
+                }
+            }
+        }
+    }
+
+    // Requests tab
+    Component {
+        id: requestsContent
+        Item {
+            anchors.fill: parent
+
+            property bool initialized: false
+            property var lastLoadedOrgId: -1
+            readonly property bool hasPagination: typeof adoptRequestListViewModel !== 'undefined'
+                && adoptRequestListViewModel && adoptRequestListViewModel.totalPages > 1
+
+            function reloadRequests() {
+                if (typeof adoptRequestListViewModel !== 'undefined' && adoptRequestListViewModel && organizationViewModel) {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0 && orgId !== lastLoadedOrgId) {
+                        lastLoadedOrgId = orgId
+                        adoptRequestListViewModel.loadRequestsForOrganization(orgId)
+                    }
+                }
+            }
+
+            function buildPageWindow() {
+                if (typeof adoptRequestListViewModel === 'undefined' || !adoptRequestListViewModel
+                    || adoptRequestListViewModel.totalPages <= 1) return []
+                const cur = adoptRequestListViewModel.currentPage
+                const last = adoptRequestListViewModel.totalPages
+                const window = 2
+                let pages = []
+
+                pages.push(1)
+
+                const winStart = Math.max(2, cur - window)
+                const winEnd = Math.min(last - 1, cur + window)
+
+                if (winStart > 2) pages.push(-1)
+
+                for (let p = winStart; p <= winEnd; p++) pages.push(p)
+
+                if (winEnd < last - 1) pages.push(-1)
+
+                if (last > 1) pages.push(last)
+
+                return pages
+            }
+
+            Component.onCompleted: {
+                if (typeof adoptRequestListViewModel !== 'undefined' && adoptRequestListViewModel && !initialized) {
+                    adoptRequestListViewModel.initialize()
+                    initialized = true
+                }
+
+                reloadRequests()
+
+                if (organizationViewModel) {
+                    organizationViewModel.currentOrganizationIdChanged.connect(reloadRequests)
+                }
+            }
+
+            Component.onDestruction: {
+                if (typeof adoptRequestListViewModel !== 'undefined' && adoptRequestListViewModel) {
+                    adoptRequestListViewModel.cleanup()
+                    initialized = false
+                }
+            }
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: root.height * 0.01
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    RequestListView {
+                        anchors.fill: parent
+                        viewModel: typeof adoptRequestListViewModel !== 'undefined' ? adoptRequestListViewModel : null
+                        canActOnRequest: root.canUpdateOrganization
+                        showPaginationControls: false
+                    }
+                }
+
+                Row {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.bottomMargin: root.height * 0.01
+                    spacing: root.width * 0.01
+                    visible: hasPagination
+
+                    CustomButton {
+                        id: reqPrevButton
+                        text: "<"
+                        enabled: typeof adoptRequestListViewModel !== 'undefined' && adoptRequestListViewModel
+                            && adoptRequestListViewModel.currentPage > 1 && !adoptRequestListViewModel.isLoading
+                        onClicked: adoptRequestListViewModel.prevPage()
+                        implicitWidth: Math.min(root.width, root.height) * 0.09
+                        implicitHeight: Math.min(root.width, root.height) * 0.07
+                        fontSize: Math.min(root.width, root.height) * 0.035
+                        baseColor: reqPrevButton.enabled ? "#8572af" : "#c4b8e0"
+                        hoverColor: "#7060a0"
+                        clickColor: "#5a4a8a"
+                        textColor: "white"
+                        radius: 6
+                    }
+
+                    Repeater {
+                        model: buildPageWindow()
+
+                        delegate: Item {
+                            implicitWidth: modelData === -1
+                                ? Math.min(root.width, root.height) * 0.05
+                                : Math.min(root.width, root.height) * 0.09
+                            implicitHeight: Math.min(root.width, root.height) * 0.07
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Text {
+                                anchors.centerIn: parent
+                                visible: modelData === -1
+                                text: "..."
+                                font.family: theme.fontName
+                                font.pixelSize: Math.min(root.width, root.height) * 0.035
+                                color: theme.textDark
+                            }
+
+                            CustomButton {
+                                id: reqPageBtn
+                                anchors.fill: parent
+                                visible: modelData !== -1
+                                enabled: typeof adoptRequestListViewModel !== 'undefined' && adoptRequestListViewModel
+                                    && !adoptRequestListViewModel.isLoading
+                                    && modelData !== adoptRequestListViewModel.currentPage
+                                onClicked: adoptRequestListViewModel.goToPage(modelData)
+
+                                readonly property bool isCurrent: modelData === (typeof adoptRequestListViewModel !== 'undefined'
+                                    && adoptRequestListViewModel ? adoptRequestListViewModel.currentPage : -1)
+
+                                text: modelData !== -1 ? String(modelData) : ""
+                                fontSize: Math.min(root.width, root.height) * 0.032
+                                baseColor: "#00f0ecf9"
+                                hoverColor: "#f0ecf9"
+                                clickColor: "#e0d8f5"
+                                textColor: reqPageBtn.isCurrent ? "#5a4a8a"
+                                         : reqPageBtn.enabled   ? "#8572af"
+                                         :                       "#c4b8e0"
+                                border.color: reqPageBtn.isCurrent ? "#5a4a8a" : "transparent"
+                                border.width: reqPageBtn.isCurrent ? 2 : 0
+                                radius: 6
+                            }
+                        }
+                    }
+
+                    CustomButton {
+                        id: reqNextButton
+                        text: ">"
+                        enabled: typeof adoptRequestListViewModel !== 'undefined' && adoptRequestListViewModel
+                            && adoptRequestListViewModel.currentPage < adoptRequestListViewModel.totalPages
+                            && !adoptRequestListViewModel.isLoading
+                        onClicked: adoptRequestListViewModel.nextPage()
+                        implicitWidth: Math.min(root.width, root.height) * 0.09
+                        implicitHeight: Math.min(root.width, root.height) * 0.07
+                        fontSize: Math.min(root.width, root.height) * 0.035
+                        baseColor: reqNextButton.enabled ? "#8572af" : "#c4b8e0"
                         hoverColor: "#7060a0"
                         clickColor: "#5a4a8a"
                         textColor: "white"
