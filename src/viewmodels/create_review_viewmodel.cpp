@@ -41,24 +41,24 @@ void CreateReviewViewModel::setupConnections() {
 }
 
 void CreateReviewViewModel::onAnimalsLoaded(const QList<models::AnimalDTO>& animals) {
-    QVariantList availableAnimals;
+    QVariantList pendingAnimals;
     bool selectedAnimalAval = false;
 
     for (const auto& animal : animals) {
         QVariantMap item;
         item["id"] = animal.id;
         item["name"] = animal.name;
-        availableAnimals.append(item);
+        pendingAnimals.append(item);
 
         if (animal.id == m_createDto.animalId) {
             selectedAnimalAval = true;
         }
     }
 
-    updateProperty(m_availableAnimals, availableAnimals, [this] { emit availableAnimalsChanged(); });
+    updateProperty(m_availableAnimals, pendingAnimals, [this] { emit availableAnimalsChanged(); });
 
-    if (!availableAnimals.isEmpty() && (!selectedAnimalAval || m_createDto.animalId <= 0)) {
-        setAnimalId(availableAnimals.first().toMap().value("id").toLongLong());
+    if (!pendingAnimals.isEmpty() && (!selectedAnimalAval || m_createDto.animalId <= 0)) {
+        setAnimalId(pendingAnimals.first().toMap().value("id").toLongLong());
     }
 
     setIsBusy(false);
