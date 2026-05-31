@@ -39,6 +39,7 @@ Rectangle {
     signal updateOrganizationClicked()
     signal createAnimalRequested()
     signal createPostRequested()
+    signal createReviewRequested()
     signal animalDetailRequested(int animalId)
     signal backClicked()
 
@@ -622,8 +623,26 @@ Rectangle {
                 }
             }
 
+            Component {
+                id: createReviewButtonComponent
+                CustomButton {
+                    text: "+ Create Review"
+                    baseColor: theme.purple
+                    hoverColor: theme.accentPink
+                    textColor: theme.buttonText
+                    fontSize: root.height * 0.025
+                    Layout.alignment: Qt.AlignRight
+                    Layout.preferredWidth: root.width * 0.15
+                    Layout.preferredHeight: root.height * 0.06
+                    Layout.rightMargin: root.height * 0.02
+                    Layout.topMargin: root.height * 0.02
+                    onClicked: root.createReviewRequested()
+                }
+            }
+
             ReviewListView {
                 anchors.fill: parent
+                headerComponent: createReviewButtonComponent
                 onAnimalRequested: function(animalId) { root.animalDetailRequested(animalId) }
             }
         }

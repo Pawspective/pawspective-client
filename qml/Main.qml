@@ -39,6 +39,7 @@ ApplicationWindow {
     signal animalCreated()
     signal animalUpdated()
     signal animalDeleted()
+    signal reviewCreated()
     signal postCreated()
     signal postUpdated()
 
@@ -258,6 +259,9 @@ ApplicationWindow {
             
             onCreateOrganizationClicked: stackView.push(registerOrganizationViewComponent)
             onUpdateOrganizationClicked: stackView.push(updateOrganizationViewComponent)
+            onCreateReviewRequested: {
+                stackView.push(reviewCreateViewComponent)
+            }
             onCreateAnimalRequested: {
                 var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
                 console.log("Creating animal for organization ID:", orgId)
@@ -323,6 +327,15 @@ ApplicationWindow {
                     if (orgId > 0) {
                         console.log("Post updated, reloading posts for org:", orgId)
                         postListViewModel.loadPostsForOrganization(orgId)
+                    }
+                }
+            }
+            function onReviewCreated() {
+                if (organizationViewModel && typeof reviewListViewModel !== 'undefined') {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0) {
+                        console.log("Review created, reloading reviews for org:", orgId)
+                        reviewListViewModel.loadReviewsForOrganization(orgId)
                     }
                 }
             }
@@ -439,6 +452,35 @@ ApplicationWindow {
             Component.onDestruction: {
                 if (createPostViewModel) {
                     createPostViewModel.cleanup()
+                }
+            }
+        }
+    }
+
+    Component {
+        id: reviewCreateViewComponent
+        ReviewCreateView {
+            viewModel: createReviewViewModel
+
+            onBackClicked: {
+                createReviewViewModel.cleanup()
+                stackView.pop()
+            }
+
+            onCreateSuccess: {
+                createReviewViewModel.cleanup()
+                stackView.pop()
+                window.reviewCreated()
+            }
+
+            Component.onCompleted: {
+                if (createReviewViewModel) {
+                    createReviewViewModel.initialize()
+                }
+            }
+            Component.onDestruction: {
+                if (createReviewViewModel) {
+                    createReviewViewModel.cleanup()
                 }
             }
         }

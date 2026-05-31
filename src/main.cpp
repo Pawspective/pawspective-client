@@ -19,6 +19,7 @@
 #include "viewmodels/animal_detail_viewmodel.hpp"
 #include "viewmodels/animal_list_viewmodel.hpp"
 #include "viewmodels/create_animal_viewmodel.hpp"
+#include "viewmodels/create_review_viewmodel.hpp"
 #include "viewmodels/create_post_viewmodel.hpp"
 #include "viewmodels/login_view_model.hpp"
 #include "viewmodels/organization_card_viewmodel.hpp"
@@ -70,6 +71,7 @@ int main(int argc, char* argv[]) {
     auto updateOrganizationViewModel =
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
     auto createAnimalViewModel = new pawspective::viewmodels::CreateAnimalViewModel(animalService, breedService, &app);
+    auto createReviewViewModel = new pawspective::viewmodels::CreateReviewViewModel(reviewService, animalService, &app);
     auto organizationCardViewModel = new pawspective::viewmodels::OrganizationCardViewModel(&app);
     auto animalDetailViewModel = new pawspective::viewmodels::AnimalDetailViewModel(
         animalService,
@@ -103,6 +105,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("updateOrganizationViewModel", updateOrganizationViewModel);
     engine.rootContext()->setContextProperty("userUpdateViewModel", userUpdateViewModel);
     engine.rootContext()->setContextProperty("createAnimalViewModel", createAnimalViewModel);
+    engine.rootContext()->setContextProperty("createReviewViewModel", createReviewViewModel);
     engine.rootContext()->setContextProperty("organizationCardViewModel", organizationCardViewModel);
     engine.rootContext()->setContextProperty("animalDetailViewModel", animalDetailViewModel);
     engine.rootContext()->setContextProperty("searchOrganizationViewModel", searchOrganizationViewModel);
