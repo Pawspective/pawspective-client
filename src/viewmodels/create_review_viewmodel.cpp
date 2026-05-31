@@ -96,9 +96,7 @@ void CreateReviewViewModel::loadAvailableAnimals() {
     m_animalService.getPendingReviewAnimals();
 }
 
-void CreateReviewViewModel::initialize() {
-    loadAvailableAnimals();
-}
+void CreateReviewViewModel::initialize() { loadAvailableAnimals(); }
 
 void CreateReviewViewModel::cleanup() {
     m_createDto = models::ReviewCreateDTO{};

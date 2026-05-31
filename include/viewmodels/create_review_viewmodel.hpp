@@ -1,7 +1,7 @@
 #pragma once
 
-#include <functional>
 #include <QVariantList>
+#include <functional>
 
 #include "base.hpp"
 #include "models/review_create_dto.hpp"
