@@ -61,9 +61,15 @@ void ReviewService::handleSuccess(
     }
 }
 
-void ReviewService::getByOrganizationId(qint64 id) {
+void ReviewService::getByOrganizationId(qint64 id, int page, int limit) {
     QUrlQuery query;
     query.addQueryItem("org_id", QString::number(id));
+    if (page > 0) {
+        query.addQueryItem("page", QString::number(page));
+    }
+    if (limit > 0) {
+        query.addQueryItem("limit", QString::number(limit));
+    }
 
     QUrl url("/reviews");
     url.setQuery(query);
