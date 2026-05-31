@@ -1,10 +1,12 @@
 #pragma once
 
 #include <QObject>
+#include <QSet>
 #include <QString>
 
 #include "base.hpp"
 #include "models/animal_dto.hpp"
+#include "services/adopt_request_service.hpp"
 #include "services/animal_service.hpp"
 #include "services/organization_service.hpp"
 
@@ -27,11 +29,14 @@ class AnimalDetailViewModel : public BaseViewModel {
     Q_PROPERTY(QString organizationName READ organizationName NOTIFY organizationNameChanged)
     Q_PROPERTY(QString organizationCity READ organizationCity NOTIFY organizationCityChanged)
     Q_PROPERTY(QString organizationDescription READ organizationDescription NOTIFY organizationDescriptionChanged)
+    Q_PROPERTY(bool canBeAdopted READ canBeAdopted NOTIFY canBeAdoptedChanged)
+    Q_PROPERTY(bool adoptRequestSent READ adoptRequestSent NOTIFY adoptRequestSentChanged)
 
 public:
     explicit AnimalDetailViewModel(
         services::AnimalService& animalService,
         services::OrganizationService& organizationService,
+        services::AdoptRequestService& adoptRequestService,
         QObject* parent = nullptr
     );
 
@@ -50,9 +55,12 @@ public:
     const QString& organizationName() const { return m_organizationName; }
     const QString& organizationCity() const { return m_organizationCity; }
     const QString& organizationDescription() const { return m_organizationDescription; }
+    bool canBeAdopted() const { return m_canBeAdopted; }
+    bool adoptRequestSent() const { return m_adoptRequestSentIds.contains(m_currentAnimalId); }
 
     Q_INVOKABLE void loadAnimal(qint64 id);
     Q_INVOKABLE void deleteAnimal();
+    Q_INVOKABLE void adoptAnimal();
     void initialize() override {}
     void cleanup() override {}
 
@@ -72,8 +80,12 @@ signals:
     void organizationNameChanged();
     void organizationCityChanged();
     void organizationDescriptionChanged();
+    void canBeAdoptedChanged();
+    void adoptRequestSentChanged();
     void deleteSuccess();
     void deleteFailed(const QString& message);
+    void adoptSuccess();
+    void adoptFailed(const QString& message);
 
 private slots:
     void handleDeleteSuccess();
@@ -86,6 +98,7 @@ private:
 
     services::AnimalService& m_animalService;
     services::OrganizationService& m_organizationService;
+    services::AdoptRequestService& m_adoptRequestService;
 
     qint64 m_currentAnimalId = 0;
     QString m_name;
@@ -103,6 +116,8 @@ private:
     QString m_organizationName;
     QString m_organizationCity;
     QString m_organizationDescription;
+    bool m_canBeAdopted = false;
+    QSet<qint64> m_adoptRequestSentIds;
 };
 
 }  // namespace pawspective::viewmodels

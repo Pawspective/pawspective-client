@@ -23,6 +23,7 @@ QJsonObject AnimalDTO::toJson() const {
         json["description"] = description.value();
     }
     json["status"] = toApiString(status);
+    json["can_be_adopted"] = canBeAdopted;
 
     return json;
 }
@@ -41,6 +42,7 @@ AnimalDTO AnimalDTO::fromJson(const QJsonObject& json) {
     dto.age = pawspective::utils::json::getRequiredInt32(json, "age");
     dto.description = pawspective::utils::json::getOptionalString(json, "description");
     dto.status = animalStatusFromApi(pawspective::utils::json::getRequiredString(json, "status"));
+    dto.canBeAdopted = pawspective::utils::json::getRequiredBool(json, "can_be_adopted");
     return dto;
 }
 

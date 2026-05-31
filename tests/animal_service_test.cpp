@@ -107,6 +107,7 @@ static QByteArray validAnimalJson(qint64 id = 1, const QString& name = "Buddy") 
     animal["good_with"] = "dogs";
     animal["age"] = 3;
     animal["status"] = "available";
+    animal["can_be_adopted"] = true;
     return QJsonDocument(animal).toJson(QJsonDocument::Compact);
 }
 
@@ -125,6 +126,7 @@ static QByteArray validAnimalArrayJson() {
     a1["good_with"] = "dogs";
     a1["age"] = 3;
     a1["status"] = "available";
+    a1["can_be_adopted"] = true;
 
     QJsonObject a2;
     a2["id"] = 2;
@@ -138,6 +140,7 @@ static QByteArray validAnimalArrayJson() {
     a2["good_with"] = "cats";
     a2["age"] = 2;
     a2["status"] = "available";
+    a2["can_be_adopted"] = false;
 
     arr.append(a1);
     arr.append(a2);
@@ -165,6 +168,7 @@ static QByteArray validAnimalListJson(int page = 1, int limit = 10) {
     a1["good_with"] = "dogs";
     a1["age"] = 3;
     a1["status"] = "available";
+    a1["can_be_adopted"] = true;
 
     QJsonObject a2;
     a2["id"] = 2;
@@ -178,6 +182,7 @@ static QByteArray validAnimalListJson(int page = 1, int limit = 10) {
     a2["good_with"] = "cats";
     a2["age"] = 2;
     a2["status"] = "available";
+    a2["can_be_adopted"] = false;
 
     items.append(a1);
     items.append(a2);
@@ -283,6 +288,7 @@ void TestAnimalService::testAnimalDtoFromJson_ValidObject() {
     json["good_with"] = "children";
     json["age"] = 4;
     json["status"] = "available";
+    json["can_be_adopted"] = true;
 
     AnimalDTO dto = AnimalDTO::fromJson(json);
 
@@ -346,6 +352,7 @@ void TestAnimalService::testAnimalDtoToJson_RoundTrip() {
     json["good_with"] = "elderly";
     json["age"] = 2;
     json["status"] = "available";
+    json["can_be_adopted"] = false;
 
     AnimalDTO dto = AnimalDTO::fromJson(json);
     QJsonObject result = dto.toJson();
@@ -371,6 +378,7 @@ void TestAnimalService::testAnimalDtoToJson_WithDescription() {
     json["age"] = 1;
     json["description"] = "Very friendly";
     json["status"] = "available";
+    json["can_be_adopted"] = true;
 
     AnimalDTO dto = AnimalDTO::fromJson(json);
     QJsonObject result = dto.toJson();

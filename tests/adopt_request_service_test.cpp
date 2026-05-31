@@ -98,6 +98,7 @@ static QJsonObject animalJson(qint64 id = 10, const QString& name = "Buddy") {
     animal["good_with"] = "dogs";
     animal["age"] = 3;
     animal["status"] = "available";
+    animal["can_be_adopted"] = true;
     return animal;
 }
 
