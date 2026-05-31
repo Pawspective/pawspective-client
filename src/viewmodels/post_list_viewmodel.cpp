@@ -84,6 +84,18 @@ PostListViewModel::PostListViewModel(services::PostService& postService, QObject
         this,
         &PostListViewModel::handleGetPostsFailed
     );
+    connect(
+        &m_postService,
+        &services::PostService::deletePostSuccess,
+        this,
+        &PostListViewModel::handleDeletePostSuccess
+    );
+    connect(
+        &m_postService,
+        &services::PostService::deletePostFailed,
+        this,
+        &PostListViewModel::handleDeletePostFailed
+    );
 }
 
 QAbstractListModel* PostListViewModel::listModel() { return m_listModel; }
@@ -166,6 +178,30 @@ void PostListViewModel::setLoading(bool loading) {
         m_isLoading = loading;
         emit isLoadingChanged();
     }
+}
+
+void PostListViewModel::deletePost(qint64 postId) {
+    if (postId <= 0) {
+        emit deleteFailed("Invalid post ID");
+        return;
+    }
+    setLoading(true);
+    m_postService.deletePost(postId);
+}
+
+void PostListViewModel::handleDeletePostSuccess() {
+    setLoading(false);
+    emit deleteSuccess();
+    if (m_currentOrganizationId > 0) {
+        loadPostsForOrganization(m_currentOrganizationId);
+    }
+}
+
+void PostListViewModel::handleDeletePostFailed(QSharedPointer<services::BaseError> error) {
+    setLoading(false);
+    QString message = error ? error->getMessage() : "Failed to delete post";
+    emit deleteFailed(message);
+    emitError(ErrorType::NetworkError, message);
 }
 
 }  // namespace pawspective::viewmodels

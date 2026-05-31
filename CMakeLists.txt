@@ -87,6 +87,7 @@ add_executable(pawspective-client
     src/models/post_update_dto.cpp
     src/utils/json.cpp
     src/viewmodels/organization_view_model.cpp
+    src/viewmodels/update_post_viewmodel.cpp
 	${PROJECT_HEADERS}
 )
 
@@ -124,6 +125,7 @@ qt_add_qml_module(pawspective-client
         qml/PostCreateView.qml
         qml/PostCardView.qml
         qml/PostListView.qml
+        qml/PostUpdateView.qml
 )
 
 target_include_directories(pawspective-client PRIVATE include)

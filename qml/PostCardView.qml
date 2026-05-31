@@ -20,8 +20,12 @@ Rectangle {
     property int postId: -1
     property string postText: ""
     property var postCreatedAt: null
+    property bool canEdit: false
     property bool isExpanded: false
     property int previewLimit: 220
+
+    signal editRequested(int postId, string postText, var postCreatedAt)
+    signal deleteRequested(int postId)
 
     readonly property real padV: root.width * 0.025
     readonly property real padH: root.width * 0.06
@@ -118,6 +122,105 @@ Rectangle {
                 color: theme.fieldBg
                 elide: Text.ElideRight
                 Layout.alignment: Qt.AlignRight | Qt.AlignTop
+            }
+        }
+    }
+
+    Rectangle {
+        id: optionsButton
+        width: root.width * 0.034
+        height: width
+        radius: width / 2
+        color: optionsArea.containsMouse ? "#19000000" : "transparent"
+        border.color: "transparent"
+        border.width: 0
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.topMargin: root.padV * 0.4
+        anchors.rightMargin: root.padH * 0.25
+        visible: root.canEdit
+        z: 2
+
+        Row {
+            anchors.centerIn: parent
+            spacing: Math.max(1, Math.round(parent.width * 0.08))
+
+            Repeater {
+                model: 3
+                delegate: Rectangle {
+                    width: Math.max(2, Math.round(parent.width * 0.22))
+                    height: width
+                    radius: width / 2
+                    color: theme.fieldBg
+                }
+            }
+        }
+
+        MouseArea {
+            id: optionsArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: optionsPopup.open()
+        }
+    }
+
+    Popup {
+        id: optionsPopup
+        parent: root
+        modal: false
+        focus: true
+        padding: 6
+        closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
+        x: optionsButton.x + optionsButton.width - width
+        y: optionsButton.y + optionsButton.height + root.padV * 0.3
+
+        background: Rectangle {
+            radius: 8
+            color: theme.fieldBg
+            border.color: theme.purple
+            border.width: 1
+        }
+
+        contentItem: Column {
+            spacing: 4
+
+            ItemDelegate {
+                width: Math.max(120, implicitWidth)
+                text: "Edit"
+                contentItem: Text {
+                    text: parent.text
+                    font.family: theme.fontName
+                    font.pixelSize: root.subtitleSize
+                    color: theme.textDark
+                }
+                background: Rectangle {
+                    color: parent.hovered ? theme.accentPink : "transparent"
+                    radius: 6
+                }
+                onClicked: {
+                    optionsPopup.close()
+                    root.editRequested(root.postId, root.postText, root.postCreatedAt)
+                }
+            }
+
+            ItemDelegate {
+                width: Math.max(120, implicitWidth)
+                text: "Delete"
+                contentItem: Text {
+                    text: parent.text
+                    font.family: theme.fontName
+                    font.pixelSize: root.subtitleSize
+                    color: theme.textDark
+                }
+                background: Rectangle {
+                    color: parent.hovered ? theme.accentPink : "transparent"
+                    radius: 6
+                }
+                onClicked: {
+                    optionsPopup.close()
+                    root.deleteRequested(root.postId)
+                }
             }
         }
     }

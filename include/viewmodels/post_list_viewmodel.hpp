@@ -72,10 +72,13 @@ public:
     Q_INVOKABLE void goToPage(int page);
     Q_INVOKABLE void nextPage();
     Q_INVOKABLE void prevPage();
+    Q_INVOKABLE void deletePost(qint64 postId);
 
 signals:
     void isLoadingChanged();
     void paginationChanged();
+    void deleteSuccess();
+    void deleteFailed(const QString& message);
 
 private:
     void setLoading(bool loading);
@@ -93,6 +96,8 @@ private:
 private slots:
     void handleGetPostsSuccess(const models::PostListDTO& result);
     void handleGetPostsFailed(QSharedPointer<services::BaseError> error);
+    void handleDeletePostSuccess();
+    void handleDeletePostFailed(QSharedPointer<services::BaseError> error);
 };
 
 }  // namespace pawspective::viewmodels

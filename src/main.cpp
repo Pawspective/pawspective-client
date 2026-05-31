@@ -30,6 +30,7 @@
 #include "viewmodels/update_organization_viewmodel.hpp"
 #include "viewmodels/user_update_viewmodel.hpp"
 #include "viewmodels/user_viewmodel.hpp"
+#include "viewmodels/update_post_viewmodel.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
@@ -85,6 +86,7 @@ int main(int argc, char* argv[]) {
     auto createPostViewModel = new pawspective::viewmodels::CreatePostViewModel(postService, &app);
     auto postListViewModel = new pawspective::viewmodels::PostListViewModel(postService, &app);
     auto postCardViewModel = new pawspective::viewmodels::PostCardViewModel(&app);
+    auto updatePostViewModel = new pawspective::viewmodels::UpdatePostViewModel(postService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -103,6 +105,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("createPostViewModel", createPostViewModel);
     engine.rootContext()->setContextProperty("postListViewModel", postListViewModel);
     engine.rootContext()->setContextProperty("postCardViewModel", postCardViewModel);
+    engine.rootContext()->setContextProperty("updatePostViewModel", updatePostViewModel);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,
