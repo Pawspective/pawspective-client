@@ -15,6 +15,7 @@ Item {
     readonly property string fontName: "Comic Sans MS"
 
     readonly property bool hasPagination: viewModel && viewModel.totalPages > 1 && showPaginationControls
+    property bool canEditPosts: false
 
     ListView {
         id: postListView
@@ -70,6 +71,21 @@ Item {
             postId: model.postId
             postText: model.postText
             postCreatedAt: model.postCreatedAt
+            canEdit: root.canEditPosts
+            onEditRequested: function(postId, postText, postCreatedAt) {
+                console.log("Edit post:", postId)
+                stackView.push(postUpdateViewComponent, { 
+                    postId: postId, 
+                    postText: postText,
+                    postCreatedAt: postCreatedAt
+                })
+            }
+            
+            onDeleteRequested: function(postId) {
+                console.log("Delete post:", postId)
+                deleteConfirmDialog.postId = postId
+                deleteConfirmDialog.open()
+            }
         }
 
         ScrollBar.vertical: ScrollBar { 
@@ -78,6 +94,58 @@ Item {
         }
 
         model: root.viewModel ? root.viewModel.listModel : null
+    }
+
+    Dialog {
+        id: deleteConfirmDialog
+        property int postId: -1
+        modal: true
+        parent: ApplicationWindow.overlay
+        anchors.centerIn: parent
+        width: parent.width * 0.8
+        title: "Delete Post"
+        standardButtons: Dialog.Yes | Dialog.No
+
+        onAccepted: {
+            if (postId > 0 && viewModel) {
+                viewModel.deletePost(postId)
+            }
+        }
+
+        contentItem: Text {
+            text: "Are you sure you want to permanently delete this post?"
+            wrapMode: Text.WordWrap
+            anchors.fill: parent
+            anchors.margins: 20
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            font.pixelSize: 14
+        }
+    }
+
+    Connections {
+        target: viewModel
+        function onDeleteFailed(message) {
+            console.error("Delete failed:", message)
+            errorMessage.text = message
+            errorTimer.start()
+        }
+    }
+
+    Text {
+        id: errorMessage
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottomMargin: root.height * 0.02
+        visible: text.length > 0
+        color: "#6c63ff"
+        font.pixelSize: 12
+    }
+
+    Timer {
+        id: errorTimer
+        interval: 3000
+        onTriggered: errorMessage.text = ""
     }
 
     function buildPageWindow() {
