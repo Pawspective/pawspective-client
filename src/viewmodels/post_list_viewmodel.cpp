@@ -90,12 +90,7 @@ PostListViewModel::PostListViewModel(services::PostService& postService, QObject
         this,
         &PostListViewModel::handleDeletePostSuccess
     );
-    connect(
-        &m_postService,
-        &services::PostService::deletePostFailed,
-        this,
-        &PostListViewModel::handleDeletePostFailed
-    );
+    connect(&m_postService, &services::PostService::deletePostFailed, this, &PostListViewModel::handleDeletePostFailed);
 }
 
 QAbstractListModel* PostListViewModel::listModel() { return m_listModel; }

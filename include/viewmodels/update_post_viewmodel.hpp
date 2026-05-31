@@ -4,8 +4,8 @@
 #include <optional>
 
 #include "base.hpp"
-#include "models/post_update_dto.hpp"
 #include "models/post_dto.hpp"
+#include "models/post_update_dto.hpp"
 #include "services/post_service.hpp"
 
 namespace pawspective::viewmodels {
@@ -16,10 +16,7 @@ class UpdatePostViewModel : public BaseViewModel {
     Q_PROPERTY(bool isDirty READ isDirty NOTIFY dirtyChanged)
 
 public:
-    explicit UpdatePostViewModel(
-        services::PostService& postService,
-        QObject* parent = nullptr
-    );
+    explicit UpdatePostViewModel(services::PostService& postService, QObject* parent = nullptr);
 
     QString text() const { return m_changes.text.value_or(m_originalData.text); }
     bool isDirty() const { return m_isDirty; }

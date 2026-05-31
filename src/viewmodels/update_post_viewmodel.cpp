@@ -2,27 +2,14 @@
 
 namespace pawspective::viewmodels {
 
-UpdatePostViewModel::UpdatePostViewModel(
-    services::PostService& postService,
-    QObject* parent
-)
+UpdatePostViewModel::UpdatePostViewModel(services::PostService& postService, QObject* parent)
     : BaseViewModel(parent), m_postService(postService) {
     setupConnections();
 }
 
 void UpdatePostViewModel::setupConnections() {
-    connect(
-        &m_postService,
-        &services::PostService::updatePostSuccess,
-        this,
-        &UpdatePostViewModel::handleUpdateSuccess
-    );
-    connect(
-        &m_postService,
-        &services::PostService::updatePostFailed,
-        this,
-        &UpdatePostViewModel::handleUpdateFailed
-    );
+    connect(&m_postService, &services::PostService::updatePostSuccess, this, &UpdatePostViewModel::handleUpdateSuccess);
+    connect(&m_postService, &services::PostService::updatePostFailed, this, &UpdatePostViewModel::handleUpdateFailed);
 }
 
 void UpdatePostViewModel::initialize() {
@@ -101,8 +88,7 @@ void UpdatePostViewModel::discardChanges() {
 }
 
 void UpdatePostViewModel::updateDirtyStatus() {
-    bool dirty =
-        m_changes.text.has_value();
+    bool dirty = m_changes.text.has_value();
     setDirty(dirty);
 }
 
