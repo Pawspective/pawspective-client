@@ -586,12 +586,46 @@ Rectangle {
     // Review tab
     Component {
         id: reviewsContent
+        Item {
+            anchors.fill: parent
 
-        Text {
-            text: "Reviews section placeholder"
-            font.family: theme.fontName
-            font.pixelSize: root.height * 0.03
-            color: theme.textDark
+            property bool initialized: false
+            property var lastLoadedOrgId: -1
+
+            function reloadReviews() {
+                if (typeof reviewListViewModel !== 'undefined' && reviewListViewModel && organizationViewModel) {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0 && orgId !== lastLoadedOrgId) {
+                        lastLoadedOrgId = orgId
+                        reviewListViewModel.loadReviewsForOrganization(orgId)
+                    }
+                }
+            }
+
+            Component.onCompleted: {
+                if (typeof reviewListViewModel !== 'undefined' && reviewListViewModel && !initialized) {
+                    reviewListViewModel.initialize()
+                    initialized = true
+                }
+
+                reloadReviews()
+
+                if (organizationViewModel) {
+                    organizationViewModel.currentOrganizationIdChanged.connect(reloadReviews)
+                }
+            }
+
+            Component.onDestruction: {
+                if (typeof reviewListViewModel !== 'undefined' && reviewListViewModel) {
+                    reviewListViewModel.cleanup()
+                    initialized = false
+                }
+            }
+
+            ReviewListView {
+                anchors.fill: parent
+                onAnimalRequested: function(animalId) { root.animalDetailRequested(animalId) }
+            }
         }
     }
 
@@ -879,7 +913,8 @@ Rectangle {
                         anchors.fill: parent
                         headerComponent: canUpdateOrganization ? createPostButtonComponent : null
                         viewModel: typeof postListViewModel !== 'undefined' ? postListViewModel : null
-                        showPaginationControls: false   
+                        showPaginationControls: false 
+                        canEditPosts: canUpdateOrganization  
                     }
                 }
                 Row {

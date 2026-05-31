@@ -14,28 +14,31 @@ Rectangle {
         readonly property color accentPink: "#f4a7b9"
         readonly property color textDark: "#8572af"
         readonly property color buttonText: "#e7ebf5"
-        readonly property color postText: "#f4a7b9"
+        readonly property color reviewText: '#f4a7b9'
     }
 
-    property int postId: -1
-    property string postText: ""
-    property var postCreatedAt: null
+    property int reviewId: -1
+    property int animalId: -1
+    property string animalName: ""
+    property string reviewText: ""
+    property var reviewCreatedAt: null
     property bool canEdit: false
     property bool isExpanded: false
     property int previewLimit: 220
 
-    signal editRequested(int postId, string postText, var postCreatedAt)
-    signal deleteRequested(int postId)
+    signal animalClicked(int animalId)
+    signal editRequested(int reviewId)
+    signal deleteRequested(int reviewId)
 
     readonly property real padV: root.width * 0.025
     readonly property real padH: root.width * 0.06
     readonly property real titleSize: root.width * 0.022
     readonly property real subtitleSize: root.width * 0.018
     readonly property real descSize: root.width * 0.018
-    readonly property bool isExpandable: root.postText.length > root.previewLimit
+    readonly property bool isExpandable: root.reviewText.length > root.previewLimit
     readonly property string displayText: buildDisplayText()
 
-    readonly property string createdAtText: formatCreatedAt(root.postCreatedAt)
+    readonly property string createdAtText: formatCreatedAt(root.reviewCreatedAt)
 
     radius: root.width * 0.015
     color: theme.purple
@@ -61,23 +64,23 @@ Rectangle {
             color: theme.fieldBg
             border.color: theme.fieldBg
             border.width: 1
-            visible: root.postText.length > 0
-            implicitHeight: postTextColumn.implicitHeight + root.padV * 1.2
+            visible: root.reviewText.length > 0
+            implicitHeight: reviewTextColumn.implicitHeight + root.padV * 1.2
 
             ColumnLayout {
-                id: postTextColumn
+                id: reviewTextColumn
                 anchors.fill: parent
                 anchors.margins: root.padV * 0.6
                 spacing: root.padV * 0.3
 
                 Text {
-                    id: postBodyText
+                    id: reviewBodyText
                     text: root.displayText
                     textFormat: Text.PlainText
                     font.family: theme.fontName
                     font.pixelSize: root.descSize
-                    color: theme.postText
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    color: theme.reviewText
+                    wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
@@ -110,8 +113,46 @@ Rectangle {
             Layout.fillWidth: true
             spacing: root.padH * 0.3
 
-            Item {
+            RowLayout {
                 Layout.fillWidth: true
+                spacing: root.padH * 0.15
+
+                Text {
+                    text: "Adopted pet name:"
+                    font.family: theme.fontName
+                    font.pixelSize: root.subtitleSize
+                    color: theme.fieldBg
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: adoptedNameText.implicitHeight
+
+                    Text {
+                        id: adoptedNameText
+                        text: root.animalName.length > 0 ? root.animalName : "-"
+                        font.family: theme.fontName
+                        font.pixelSize: root.subtitleSize
+                        font.underline: adoptedNameArea.containsMouse
+                        color: theme.fieldBg
+                        elide: Text.ElideRight
+                        width: parent.width
+                    }
+
+                    MouseArea {
+                        id: adoptedNameArea
+                        anchors.fill: adoptedNameText
+                        hoverEnabled: true
+                        enabled: root.animalId > 0 && root.animalName.length > 0
+                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: function(mouse) {
+                            mouse.accepted = true
+                            if (root.animalId > 0) {
+                                root.animalClicked(root.animalId)
+                            }
+                        }
+                    }
+                }
             }
 
             Text {
@@ -200,7 +241,7 @@ Rectangle {
                 }
                 onClicked: {
                     optionsPopup.close()
-                    root.editRequested(root.postId, root.postText, root.postCreatedAt)
+                    root.editRequested(root.reviewId)
                 }
             }
 
@@ -219,7 +260,7 @@ Rectangle {
                 }
                 onClicked: {
                     optionsPopup.close()
-                    root.deleteRequested(root.postId)
+                    root.deleteRequested(root.reviewId)
                 }
             }
         }
@@ -242,7 +283,7 @@ Rectangle {
     }
 
     function buildDisplayText() {
-        var rawText = root.postText || ""
+        var rawText = root.reviewText || ""
         if (!root.isExpandable) {
             return rawText
         }

@@ -40,6 +40,7 @@ ApplicationWindow {
     signal animalUpdated()
     signal animalDeleted()
     signal postCreated()
+    signal postUpdated()
 
     function openOrganizationView(organizationId, source, allowRefresh, ignoreFallback) {
         let resolvedOrganizationId = null
@@ -316,6 +317,15 @@ ApplicationWindow {
                     }
                 }
             }
+            function onPostUpdated() {
+                if (organizationViewModel && typeof postListViewModel !== 'undefined') {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0) {
+                        console.log("Post updated, reloading posts for org:", orgId)
+                        postListViewModel.loadPostsForOrganization(orgId)
+                    }
+                }
+            }
         }
         }
     }
@@ -458,6 +468,37 @@ ApplicationWindow {
         Component.onDestruction: {
             if (updateAnimalViewModel) {
                 updateAnimalViewModel.cleanup()
+            }
+        }
+    }
+}
+Component {
+    id: postUpdateViewComponent
+    PostUpdateView {
+        viewModel: updatePostViewModel
+        postId: typeof postId !== 'undefined' ? postId : 0
+        postText: typeof postText !== 'undefined' ? postText : ""
+        postCreatedAt: typeof postCreatedAt !== 'undefined' ? postCreatedAt : null
+        
+        onBackClicked: {
+            updatePostViewModel.cleanup()
+            stackView.pop()
+        }
+        
+        onSaveCompleted: {
+            updatePostViewModel.cleanup()
+            stackView.pop()
+            window.postUpdated()
+        }
+        
+        Component.onCompleted: {
+            if (updatePostViewModel) {
+                updatePostViewModel.initialize()
+            }
+        }
+        Component.onDestruction: {
+            if (updatePostViewModel) {
+                updatePostViewModel.cleanup()
             }
         }
     }

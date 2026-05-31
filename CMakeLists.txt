@@ -66,6 +66,7 @@ add_executable(pawspective-client
     src/viewmodels/update_animal_viewmodel.cpp
     src/viewmodels/animal_list_viewmodel.cpp
     src/viewmodels/create_post_viewmodel.cpp
+    src/viewmodels/review_list_viewmodel.cpp
     src/viewmodels/post_card_viewmodel.cpp
     src/viewmodels/post_list_viewmodel.cpp
     src/viewmodels/adopt_request_list_viewmodel.cpp
@@ -88,6 +89,7 @@ add_executable(pawspective-client
     src/models/post_update_dto.cpp
     src/utils/json.cpp
     src/viewmodels/organization_view_model.cpp
+    src/viewmodels/update_post_viewmodel.cpp
 	${PROJECT_HEADERS}
 )
 
@@ -120,11 +122,14 @@ qt_add_qml_module(pawspective-client
         qml/AnimalDetailView.qml
         qml/AnimalUpdateView.qml
         qml/AnimalListView.qml
+        qml/ReviewCardView.qml
+        qml/ReviewListView.qml
         qml/FieldTag.qml
         qml/FilterRangeInput.qml
         qml/PostCreateView.qml
         qml/PostCardView.qml
         qml/PostListView.qml
+        qml/PostUpdateView.qml
         qml/RequestCardView.qml
         qml/RequestListView.qml
 )

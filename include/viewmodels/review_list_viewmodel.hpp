@@ -1,40 +1,41 @@
 #pragma once
 
-#include "models/post_dto.hpp"
-#include "services/post_service.hpp"
+#include "models/review_dto.hpp"
+#include "services/review_service.hpp"
 #include "viewmodels/base.hpp"
 
 #include <QAbstractListModel>
 #include <QHash>
 #include <QList>
-#include <QSet>
-#include <QSharedPointer>
-#include <QVariantList>
 
 namespace pawspective::viewmodels {
 
 namespace detail {
-class PostListInternalModel : public QAbstractListModel {
+
+class ReviewListInternalModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
-    struct Item {
-        qint64 id;
-        QString text;
-        QDateTime createdAt;
-    };
+    using Item = models::ReviewDTO;
 
     // NOLINTNEXTLINE(performance-enum-size)
-    enum PostRole { PostIdRole = Qt::UserRole + 1, TextRole, CreatedAtRole };
+    enum ReviewRole {
+        ReviewIdRole = Qt::UserRole + 1,
+        AnimalIdRole,
+        AnimalNameRole,
+        TextRole,
+        CreatedAtRole,
+        CanEditRole
+    };
 
-    explicit PostListInternalModel(QObject* parent = nullptr);
-    ~PostListInternalModel() override = default;
+    explicit ReviewListInternalModel(QObject* parent = nullptr);
+    ~ReviewListInternalModel() override = default;
 
     int rowCount(const QModelIndex& parent) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void update(const QList<models::PostDTO>& dtos);
+    void update(const QList<models::ReviewDTO>& dtos);
     void clear();
 
 private:
@@ -43,7 +44,7 @@ private:
 
 }  // namespace detail
 
-class PostListViewModel : public BaseViewModel {
+class ReviewListViewModel : public BaseViewModel {
     Q_OBJECT
 
     Q_PROPERTY(QAbstractListModel* listModel READ listModel CONSTANT)
@@ -54,9 +55,9 @@ class PostListViewModel : public BaseViewModel {
     Q_PROPERTY(int pageSize READ pageSize NOTIFY paginationChanged)
 
 public:
-    explicit PostListViewModel(services::PostService& postService, QObject* parent = nullptr);
+    explicit ReviewListViewModel(services::ReviewService& reviewService, QObject* parent = nullptr);
 
-    ~PostListViewModel() override = default;
+    ~ReviewListViewModel() override = default;
 
     QAbstractListModel* listModel();
     bool isLoading() const { return m_isLoading; }
@@ -67,12 +68,12 @@ public:
 
     Q_INVOKABLE void initialize() override;
     Q_INVOKABLE void cleanup() override;
-
-    Q_INVOKABLE void loadPostsForOrganization(qint64 organizationId);
+    Q_INVOKABLE void replaceAllReviews(const QList<models::ReviewDTO>& reviews);
+    Q_INVOKABLE void loadReviewsForOrganization(qint64 organizationId);
     Q_INVOKABLE void goToPage(int page);
     Q_INVOKABLE void nextPage();
     Q_INVOKABLE void prevPage();
-    Q_INVOKABLE void deletePost(qint64 postId);
+    Q_INVOKABLE void deleteReview(qint64 id);
 
 signals:
     void isLoadingChanged();
@@ -81,10 +82,8 @@ signals:
     void deleteFailed(const QString& message);
 
 private:
-    void setLoading(bool loading);
-
     QAbstractListModel* m_listModel;
-    services::PostService& m_postService;
+    services::ReviewService& m_reviewService;
     qint64 m_currentOrganizationId = 0;
     bool m_isLoading = false;
     int m_currentPage = 1;
@@ -94,10 +93,10 @@ private:
 
     // NOLINTNEXTLINE(readability-redundant-access-specifiers)
 private slots:
-    void handleGetPostsSuccess(const models::PostListDTO& result);
-    void handleGetPostsFailed(QSharedPointer<services::BaseError> error);
-    void handleDeletePostSuccess();
-    void handleDeletePostFailed(QSharedPointer<services::BaseError> error);
+    void handleGetReviewsSuccess(const models::ReviewListDTO& result);
+    void handleGetReviewsFailed(QSharedPointer<services::BaseError> error);
+    void handleDeleteSuccess();
+    void handleDeleteFailed(QSharedPointer<services::BaseError> error);
 };
 
 }  // namespace pawspective::viewmodels

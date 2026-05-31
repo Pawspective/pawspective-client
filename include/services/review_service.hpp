@@ -14,7 +14,7 @@ class ReviewService : public QObject {
 public:
     explicit ReviewService(INetworkClient& networkClient, QObject* parent = nullptr);
 
-    void getByOrganizationId(qint64 id);
+    void getByOrganizationId(qint64 id, int page = 1, int limit = 10);
     void createReview(const models::ReviewCreateDTO& dto);
     void updateReview(qint64 id, const models::ReviewUpdateDTO& dto);
     void deleteReview(qint64 id);
