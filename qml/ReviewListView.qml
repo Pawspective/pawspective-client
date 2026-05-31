@@ -109,12 +109,9 @@ Item {
         id: deleteConfirmDialog
         property int reviewId: -1
         modal: true
-        parent: Window.window ? Window.window.overlay : Overlay.overlay
-        
-        width: Window.window ? Window.window.width * 0.8 : 300
-        
-        x: parent ? (parent.width - width) / 2 : 0
-        y: parent ? (parent.height - height) / 2 : 0
+        parent: ApplicationWindow.overlay
+        anchors.centerIn: parent
+        width: parent.width * 0.8
         title: "Delete Review"
         standardButtons: Dialog.Yes | Dialog.No
 
