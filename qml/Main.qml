@@ -39,6 +39,7 @@ ApplicationWindow {
     signal animalCreated()
     signal animalUpdated()
     signal animalDeleted()
+    signal postCreated()
 
     function openOrganizationView(organizationId, source, allowRefresh, ignoreFallback) {
         let resolvedOrganizationId = null
@@ -264,6 +265,14 @@ ApplicationWindow {
                 }
                 stackView.push(animalCreateViewComponent)
             }
+            onCreatePostRequested: {   
+                var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
+                console.log("Creating post for organization ID:", orgId)
+                if (orgId > 0) {
+                    createPostViewModel.setOrganizationId(orgId)
+                }
+                stackView.push(postCreateViewComponent)
+            }
             onAnimalDetailRequested: function(animalId) {
                 stackView.push(animalDetailViewComponent, { animalId: animalId, currentUserViewModel: userViewModel })
             }
@@ -290,14 +299,23 @@ ApplicationWindow {
                 }
             }
             function onAnimalDeleted() {
-                    if (organizationViewModel) {
-                        var orgId = organizationViewModel.currentOrganizationId
-                        if (orgId > 0 && animalListViewModel) {
-                            console.log("Animal deleted, reloading animals for org:", orgId)
-                            animalListViewModel.loadAnimalsForOrganization(orgId)
-                        }
+                if (organizationViewModel) {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0 && animalListViewModel) {
+                        console.log("Animal deleted, reloading animals for org:", orgId)
+                        animalListViewModel.loadAnimalsForOrganization(orgId)
                     }
                 }
+            }
+            function onPostCreated() {
+                if (organizationViewModel && typeof postListViewModel !== 'undefined') {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0) {
+                        console.log("Post created, reloading posts for org:", orgId)
+                        postListViewModel.loadPostsForOrganization(orgId)
+                    }
+                }
+            }
         }
         }
     }
@@ -386,6 +404,36 @@ ApplicationWindow {
         }
         }
     }
+
+    Component {
+        id: postCreateViewComponent
+        PostCreateView {
+            viewModel: createPostViewModel
+            
+            onBackClicked: {
+                createPostViewModel.cleanup()
+                stackView.pop()
+            }
+            
+            onCreateSuccess: {
+                createPostViewModel.cleanup()
+                stackView.pop()
+                window.postCreated()
+            }
+            
+            Component.onCompleted: {
+                if (createPostViewModel) {
+                    createPostViewModel.initialize()
+                }
+            }
+            Component.onDestruction: {
+                if (createPostViewModel) {
+                    createPostViewModel.cleanup()
+                }
+            }
+        }
+    }
+
     Component {
     id: animalUpdateViewComponent
     AnimalUpdateView {

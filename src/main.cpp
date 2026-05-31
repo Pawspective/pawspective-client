@@ -12,13 +12,17 @@
 #include "services/breed_service.hpp"
 #include "services/city_service.hpp"
 #include "services/organization_service.hpp"
+#include "services/post_service.hpp"
 #include "services/user_service.hpp"
 #include "viewmodels/animal_detail_viewmodel.hpp"
 #include "viewmodels/animal_list_viewmodel.hpp"
 #include "viewmodels/create_animal_viewmodel.hpp"
+#include "viewmodels/create_post_viewmodel.hpp"
 #include "viewmodels/login_view_model.hpp"
 #include "viewmodels/organization_card_viewmodel.hpp"
 #include "viewmodels/organization_view_model.hpp"
+#include "viewmodels/post_card_viewmodel.hpp"
+#include "viewmodels/post_list_viewmodel.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
 #include "viewmodels/register_view_model.hpp"
 #include "viewmodels/search_organization_viewmodel.hpp"
@@ -49,6 +53,7 @@ int main(int argc, char* argv[]) {
     pawspective::services::AnimalService animalService(networkClient);
     pawspective::services::BreedService breedService(networkClient);
     pawspective::services::AdoptRequestService adoptRequestService(networkClient);
+    pawspective::services::PostService postService(networkClient);
     auto loginViewModel = new pawspective::viewmodels::LoginViewModel(authService, &app);
     auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
     auto registerOrganizationViewModel =
@@ -61,8 +66,12 @@ int main(int argc, char* argv[]) {
         new pawspective::viewmodels::UpdateOrganizationViewModel(organizationService, cityService, authService, &app);
     auto createAnimalViewModel = new pawspective::viewmodels::CreateAnimalViewModel(animalService, breedService, &app);
     auto organizationCardViewModel = new pawspective::viewmodels::OrganizationCardViewModel(&app);
-    auto animalDetailViewModel =
-        new pawspective::viewmodels::AnimalDetailViewModel(animalService, organizationService, adoptRequestService, &app);
+    auto animalDetailViewModel = new pawspective::viewmodels::AnimalDetailViewModel(
+        animalService,
+        organizationService,
+        adoptRequestService,
+        &app
+    );
     auto searchOrganizationViewModel =
         new pawspective::viewmodels::SearchOrganizationViewModel(organizationService, &app);
     auto updateAnimalViewModel = new pawspective::viewmodels::UpdateAnimalViewModel(animalService, breedService, &app);
@@ -73,6 +82,9 @@ int main(int argc, char* argv[]) {
         cityService,
         &app
     );
+    auto createPostViewModel = new pawspective::viewmodels::CreatePostViewModel(postService, &app);
+    auto postListViewModel = new pawspective::viewmodels::PostListViewModel(postService, &app);
+    auto postCardViewModel = new pawspective::viewmodels::PostCardViewModel(&app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -88,7 +100,9 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("searchOrganizationViewModel", searchOrganizationViewModel);
     engine.rootContext()->setContextProperty("updateAnimalViewModel", updateAnimalViewModel);
     engine.rootContext()->setContextProperty("animalListViewModel", animalListViewModel);
-
+    engine.rootContext()->setContextProperty("createPostViewModel", createPostViewModel);
+    engine.rootContext()->setContextProperty("postListViewModel", postListViewModel);
+    engine.rootContext()->setContextProperty("postCardViewModel", postCardViewModel);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,

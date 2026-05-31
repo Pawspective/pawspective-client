@@ -20,7 +20,9 @@ AnimalDetailViewModel::AnimalDetailViewModel(
         &services::AnimalService::getAnimalSuccess,
         this,
         [this](const models::AnimalDTO& animal) {
-            if (animal.id != m_currentAnimalId) return;
+            if (animal.id != m_currentAnimalId) {
+                return;
+            }
             setFromDTO(animal);
             if (m_organizationId > 0) {
                 m_organizationService.getOrganization(m_organizationId);

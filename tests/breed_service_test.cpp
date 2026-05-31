@@ -22,6 +22,7 @@ class FakeNetworkReply : public QNetworkReply {
 public:
     explicit FakeNetworkReply(const QByteArray& data, QObject* parent = nullptr)
         : QNetworkReply(parent), m_data(data) {
+        setProperty("responseData", data);
         open(QIODevice::ReadOnly);
     }
     void abort() override {}
@@ -80,12 +81,12 @@ public:
 static QByteArray validBreedArrayJson() {
     QJsonObject dog1;
     dog1["id"] = 1;
-    dog1["animalType"] = "DOG";
+    dog1["animal_type"] = "dog";
     dog1["name"] = "Labrador";
 
     QJsonObject dog2;
     dog2["id"] = 2;
-    dog2["animalType"] = "DOG";
+    dog2["animal_type"] = "dog";
     dog2["name"] = "Poodle";
 
     return QJsonDocument(QJsonArray{dog1, dog2}).toJson(QJsonDocument::Compact);

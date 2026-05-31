@@ -49,6 +49,8 @@ add_executable(pawspective-client
     src/services/animal_service.cpp
     src/services/adopt_request_service.cpp
     src/services/errors.cpp
+    src/services/review_service.cpp
+    src/services/post_service.cpp
     src/viewmodels/base.cpp
     src/viewmodels/user_viewmodel.cpp
     src/viewmodels/user_update_viewmodel.cpp
@@ -63,6 +65,9 @@ add_executable(pawspective-client
     src/viewmodels/search_organization_viewmodel.cpp
     src/viewmodels/update_animal_viewmodel.cpp
     src/viewmodels/animal_list_viewmodel.cpp
+    src/viewmodels/create_post_viewmodel.cpp   
+    src/viewmodels/post_card_viewmodel.cpp 
+    src/viewmodels/post_list_viewmodel.cpp
     src/models/organization_dto.cpp
 	src/models/organization_update_dto.cpp
 	src/models/organization_register_dto.cpp
@@ -116,6 +121,9 @@ qt_add_qml_module(pawspective-client
         qml/AnimalListView.qml
         qml/FieldTag.qml
         qml/FilterRangeInput.qml
+        qml/PostCreateView.qml
+        qml/PostCardView.qml
+        qml/PostListView.qml
 )
 
 target_include_directories(pawspective-client PRIVATE include)
@@ -226,4 +234,48 @@ target_link_libraries(breed_service_test PRIVATE
 )
 
 add_test(NAME breed_service_test COMMAND breed_service_test)
+
+add_executable(review_service_test
+    tests/review_service_test.cpp
+    include/services/review_service.hpp
+    src/models/review_dto.cpp
+    src/models/review_create_dto.cpp
+    src/models/review_update_dto.cpp
+    src/services/review_service.cpp
+    src/services/errors.cpp
+    src/utils/json.cpp
+    src/utils/validator.cpp
+)
+
+target_include_directories(review_service_test PRIVATE include)
+
+target_link_libraries(review_service_test PRIVATE
+    Qt6::Core
+    Qt6::Network
+    Qt6::Test
+)
+
+add_test(NAME review_service_test COMMAND review_service_test)
+
+add_executable(post_service_test
+    tests/post_service_test.cpp
+    include/services/post_service.hpp
+    src/models/post_dto.cpp
+    src/models/post_create_dto.cpp
+    src/models/post_update_dto.cpp
+    src/services/post_service.cpp
+    src/services/errors.cpp
+    src/utils/json.cpp
+    src/utils/validator.cpp
+)
+
+target_include_directories(post_service_test PRIVATE include)
+
+target_link_libraries(post_service_test PRIVATE
+    Qt6::Core
+    Qt6::Network
+    Qt6::Test
+)
+
+add_test(NAME post_service_test COMMAND post_service_test)
 
