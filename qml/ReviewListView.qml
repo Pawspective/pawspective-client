@@ -111,10 +111,8 @@ Item {
         modal: true
         parent: Window.window ? Window.window.overlay : Overlay.overlay
         
-        // Задаем ширину (80% от ширины всего окна приложения)
         width: Window.window ? Window.window.width * 0.8 : 300
         
-        // Математическое выравнивание строго по центру родителя (оверлея окна)
         x: parent ? (parent.width - width) / 2 : 0
         y: parent ? (parent.height - height) / 2 : 0
         title: "Delete Review"
