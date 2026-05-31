@@ -25,6 +25,7 @@ public:
     void updateAnimal(qint64 id, const models::AnimalUpdateDTO& dto);
     void getAnimalFilters();
     void getAnimalsByOrganization(qint64 organizationId, int page = 1, int limit = 10);
+    void getPendingReviewAnimals();
     void deleteAnimal(qint64 id);
 
 signals:
@@ -34,6 +35,7 @@ signals:
     void updateAnimalSuccess(const models::AnimalDTO& animal);
     void getAnimalFiltersSuccess(const models::AnimalFilterDTO& filters);
     void getAnimalsByOrganizationSuccess(const models::AnimalListDTO& result);
+    void getPendingReviewAnimalsSuccess(const QList<models::AnimalDTO>& animals);
     void deleteAnimalSuccess();
 
     void getAnimalsFailed(QSharedPointer<services::BaseError> error);
@@ -42,6 +44,7 @@ signals:
     void updateAnimalFailed(QSharedPointer<services::BaseError> error);
     void getAnimalFiltersFailed(QSharedPointer<services::BaseError> error);
     void getAnimalsByOrganizationFailed(QSharedPointer<services::BaseError> error);
+    void getPendingReviewAnimalsFailed(QSharedPointer<services::BaseError> error);
     void deleteAnimalFailed(QSharedPointer<services::BaseError> error);
 
 private:

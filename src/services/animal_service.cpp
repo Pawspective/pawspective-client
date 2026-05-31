@@ -297,6 +297,28 @@ void AnimalService::getAnimalsByOrganization(qint64 organizationId, int page, in
     );
 }
 
+void AnimalService::getPendingReviewAnimals() {
+    m_networkClient.get(
+        QUrl("/me/adopted-animals/pending-review"),
+        [this](QNetworkReply& reply) {
+            handleSuccessArray(
+                reply,
+                [this](const QJsonArray& array) {
+                    QList<models::AnimalDTO> animals;
+                    for (const auto& value : array) {
+                        animals.append(models::AnimalDTO::fromJson(value.toObject()));
+                    }
+                    emit getPendingReviewAnimalsSuccess(animals);
+                },
+                [this](QSharedPointer<BaseError> error) { emit getPendingReviewAnimalsFailed(error); }
+            );
+        },
+        [this](QNetworkReply& reply) {
+            handleError(reply, [this](QSharedPointer<BaseError> error) { emit getPendingReviewAnimalsFailed(error); });
+        }
+    );
+}
+
 void AnimalService::deleteAnimal(qint64 id) {
     m_networkClient.deleteResource(
         QUrl(QString("/animals/%1").arg(id)),

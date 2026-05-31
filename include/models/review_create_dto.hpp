@@ -6,7 +6,7 @@
 namespace pawspective::models {
 
 struct ReviewCreateDTO {
-    quint64 animalId{};
+    qint64 animalId{};
     QString text;
 
     QJsonObject toJson() const;

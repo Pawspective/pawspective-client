@@ -59,6 +59,7 @@ add_executable(pawspective-client
     src/viewmodels/register_organization_view_model.cpp
     src/viewmodels/update_organization_viewmodel.cpp
     src/viewmodels/create_animal_viewmodel.cpp
+    src/viewmodels/create_review_viewmodel.cpp
     src/viewmodels/organization_card_viewmodel.cpp
     src/viewmodels/animal_card_viewmodel.cpp
     src/viewmodels/animal_detail_viewmodel.cpp
@@ -124,6 +125,7 @@ qt_add_qml_module(pawspective-client
         qml/AnimalListView.qml
         qml/ReviewCardView.qml
         qml/ReviewListView.qml
+        qml/ReviewCreateView.qml
         qml/FieldTag.qml
         qml/FilterRangeInput.qml
         qml/PostCreateView.qml
