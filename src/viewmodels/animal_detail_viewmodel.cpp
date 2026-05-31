@@ -78,9 +78,7 @@ AnimalDetailViewModel::AnimalDetailViewModel(
         &m_adoptRequestService,
         &services::AdoptRequestService::createAdoptRequestSuccess,
         this,
-        [this](const models::AdoptRequestDTO& dto) {
-            m_adoptRequestSentIds.insert(dto.animal.id);
-            emit adoptRequestSentChanged();
+        [this](const models::AdoptRequestDTO&) {
             if (m_canBeAdopted) {
                 m_canBeAdopted = false;
                 emit canBeAdoptedChanged();
@@ -102,7 +100,6 @@ AnimalDetailViewModel::AnimalDetailViewModel(
 
 void AnimalDetailViewModel::loadAnimal(qint64 id) {
     m_currentAnimalId = id;
-    emit adoptRequestSentChanged();
     setIsBusy(true);
     m_animalService.getAnimal(id);
 }

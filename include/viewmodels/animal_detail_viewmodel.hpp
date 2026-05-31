@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QObject>
-#include <QSet>
 #include <QString>
 
 #include "base.hpp"
@@ -30,7 +29,6 @@ class AnimalDetailViewModel : public BaseViewModel {
     Q_PROPERTY(QString organizationCity READ organizationCity NOTIFY organizationCityChanged)
     Q_PROPERTY(QString organizationDescription READ organizationDescription NOTIFY organizationDescriptionChanged)
     Q_PROPERTY(bool canBeAdopted READ canBeAdopted NOTIFY canBeAdoptedChanged)
-    Q_PROPERTY(bool adoptRequestSent READ adoptRequestSent NOTIFY adoptRequestSentChanged)
 
 public:
     explicit AnimalDetailViewModel(
@@ -56,7 +54,6 @@ public:
     const QString& organizationCity() const { return m_organizationCity; }
     const QString& organizationDescription() const { return m_organizationDescription; }
     bool canBeAdopted() const { return m_canBeAdopted; }
-    bool adoptRequestSent() const { return m_adoptRequestSentIds.contains(m_currentAnimalId); }
 
     Q_INVOKABLE void loadAnimal(qint64 id);
     Q_INVOKABLE void deleteAnimal();
@@ -81,7 +78,6 @@ signals:
     void organizationCityChanged();
     void organizationDescriptionChanged();
     void canBeAdoptedChanged();
-    void adoptRequestSentChanged();
     void deleteSuccess();
     void deleteFailed(const QString& message);
     void adoptSuccess();
@@ -117,7 +113,6 @@ private:
     QString m_organizationCity;
     QString m_organizationDescription;
     bool m_canBeAdopted = false;
-    QSet<qint64> m_adoptRequestSentIds;
 };
 
 }  // namespace pawspective::viewmodels
