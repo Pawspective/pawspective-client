@@ -30,6 +30,7 @@ Rectangle {
 
     property bool showDescription: organizationViewModel ? organizationViewModel.showDescription : false
     property int currentTab: organizationViewModel ? organizationViewModel.currentTab : 1
+    property bool requestsPanelVisible: false
 
     signal profileRequested()
     signal searchRequested()
@@ -132,6 +133,67 @@ Rectangle {
                                  : (root.hasOrganization
                                     ? organizationProfileComponent
                                     : createOrganizationComponent)
+            }
+
+            // Requests panel overlay
+            Rectangle {
+                id: requestsPanel
+                visible: root.requestsPanelVisible && root.hasOrganization && root.canUpdateOrganization
+                z: 5
+                anchors.fill: parent
+                anchors.margins: root.contentMargins
+                color: theme.fieldBg
+                radius: 16
+                clip: true
+
+                onVisibleChanged: {
+                    if (visible && organizationViewModel && typeof adoptRequestListViewModel !== 'undefined') {
+                        var orgId = organizationViewModel.currentOrganizationId
+                        if (orgId > 0) {
+                            adoptRequestListViewModel.loadRequestsForOrganization(orgId)
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: root.height * 0.02
+                    spacing: root.height * 0.015
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: root.width * 0.015
+
+                        Text {
+                            text: "Adoption Requests"
+                            font.family: theme.fontName
+                            font.pixelSize: root.height * 0.032
+                            font.bold: true
+                            color: theme.textDark
+                            Layout.fillWidth: true
+                        }
+
+                        CustomButton {
+                            text: "×"
+                            baseColor: theme.accentPink
+                            hoverColor: "#e0809a"
+                            clickColor: "#cc5a70"
+                            textColor: theme.buttonText
+                            fontSize: root.height * 0.032
+                            implicitWidth: root.height * 0.06
+                            implicitHeight: root.height * 0.06
+                            radius: root.height * 0.03
+                            onClicked: root.requestsPanelVisible = false
+                        }
+                    }
+
+                    RequestListView {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        viewModel: typeof adoptRequestListViewModel !== 'undefined' ? adoptRequestListViewModel : null
+                        canActOnRequest: true
+                    }
+                }
             }
 
             // Back Button - positioned absolutely, doesn't affect layout
@@ -350,38 +412,99 @@ Rectangle {
 
                         Item { Layout.fillWidth: true }
 
-                        ColumnLayout {
-                            spacing: root.height * 0.01
-
-                            CustomButton {
-                                text: root.showDescription ? "Hide Description" : "Show Description"
-                                baseColor: theme.purple
-                                hoverColor: theme.accentPink
-                                textColor: theme.buttonText
-                                fontSize: Math.min(root.height * 0.027, root.width * 0.015)
-                                Layout.preferredWidth: root.width * 0.18
-                                Layout.preferredHeight: root.height * 0.07
-                                onClicked: {
-                                    if (organizationViewModel) {
-                                        organizationViewModel.showDescription = !organizationViewModel.showDescription
-                                    }
+                        CustomButton {
+                            text: root.showDescription ? "Hide Description" : "Show Description"
+                            Layout.alignment: Qt.AlignVCenter
+                            baseColor: theme.purple
+                            hoverColor: theme.accentPink
+                            textColor: theme.buttonText
+                            fontSize: Math.min(root.height * 0.027, root.width * 0.015)
+                            implicitWidth: root.width * 0.18
+                            implicitHeight: root.height * 0.065
+                            onClicked: {
+                                if (organizationViewModel) {
+                                    organizationViewModel.showDescription = !organizationViewModel.showDescription
                                 }
                             }
+                        }
 
-                            CustomButton {
-                                visible: root.canUpdateOrganization
-                                text: "Update Organization Data"
-                                baseColor: theme.purple
-                                hoverColor: theme.accentPink
-                                textColor: theme.buttonText
-                                fontSize: Math.min(root.height * 0.024, root.width * 0.013)
-                                Layout.preferredWidth: root.width * 0.18
-                                Layout.preferredHeight: root.height * 0.07
-                                onClicked: {
-                                    if (organizationViewModel) {
-                                        organizationViewModel.updateOrganization()
+                        Rectangle {
+                            id: dotsButtonRect
+                            visible: root.canUpdateOrganization
+                            Layout.alignment: Qt.AlignVCenter
+                            width: root.height * 0.048
+                            height: root.height * 0.055
+                            radius: root.height * 0.008
+                            color: dotsHoverArea.containsMouse ? theme.accentPink : "transparent"
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "⋮"
+                                font.family: theme.fontName
+                                font.pixelSize: root.height * 0.032
+                                color: theme.textDark
+                            }
+
+                            MouseArea {
+                                id: dotsHoverArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: dotsMenu.popup(dotsButtonRect,
+                                    dotsButtonRect.width - dotsMenu.width,
+                                    dotsButtonRect.height)
+                            }
+
+                            Menu {
+                                id: dotsMenu
+                                width: root.width * 0.18
+
+                                background: Rectangle {
+                                    radius: 8
+                                    color: theme.fieldBg
+                                    border.color: theme.purple
+                                    border.width: 1
+                                }
+
+                                MenuItem {
+                                    text: "Update Organization"
+                                    font.family: theme.fontName
+                                    font.pixelSize: root.height * 0.024
+                                    contentItem: Text {
+                                        text: parent.text
+                                        font: parent.font
+                                        color: theme.textDark
+                                        verticalAlignment: Text.AlignVCenter
+                                        leftPadding: root.height * 0.015
                                     }
-                                    root.updateOrganizationClicked()
+                                    background: Rectangle {
+                                        radius: 6
+                                        color: parent.highlighted ? theme.purple : "transparent"
+                                    }
+                                    onTriggered: {
+                                        if (organizationViewModel) {
+                                            organizationViewModel.updateOrganization()
+                                        }
+                                        root.updateOrganizationClicked()
+                                    }
+                                }
+
+                                MenuItem {
+                                    text: "Adoption Requests"
+                                    font.family: theme.fontName
+                                    font.pixelSize: root.height * 0.024
+                                    contentItem: Text {
+                                        text: parent.text
+                                        font: parent.font
+                                        color: theme.textDark
+                                        verticalAlignment: Text.AlignVCenter
+                                        leftPadding: root.height * 0.015
+                                    }
+                                    background: Rectangle {
+                                        radius: 6
+                                        color: parent.highlighted ? theme.purple : "transparent"
+                                    }
+                                    onTriggered: root.requestsPanelVisible = true
                                 }
                             }
                         }
@@ -876,6 +999,8 @@ Rectangle {
             }
         }
     }
+
+
 
     component SidebarItem : Rectangle {
         property string text: ""

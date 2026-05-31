@@ -65,11 +65,11 @@ add_executable(pawspective-client
     src/viewmodels/search_organization_viewmodel.cpp
     src/viewmodels/update_animal_viewmodel.cpp
     src/viewmodels/animal_list_viewmodel.cpp
-    src/viewmodels/create_post_viewmodel.cpp    
+    src/viewmodels/create_post_viewmodel.cpp
     src/viewmodels/review_list_viewmodel.cpp
-    src/viewmodels/create_post_viewmodel.cpp   
-    src/viewmodels/post_card_viewmodel.cpp 
+    src/viewmodels/post_card_viewmodel.cpp
     src/viewmodels/post_list_viewmodel.cpp
+    src/viewmodels/adopt_request_list_viewmodel.cpp
     src/models/organization_dto.cpp
 	src/models/organization_update_dto.cpp
 	src/models/organization_register_dto.cpp
@@ -130,6 +130,8 @@ qt_add_qml_module(pawspective-client
         qml/PostCardView.qml
         qml/PostListView.qml
         qml/PostUpdateView.qml
+        qml/RequestCardView.qml
+        qml/RequestListView.qml
 )
 
 target_include_directories(pawspective-client PRIVATE include)

@@ -15,6 +15,7 @@
 #include "services/post_service.hpp"
 #include "services/review_service.hpp"
 #include "services/user_service.hpp"
+#include "viewmodels/adopt_request_list_viewmodel.hpp"
 #include "viewmodels/animal_detail_viewmodel.hpp"
 #include "viewmodels/animal_list_viewmodel.hpp"
 #include "viewmodels/create_animal_viewmodel.hpp"
@@ -90,6 +91,7 @@ int main(int argc, char* argv[]) {
     auto reviewListViewModel = new pawspective::viewmodels::ReviewListViewModel(reviewService, &app);
     auto postListViewModel = new pawspective::viewmodels::PostListViewModel(postService, &app);
     auto postCardViewModel = new pawspective::viewmodels::PostCardViewModel(&app);
+    auto adoptRequestListViewModel = new pawspective::viewmodels::AdoptRequestListViewModel(adoptRequestService, &app);
     auto updatePostViewModel = new pawspective::viewmodels::UpdatePostViewModel(postService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
@@ -111,6 +113,7 @@ int main(int argc, char* argv[]) {
 
     engine.rootContext()->setContextProperty("postListViewModel", postListViewModel);
     engine.rootContext()->setContextProperty("postCardViewModel", postCardViewModel);
+    engine.rootContext()->setContextProperty("adoptRequestListViewModel", adoptRequestListViewModel);
     engine.rootContext()->setContextProperty("updatePostViewModel", updatePostViewModel);
     QObject::connect(
         &engine,
