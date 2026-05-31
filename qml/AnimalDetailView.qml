@@ -14,6 +14,8 @@ Rectangle {
     signal updateAnimalRequested(int animalId)
     signal animalDeleted()
 
+    property bool requestJustSent: false
+
     Connections {
         target: root.viewModel
         function onErrorOccurred(type, message) {
@@ -29,7 +31,7 @@ Rectangle {
         }
         function onAdoptSuccess() {
             errorText.text = ""
-            adoptToast.show()
+            root.requestJustSent = true
         }
         function onAdoptFailed(message) {
             errorText.text = message
@@ -61,7 +63,6 @@ Rectangle {
         readonly property color chipBg: "#e8d8cb"
         readonly property color border: "#b8abd7"
         readonly property color deleteRed: "#e26d5c"
-        readonly property color adoptGreen: "#7dbf8e"
     }
 
     readonly property real fieldLabelSize: root.height * 0.022
@@ -271,11 +272,19 @@ Rectangle {
 
                 CustomButton {
                     readonly property bool canAdopt: root.viewModel && root.viewModel.canBeAdopted
+                    readonly property string disabledReason: {
+                        if (!root.viewModel) return ""
+                        var s = root.viewModel.status
+                        if (s === "adopted") return "already adopted"
+                        return "request already sent or unavailable to adopt"
+                    }
 
-                    text: canAdopt ? "Adopt" : "You can't adopt now"
-                    enabled: canAdopt
-                    baseColor: canAdopt ? theme.purple : "#b0b0b0"
-                    hoverColor: canAdopt ? theme.accentPink : "#b0b0b0"
+                    text: root.requestJustSent ? "Request sent"
+                        : canAdopt ? "Adopt"
+                        : "You can't adopt now (" + disabledReason + ")"
+                    enabled: canAdopt && !root.requestJustSent
+                    baseColor: (canAdopt && !root.requestJustSent) ? theme.purple : "#b0b0b0"
+                    hoverColor: (canAdopt && !root.requestJustSent) ? theme.accentPink : "#b0b0b0"
                     textColor: theme.buttonText
                     fontSize: root.height * 0.025
                     Layout.fillWidth: true
@@ -385,54 +394,4 @@ Rectangle {
         }
     }
 
-    Rectangle {
-        id: adoptToast
-        z: 20
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: root.height * 0.08
-        width: toastRow.implicitWidth + root.width * 0.1
-        height: root.height * 0.07
-        radius: height / 2
-        color: theme.adoptGreen
-        opacity: 0
-        visible: opacity > 0
-
-        function show() {
-            hideTimer.stop()
-            opacity = 1
-            hideTimer.start()
-        }
-
-        Behavior on opacity {
-            NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
-        }
-
-        Timer {
-            id: hideTimer
-            interval: 3000
-            onTriggered: adoptToast.opacity = 0
-        }
-
-        Row {
-            id: toastRow
-            anchors.centerIn: parent
-            spacing: root.width * 0.02
-
-            Text {
-                text: "Adoption request sent!"
-                font.family: theme.fontName
-                font.pixelSize: adoptToast.height * 0.38
-                font.bold: true
-                color: "#fdfdfd"
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: adoptToast.opacity = 0
-        }
-    }
 }
