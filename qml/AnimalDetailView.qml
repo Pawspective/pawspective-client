@@ -276,7 +276,7 @@ Rectangle {
                         if (!root.viewModel) return ""
                         var s = root.viewModel.status
                         if (s === "adopted") return "already adopted"
-                        return "request already sent or unavailable to adopt"
+                        return "request already sent or animal is unavailable"
                     }
 
                     text: root.requestJustSent ? "Request sent"
