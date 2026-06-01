@@ -13,7 +13,7 @@ Item {
     property bool showPaginationControls: true
     property real paginationScale: Math.min(root.width, root.height) * 1.75
 
-    signal editRequested(int reviewId)
+    signal editRequested(int reviewId, string reviewText)
     signal animalRequested(int animalId)
 
     readonly property color textDark: "#8572af"
@@ -92,7 +92,7 @@ Item {
             canEdit: model.canEdit !== undefined
                 ? model.canEdit
                 : (model.can_edit !== undefined ? model.can_edit : false)
-            onEditRequested: function(reviewId) { root.editRequested(reviewId) }
+            onEditRequested: function(reviewId, reviewText) { root.editRequested(reviewId, reviewText) }
             onDeleteRequested: function(reviewId) { deleteConfirmDialog.reviewId = reviewId; deleteConfirmDialog.open() }
             onAnimalClicked: function(animalId) { root.animalRequested(animalId) }
         }

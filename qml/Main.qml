@@ -40,6 +40,7 @@ ApplicationWindow {
     signal animalUpdated()
     signal animalDeleted()
     signal reviewCreated()
+    signal reviewUpdated()
     signal postCreated()
     signal postUpdated()
 
@@ -262,6 +263,12 @@ ApplicationWindow {
             onCreateReviewRequested: {
                 stackView.push(reviewCreateViewComponent)
             }
+            onReviewEditRequested: function(reviewId, reviewText) {
+                stackView.push(reviewUpdateViewComponent, {
+                    reviewId: reviewId,
+                    reviewText: reviewText
+                })
+            }
             onCreateAnimalRequested: {
                 var orgId = organizationViewModel ? organizationViewModel.currentOrganizationId : 0
                 console.log("Creating animal for organization ID:", orgId)
@@ -335,6 +342,15 @@ ApplicationWindow {
                     var orgId = organizationViewModel.currentOrganizationId
                     if (orgId > 0) {
                         console.log("Review created, reloading reviews for org:", orgId)
+                        reviewListViewModel.loadReviewsForOrganization(orgId)
+                    }
+                }
+            }
+            function onReviewUpdated() {
+                if (organizationViewModel && typeof reviewListViewModel !== 'undefined') {
+                    var orgId = organizationViewModel.currentOrganizationId
+                    if (orgId > 0) {
+                        console.log("Review updated, reloading reviews for org:", orgId)
                         reviewListViewModel.loadReviewsForOrganization(orgId)
                     }
                 }
@@ -481,6 +497,37 @@ ApplicationWindow {
             Component.onDestruction: {
                 if (createReviewViewModel) {
                     createReviewViewModel.cleanup()
+                }
+            }
+        }
+    }
+
+    Component {
+        id: reviewUpdateViewComponent
+        ReviewUpdateView {
+            viewModel: updateReviewViewModel
+            reviewId: typeof reviewId !== 'undefined' ? reviewId : 0
+            reviewText: typeof reviewText !== 'undefined' ? reviewText : ""
+
+            onBackClicked: {
+                updateReviewViewModel.cleanup()
+                stackView.pop()
+            }
+
+            onSaveCompleted: {
+                updateReviewViewModel.cleanup()
+                stackView.pop()
+                window.reviewUpdated()
+            }
+
+            Component.onCompleted: {
+                if (updateReviewViewModel) {
+                    updateReviewViewModel.initialize()
+                }
+            }
+            Component.onDestruction: {
+                if (updateReviewViewModel) {
+                    updateReviewViewModel.cleanup()
                 }
             }
         }

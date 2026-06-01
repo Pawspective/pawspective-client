@@ -33,6 +33,7 @@
 #include "viewmodels/update_animal_viewmodel.hpp"
 #include "viewmodels/update_organization_viewmodel.hpp"
 #include "viewmodels/update_post_viewmodel.hpp"
+#include "viewmodels/update_review_viewmodel.hpp"
 #include "viewmodels/user_update_viewmodel.hpp"
 #include "viewmodels/user_viewmodel.hpp"
 
@@ -95,6 +96,7 @@ int main(int argc, char* argv[]) {
     auto postCardViewModel = new pawspective::viewmodels::PostCardViewModel(&app);
     auto adoptRequestListViewModel = new pawspective::viewmodels::AdoptRequestListViewModel(adoptRequestService, &app);
     auto updatePostViewModel = new pawspective::viewmodels::UpdatePostViewModel(postService, &app);
+    auto updateReviewViewModel = new pawspective::viewmodels::UpdateReviewViewModel(reviewService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -113,6 +115,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("animalListViewModel", animalListViewModel);
     engine.rootContext()->setContextProperty("createPostViewModel", createPostViewModel);
     engine.rootContext()->setContextProperty("reviewListViewModel", reviewListViewModel);
+    engine.rootContext()->setContextProperty("updateReviewViewModel", updateReviewViewModel);
 
     engine.rootContext()->setContextProperty("postListViewModel", postListViewModel);
     engine.rootContext()->setContextProperty("postCardViewModel", postCardViewModel);

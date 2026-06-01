@@ -27,7 +27,7 @@ Rectangle {
     property int previewLimit: 220
 
     signal animalClicked(int animalId)
-    signal editRequested(int reviewId)
+    signal editRequested(int reviewId, string reviewText)
     signal deleteRequested(int reviewId)
 
     readonly property real padV: root.width * 0.025
@@ -241,7 +241,7 @@ Rectangle {
                 }
                 onClicked: {
                     optionsPopup.close()
-                    root.editRequested(root.reviewId)
+                    root.editRequested(root.reviewId, root.reviewText)
                 }
             }
 
