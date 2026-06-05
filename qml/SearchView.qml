@@ -564,6 +564,7 @@ readonly property real loaderTopMargin: 10
                     collectFilterItems(careLevelsSelectedModel),
                     collectFilterItems(colorsSelectedModel),
                     collectFilterItems(goodWithsSelectedModel),
+                    collectFilterItems(statusesSelectedModel),
                     collectFilterItems(citiesSelectedModel)
                 )
             }
@@ -602,6 +603,7 @@ readonly property real loaderTopMargin: 10
                 populateFilterModel(careLevelsAvailableModel, animalListViewModel.availableCareLevels)
                 populateFilterModel(colorsAvailableModel, animalListViewModel.availableColors)
                 populateFilterModel(goodWithsAvailableModel, animalListViewModel.availableGoodWiths)
+                populateFilterModel(statusesAvailableModel, animalListViewModel.availableStatuses)
                 populateFilterModel(citiesAvailableModel, animalListViewModel.availableCities)
             }
 
@@ -667,6 +669,7 @@ readonly property real loaderTopMargin: 10
                 clearFilterModel(colorsSelectedModel)
                 clearFilterModel(goodWithsSelectedModel)
                 clearFilterModel(citiesSelectedModel)
+                clearFilterModel(statusesSelectedModel)
                 animalsContentRoot.ageRangeMin = null
                 animalsContentRoot.ageRangeMax = null
                 animalListViewModel.cleanup()
@@ -766,6 +769,14 @@ readonly property real loaderTopMargin: 10
                         labelText: "Good With"
                         availableItems: goodWithsAvailableModel
                         selectedItems: goodWithsSelectedModel
+                    }
+
+                    FieldTag {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        labelText: "Statuses"
+                        availableItems: statusesAvailableModel
+                        selectedItems: statusesSelectedModel
                     }
 
                     FieldTag {
@@ -887,6 +898,14 @@ readonly property real loaderTopMargin: 10
 
             ListModel {
                 id: goodWithsSelectedModel
+            }
+
+            ListModel {
+                id: statusesAvailableModel
+            }
+
+            ListModel {
+                id: statusesSelectedModel
             }
 
             ListModel {

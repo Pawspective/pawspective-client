@@ -140,27 +140,6 @@ QString UpdateAnimalViewModel::status() const {
 
 bool UpdateAnimalViewModel::isBreedEnabled() const { return !m_isLoadingBreeds; }
 
-QVariantList UpdateAnimalViewModel::statuses() const {
-    QVariantList list;
-
-    QVariantMap available;
-    available["text"] = "available";
-    available["value"] = "available";
-    list.append(available);
-
-    QVariantMap adopted;
-    adopted["text"] = "adopted";
-    adopted["value"] = "adopted";
-    list.append(adopted);
-
-    QVariantMap unavailable;
-    unavailable["text"] = "unavailable";
-    unavailable["value"] = "unavailable";
-    list.append(unavailable);
-
-    return list;
-}
-
 void UpdateAnimalViewModel::setName(const QString& value) {
     if (name() != value) {
         auto original = m_originalData.name;

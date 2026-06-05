@@ -228,6 +228,20 @@ std::optional<pawspective::models::GoodWith> parseGoodWith(const QString& value)
     return std::nullopt;
 }
 
+std::optional<pawspective::models::AnimalStatus> parseAnimalStatus(const QString& value) {
+    const QString normalized = normalizeFilterValue(value);
+    if (normalized == "available") {
+        return pawspective::models::AnimalStatus::Available;
+    }
+    if (normalized == "adopted") {
+        return pawspective::models::AnimalStatus::Adopted;
+    }
+    if (normalized == "unavailable") {
+        return pawspective::models::AnimalStatus::Unavailable;
+    }
+    return std::nullopt;
+}
+
 template <typename T>
 std::optional<QVector<T>> parseEnumVector(
     const QVariantList& rawValues,
@@ -470,6 +484,7 @@ void AnimalListViewModel::loadAnimalByFilters(const QVariantMap& filterData) {
     filter.careLevels = parseEnumVector<models::CareLevel>(groupedFilters.value("careLevels"), parseCareLevel);
     filter.colors = parseEnumVector<models::AnimalColor>(groupedFilters.value("colors"), parseAnimalColor);
     filter.goodWiths = parseEnumVector<models::GoodWith>(groupedFilters.value("goodWiths"), parseGoodWith);
+    filter.statuses = parseEnumVector<models::AnimalStatus>(groupedFilters.value("statuses"), parseAnimalStatus);
 
     // Only add age filters if they were explicitly provided in filterData
     if (filterData.contains("ageMin") && ageMin >= 0) {
@@ -639,12 +654,14 @@ void AnimalListViewModel::handleGetAnimalFiltersSuccess(const models::AnimalFilt
     const QVariantList colors = toEnumFilterOptions<models::AnimalColor>(filters.colors, "colors", models::toApiString);
     const QVariantList
         goodWiths = toEnumFilterOptions<models::GoodWith>(filters.goodWiths, "goodWiths", models::toApiString);
+    const QVariantList
+        statuses = toEnumFilterOptions<models::AnimalStatus>(filters.statuses, "statuses", models::toApiString);
     const QVariantList cities = buildCityFilterOptions(filters.cities, m_cityNames);
 
     const bool changed =
         m_availableBreeds != breeds || m_availableAnimalTypes != animalTypes || m_availableSizes != sizes ||
         m_availableGenders != genders || m_availableCareLevels != careLevels || m_availableColors != colors ||
-        m_availableGoodWiths != goodWiths || m_availableCities != cities;
+        m_availableGoodWiths != goodWiths || m_availableCities != cities || m_availableStatuses != statuses;
 
     if (!changed) {
         return;
@@ -658,6 +675,7 @@ void AnimalListViewModel::handleGetAnimalFiltersSuccess(const models::AnimalFilt
     m_availableColors = colors;
     m_availableGoodWiths = goodWiths;
     m_availableCities = cities;
+    m_availableStatuses = statuses;
     emit availableFiltersChanged();
 }
 

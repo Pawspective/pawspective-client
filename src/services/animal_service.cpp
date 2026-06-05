@@ -145,6 +145,11 @@ void AnimalService::getAnimals(const models::AnimalFilterDTO& filter) {
             query.addQueryItem("good_withs", models::toApiString(goodWith));
         }
     }
+    if (filter.statuses) {
+        for (models::AnimalStatus status : *filter.statuses) {
+            query.addQueryItem("statuses", models::toApiString(status));
+        }
+    }
     if (filter.ageLte) {
         query.addQueryItem("age_lte", QString::number(*filter.ageLte));
     }

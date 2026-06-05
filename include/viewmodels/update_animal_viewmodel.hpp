@@ -65,7 +65,7 @@ public:
     QVariantList careLevels() const { return toVariantList(m_filterDto.careLevels, &models::toApiString); }
     QVariantList colors() const { return toVariantList(m_filterDto.colors, &models::toApiString); }
     QVariantList goodWiths() const { return toVariantList(m_filterDto.goodWiths, &models::toApiString); }
-    QVariantList statuses() const;
+    QVariantList statuses() const { return toVariantList(m_filterDto.statuses, &models::toApiString); }
 
     void setName(const QString& value);
     void setDescription(const QString& value);

@@ -81,6 +81,7 @@ class AnimalListViewModel : public BaseViewModel {
     Q_PROPERTY(QVariantList availableCareLevels READ availableCareLevels NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableColors READ availableColors NOTIFY availableFiltersChanged)
     Q_PROPERTY(QVariantList availableGoodWiths READ availableGoodWiths NOTIFY availableFiltersChanged)
+    Q_PROPERTY(QVariantList availableStatuses READ availableStatuses NOTIFY availableFiltersChanged)
 
 public:
     explicit AnimalListViewModel(
@@ -107,7 +108,7 @@ public:
     QVariantList availableCareLevels() const { return m_availableCareLevels; }
     QVariantList availableColors() const { return m_availableColors; }
     QVariantList availableGoodWiths() const { return m_availableGoodWiths; }
-
+    QVariantList availableStatuses() const { return m_availableStatuses; }
     Q_INVOKABLE void initialize() override;
     Q_INVOKABLE void cleanup() override;
 
@@ -140,6 +141,7 @@ private:
     QVariantList m_availableCareLevels;
     QVariantList m_availableColors;
     QVariantList m_availableGoodWiths;
+    QVariantList m_availableStatuses;
     QSet<models::AnimalType> m_requestedBreedTypes;
     qint64 m_currentOrganizationId = 0;
     bool m_isLoading = false;

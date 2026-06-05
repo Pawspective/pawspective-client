@@ -17,6 +17,7 @@ struct AnimalFilterDTO {
     std::optional<QVector<CareLevel>> careLevels;
     std::optional<QVector<AnimalColor>> colors;
     std::optional<QVector<GoodWith>> goodWiths;
+    std::optional<QVector<AnimalStatus>> statuses;
     std::optional<int> ageLte;
     std::optional<int> ageGte;
     std::optional<int> page;
