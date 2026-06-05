@@ -54,7 +54,10 @@ void NetworkClient::sendRequest(
          reply,
          onSuccess = std::move(onSuccess),
          onError = std::move(onError)]() {
-            QByteArray responseData = reply->readAll();
+            QByteArray responseData;
+            if (reply->isOpen() && reply->isReadable()) {
+                responseData = reply->readAll();
+            }
             reply->setProperty("responseData", responseData);
             int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
