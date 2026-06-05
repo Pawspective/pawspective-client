@@ -56,7 +56,9 @@ void NetworkClient::sendRequest(
          onError = std::move(onError)]() {
             QByteArray responseData = reply->readAll();
             reply->setProperty("responseData", responseData);
-            if (reply->error() != QNetworkReply::NoError) {
+            int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+            if (reply->error() != QNetworkReply::NoError && statusCode == 0) {
                 if (responseData.isEmpty()) {
                     reply->setProperty("responseData", QByteArray("Network error: ") + reply->errorString().toUtf8());
                 }
@@ -68,7 +70,8 @@ void NetworkClient::sendRequest(
                 reply->deleteLater();
                 return;
             }
-            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+
+            if (statusCode == 401) {
                 QSharedPointer<BaseError> error = ErrorFactory::createError(responseData);
                 if (error.dynamicCast<AccessTokenExpiredError>()) {
                     m_pendingRequests.append({method, endpoint, data, onSuccess, onError});
@@ -92,7 +95,6 @@ void NetworkClient::sendRequest(
                 reply->deleteLater();
                 return;
             }
-            int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
             if (statusCode >= 200 && statusCode < 300) {
                 if (onSuccess) {
