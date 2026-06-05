@@ -63,6 +63,13 @@ QJsonObject AnimalFilterDTO::toJson() const {
         }
         json["good_withs"] = goodWithsArray;
     }
+    if (statuses.has_value()) {
+        QJsonArray statusesArray;
+        for (const auto& status : statuses.value()) {
+            statusesArray.append(toApiString(status));
+        }
+        json["statuses"] = statusesArray;
+    }
     if (ageLte.has_value()) {
         json["age_lte"] = ageLte.value();
     }
@@ -106,6 +113,7 @@ AnimalFilterDTO AnimalFilterDTO::fromJson(const QJsonObject& json) {
     dto.careLevels = utils::json::getOptionalEnumArray<CareLevel>(json, "careLevels", careLevelFromApi);
     dto.colors = utils::json::getOptionalEnumArray<AnimalColor>(json, "colors", animalColorFromApi);
     dto.goodWiths = utils::json::getOptionalEnumArray<GoodWith>(json, "goodWiths", goodWithFromApi);
+    dto.statuses = utils::json::getOptionalEnumArray<AnimalStatus>(json, "statuses", animalStatusFromApi);
     dto.ageLte = utils::json::getOptionalInt32(json, "age_lte");
     dto.ageGte = utils::json::getOptionalInt32(json, "age_gte");
 
