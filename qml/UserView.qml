@@ -54,6 +54,26 @@ Rectangle {
 
     color: theme.pageBg
 
+    // Component.onDestruction: {
+    //     // Гарантируем, что Main.qml не вызовет функции уничтоженного экрана
+    //     window.organizationRefreshHandler = null
+    //     window.organizationRefreshFailHandler = null
+    //     window.organizationRefreshPending = false
+    // }
+    Component.onDestruction: {
+        // Safely disconnect the signals before dropping the references
+        if (window.organizationRefreshHandler && viewModel) {
+            viewModel.userDataLoaded.disconnect(window.organizationRefreshHandler)
+        }
+        if (window.organizationRefreshFailHandler && viewModel) {
+            viewModel.userDataLoadFailed.disconnect(window.organizationRefreshFailHandler)
+        }
+        
+        window.organizationRefreshHandler = null
+        window.organizationRefreshFailHandler = null
+        window.organizationRefreshPending = false
+    }
+
     LoaderSpinner {
         anchors.centerIn: parent
         running: viewModel ? (viewModel.isBusy && !root.suppressLoading) : false
