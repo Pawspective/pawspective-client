@@ -91,16 +91,43 @@ Rectangle {
                 ProfileDataField { 
                     label: "Email"
                     value: viewModel ? viewModel.userData.email : ""
+                    fontName: theme.fontName
+                    fieldLabelFontSize: root.fieldLabelFontSize
+                    fieldValueFontSize: root.fieldValueFontSize
+                    fieldHeight: root.fieldHeight
+                    fieldLeftMargin: root.fieldLeftMargin
+                    textDark: theme.textDark
+                    fieldBg: theme.fieldBg
+                    accentPink: theme.accentPink
+                    spacing: root.fieldSpacing
                 }
                 
                 ProfileDataField { 
                     label: "First Name"
                     value: viewModel ? viewModel.userData.firstName : ""
+                    fontName: theme.fontName
+                    fieldLabelFontSize: root.fieldLabelFontSize
+                    fieldValueFontSize: root.fieldValueFontSize
+                    fieldHeight: root.fieldHeight
+                    fieldLeftMargin: root.fieldLeftMargin
+                    textDark: theme.textDark
+                    fieldBg: theme.fieldBg
+                    accentPink: theme.accentPink
+                    spacing: root.fieldSpacing
                 }
                 
                 ProfileDataField { 
                     label: "Last Name"
                     value: viewModel ? viewModel.userData.lastName : ""
+                    fontName: theme.fontName
+                    fieldLabelFontSize: root.fieldLabelFontSize
+                    fieldValueFontSize: root.fieldValueFontSize
+                    fieldHeight: root.fieldHeight
+                    fieldLeftMargin: root.fieldLeftMargin
+                    textDark: theme.textDark
+                    fieldBg: theme.fieldBg
+                    accentPink: theme.accentPink
+                    spacing: root.fieldSpacing
                 }
 
                 RowLayout {
@@ -160,12 +187,66 @@ Rectangle {
                 anchors.topMargin: root.sidebarTopMargin
                 spacing: root.sidebarSpacing
 
-                SidebarItem { text: "Profile"; active: true }
-                SidebarItem { text: "Search"; onClicked: root.searchClicked() }
+                // Repeater {
+                //     model: [
+                //         { text: "Profile", tabId: "profile" },
+                //         { text: "Search", tabId: "search" },
+                //         { text: "Organization", tabId: "organization" }
+                //     ]
+
+                //     delegate: SidebarItem {
+                //         text: modelData.text
+                //         active: root.currentTab === modelData.tabId
+                //         theme: theme
+
+                //         onClicked: {
+                //             root.currentTab = modelData.tabId
+                            
+                //             if (modelData.tabId === "search") {
+                //                 root.searchClicked()
+                //             } else if (modelData.tabId === "organization") {
+                //                 const rawOrganizationId = viewModel && viewModel.userData ? viewModel.userData.organizationId : null
+                //                 root.organizationClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
+                //             }
+                //         }
+                //     }
+                // }
+
+                SidebarItem { 
+                    text: "Profile"
+                    active: true 
+                    height: root.sidebarItemHeight
+                    fontName: theme.fontName
+                    sidebarItemFontSize: root.sidebarItemFontSize
+                    sidebarItemLeftMargin: root.sidebarItemLeftMargin
+                    purple: theme.purple
+                    textDark: theme.textDark
+                    accentPink: theme.accentPink
+                }
+
+                SidebarItem { 
+                    text: "Search"; 
+                    height: root.sidebarItemHeight
+                    fontName: theme.fontName
+                    sidebarItemFontSize: root.sidebarItemFontSize
+                    sidebarItemLeftMargin: root.sidebarItemLeftMargin
+                    purple: theme.purple
+                    textDark: theme.textDark
+                    accentPink: theme.accentPink
+                    onClicked: root.searchClicked()
+                }
+
                 SidebarItem {
                     text: "Organization"
+                    height: root.sidebarItemHeight
+                    fontName: theme.fontName
+                    sidebarItemFontSize: root.sidebarItemFontSize
+                    sidebarItemLeftMargin: root.sidebarItemLeftMargin
+                    purple: theme.purple
+                    textDark: theme.textDark
+                    accentPink: theme.accentPink
                     onClicked: {
-                        const rawOrganizationId = viewModel ? viewModel.userData.organizationId : null
+                        const rawOrganizationId = (viewModel && viewModel.userData) ? viewModel.userData.organizationId : null
                         root.organizationClicked(rawOrganizationId === undefined ? null : rawOrganizationId)
                     }
                 }
@@ -182,69 +263,6 @@ Rectangle {
 
                 Item { Layout.fillHeight: true }
             }
-        }
-    }
-
-    component ProfileDataField : ColumnLayout {
-        id: fieldRoot
-        property string label: ""
-        property string value: ""
-        Layout.fillWidth: true
-        spacing: root.fieldSpacing
-
-        Text {
-            text: fieldRoot.label || ""
-            font.family: theme.fontName
-            font.pixelSize: root.fieldLabelFontSize
-            color: theme.textDark
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: root.fieldHeight
-            radius: 10
-            color: theme.fieldBg
-
-            Text {
-                anchors.left: parent.left
-                anchors.leftMargin: root.fieldLeftMargin
-                anchors.verticalCenter: parent.verticalCenter
-                text: fieldRoot.value || ""
-                font.family: theme.fontName
-                font.pixelSize: root.fieldValueFontSize
-                color: theme.accentPink
-            }
-        }
-    }
-
-    component SidebarItem : Rectangle {
-        id: sidebarItemRoot
-        property string text: ""
-        property bool active: false
-        Layout.fillWidth: true
-        height: root.sidebarItemHeight
-        radius: 8
-        color: active ? theme.purple : "transparent"
-
-        signal clicked()
-
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: root.sidebarItemLeftMargin
-            text: sidebarItemRoot.text || ""
-            font.family: theme.fontName
-            font.pixelSize: root.sidebarItemFontSize
-            font.bold: sidebarItemRoot.active
-            color: sidebarItemRoot.active ? "white" : theme.textDark
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            onEntered: if (!sidebarItemRoot.active) sidebarItemRoot.color = theme.accentPink
-            onExited: if (!sidebarItemRoot.active) sidebarItemRoot.color = "transparent"
-            onClicked: sidebarItemRoot.clicked()
         }
     }
 }
