@@ -82,10 +82,10 @@ std::optional<uint64_t> extractUserIdFromToken(const QString& token) {
 namespace pawspective::services {
 
 AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
-    : QObject(parent)
-    , m_networkClient(networkClient)
-    , m_settings("Pawspective", "pawspective-client")
-    , m_userId(std::nullopt) {
+    : QObject(parent),
+      m_networkClient(networkClient),
+      m_settings("Pawspective", "pawspective-client"),
+      m_userId(std::nullopt) {
     connect(&m_networkClient, &NetworkClient::unauthorizedAccess, this, &AuthService::handleUnauthorizedAccess);
     connect(&m_networkClient, &NetworkClient::invalidTokenDetected, this, [this]() { clearSession(); });
 
@@ -241,9 +241,11 @@ void AuthService::logout() {
         url,
         std::move(data),
         [this](QNetworkReply& reply) {
-            handleSuccess(reply, [](const QJsonObject&) {}, [this](QSharedPointer<BaseError> error) {
-                emit logoutFailed(error);
-            });
+            handleSuccess(
+                reply,
+                [](const QJsonObject&) {},
+                [this](QSharedPointer<BaseError> error) { emit logoutFailed(error); }
+            );
         },
         [this](QNetworkReply& reply) {
             handleError(reply, [this](QSharedPointer<BaseError> error) { emit logoutFailed(error); });
@@ -361,9 +363,7 @@ void AuthService::handleUnauthorizedAccess() {
     }
 }
 
-bool AuthService::hasRefreshToken() const {
-    return !m_refreshToken.isEmpty();
-}
+bool AuthService::hasRefreshToken() const { return !m_refreshToken.isEmpty(); }
 
 void AuthService::restoreSession() {
     if (isAuthenticated()) {

@@ -42,9 +42,7 @@ UserViewModel::UserViewModel(services::AuthService& authService, services::UserS
 const models::UserDTO& UserViewModel::userData() const { return m_userData; }
 bool UserViewModel::isAuthenticated() const { return m_isAuthenticated; }
 
-void UserViewModel::initialize() {
-    m_authService.restoreSession();
-}
+void UserViewModel::initialize() { m_authService.restoreSession(); }
 
 void UserViewModel::logout() {
     if (isBusy()) {
