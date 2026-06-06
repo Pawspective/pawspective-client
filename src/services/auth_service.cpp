@@ -1,4 +1,5 @@
 #include "services/auth_service.hpp"
+#include <keychain.h>
 #include <QByteArray>
 #include <QDateTime>
 #include <QJsonDocument>
@@ -82,23 +83,9 @@ std::optional<uint64_t> extractUserIdFromToken(const QString& token) {
 namespace pawspective::services {
 
 AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
-    : QObject(parent),
-      m_networkClient(networkClient),
-      m_settings("Pawspective", "pawspective-client"),
-      m_userId(std::nullopt) {
+    : QObject(parent), m_networkClient(networkClient), m_userId(std::nullopt) {
     connect(&m_networkClient, &NetworkClient::unauthorizedAccess, this, &AuthService::handleUnauthorizedAccess);
     connect(&m_networkClient, &NetworkClient::invalidTokenDetected, this, [this]() { clearSession(); });
-
-    m_accessToken = m_settings.value("auth/access_token").toString();
-    m_refreshToken = m_settings.value("auth/refresh_token").toString();
-
-    if (!m_accessToken.isEmpty()) {
-        auto userId = extractUserIdFromToken(m_accessToken);
-        if (userId.has_value()) {
-            m_userId = userId.value();
-        }
-    }
-
     m_networkClient.setTokenProvider([this]() { return m_accessToken; });
     m_networkClient.setUserId(m_userId);
 }
@@ -120,13 +107,27 @@ void AuthService::clearSession() {
 }
 
 void AuthService::saveTokensToSettings() {
-    m_settings.setValue("auth/access_token", m_accessToken);
-    m_settings.setValue("auth/refresh_token", m_refreshToken);
+    // Only the refresh token is persisted; the access token remains in-memory only
+    auto* job = new QKeychain::WritePasswordJob(QStringLiteral("pawspective"), this);
+    job->setKey(QStringLiteral("auth/refresh_token"));
+    job->setTextData(m_refreshToken);
+    connect(job, &QKeychain::Job::finished, this, [](QKeychain::Job* j) {
+        if (j->error() != QKeychain::NoError) {
+            qWarning() << "Keychain write failed:" << j->errorString();
+        }
+    });
+    job->start();
 }
 
 void AuthService::clearTokensFromSettings() {
-    m_settings.remove("auth/access_token");
-    m_settings.remove("auth/refresh_token");
+    auto* job = new QKeychain::DeletePasswordJob(QStringLiteral("pawspective"), this);
+    job->setKey(QStringLiteral("auth/refresh_token"));
+    connect(job, &QKeychain::Job::finished, this, [](QKeychain::Job* j) {
+        if (j->error() != QKeychain::NoError && j->error() != QKeychain::EntryNotFound) {
+            qWarning() << "Keychain delete failed:" << j->errorString();
+        }
+    });
+    job->start();
 }
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
@@ -224,11 +225,10 @@ void AuthService::login(const QString& email, const QString& password) {
 
 void AuthService::logout() {
     QString refreshTokenToSend = m_refreshToken;
-
     clearSessionSilently();
-    emit logoutSuccess();
 
     if (refreshTokenToSend.isEmpty()) {
+        emit logoutSuccess();
         return;
     }
 
@@ -243,7 +243,7 @@ void AuthService::logout() {
         [this](QNetworkReply& reply) {
             handleSuccess(
                 reply,
-                [](const QJsonObject&) {},
+                [this](const QJsonObject&) { emit logoutSuccess(); },
                 [this](QSharedPointer<BaseError> error) { emit logoutFailed(error); }
             );
         },
@@ -366,12 +366,21 @@ void AuthService::handleUnauthorizedAccess() {
 bool AuthService::hasRefreshToken() const { return !m_refreshToken.isEmpty(); }
 
 void AuthService::restoreSession() {
-    if (isAuthenticated()) {
-        emit sessionRestored();
-    } else if (!m_refreshToken.isEmpty()) {
-        m_isRestoringSession = true;
-        refreshToken(m_refreshToken);
-    }
+    auto* job = new QKeychain::ReadPasswordJob(QStringLiteral("pawspective"), this);
+    job->setKey(QStringLiteral("auth/refresh_token"));
+    connect(job, &QKeychain::Job::finished, this, [this](QKeychain::Job* finishedJob) {
+        if (finishedJob->error() == QKeychain::NoError) {
+            m_refreshToken = static_cast<QKeychain::ReadPasswordJob*>(finishedJob)->textData();
+        } else if (finishedJob->error() != QKeychain::EntryNotFound) {
+            qWarning() << "Keychain read failed:" << finishedJob->errorString();
+        }
+
+        if (!m_refreshToken.isEmpty()) {
+            m_isRestoringSession = true;
+            refreshToken(m_refreshToken);
+        }
+    });
+    job->start();
 }
 
 bool AuthService::isAuthenticated() const {

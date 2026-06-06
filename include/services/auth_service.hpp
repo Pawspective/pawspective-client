@@ -1,7 +1,6 @@
 #pragma once
 #include <QNetworkAccessManager>
 #include <QObject>
-#include <QSettings>
 #include <QString>
 #include <cstdint>
 #include <functional>
@@ -65,7 +64,6 @@ private:
     std::tuple<QString, QString, QString> parseTokenResponse(const QJsonObject& obj);
 
     NetworkClient& m_networkClient;
-    QSettings m_settings;
     QString m_accessToken;
     QString m_refreshToken;
     std::optional<std::uint64_t> m_userId;

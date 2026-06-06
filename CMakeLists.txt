@@ -28,6 +28,18 @@ find_package(Qt6 REQUIRED COMPONENTS
     QuickControls2
 )
 
+include(FetchContent)
+FetchContent_Declare(
+    qtkeychain
+    GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+    GIT_TAG        0.14.3
+    GIT_SHALLOW    TRUE
+)
+set(BUILD_WITH_QT6 ON CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(BUILD_TRANSLATIONS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(qtkeychain)
+
 
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS
  "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
@@ -138,7 +150,11 @@ qt_add_qml_module(pawspective-client
         qml/RequestListView.qml
 )
 
-target_include_directories(pawspective-client PRIVATE include)
+target_include_directories(pawspective-client PRIVATE
+    include
+    ${qtkeychain_SOURCE_DIR}
+    ${qtkeychain_BINARY_DIR}
+)
 
 target_link_libraries(pawspective-client PRIVATE
     Qt6::Core
@@ -149,6 +165,7 @@ target_link_libraries(pawspective-client PRIVATE
     Qt6::Quick
     Qt6::QuickLayouts
     Qt6::QuickControls2
+    qt6keychain
 )
 
 # Tests
