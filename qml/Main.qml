@@ -93,7 +93,7 @@ ApplicationWindow {
                 organizationRefreshHandler = null
                 organizationRefreshFailHandler = null
                 const loadedOrgId = Number(userViewModel.userData.organizationId)
-                openOrganizationView(loadedOrgId, source, false)
+                Qt.callLater(openOrganizationView, loadedOrgId, source, false);
             }
             organizationRefreshFailHandler = function() {
                 userViewModel.userDataLoaded.disconnect(organizationRefreshHandler)
@@ -114,9 +114,12 @@ ApplicationWindow {
 
         const navigationSource = source || "sidebar"
         if (navigationSource == "sidebar") {
-            stackView.replace(null, organizationViewComponent, {
-                organizationId: resolvedOrganizationId,
-                navigationSource: navigationSource
+            Qt.callLater(function() {
+                stackView.clear()
+                stackView.push(organizationViewComponent, {
+                    organizationId: resolvedOrganizationId,
+                    navigationSource: navigationSource
+                })
             })
         } else {
             stackView.push(organizationViewComponent, {
@@ -198,9 +201,12 @@ ApplicationWindow {
                 window.openOrganizationView(organizationId, "sidebar")
             }
             onSearchClicked: {
-                stackView.replace(null, searchViewComponent, {
-                searchOrganizationViewModel: searchOrganizationViewModel
-            })
+                Qt.callLater(function() {
+                    stackView.clear()
+                    stackView.push(searchViewComponent, {
+                        searchOrganizationViewModel: searchOrganizationViewModel
+                    })
+                })
             }
 
             Component.onCompleted: {
@@ -217,7 +223,12 @@ ApplicationWindow {
         searchOrganizationViewModel: searchOrganizationViewModel
         currentUserViewModel: userViewModel
 
-        onProfileRequested: stackView.replace(null, userViewComponent)
+        onProfileRequested: {
+            Qt.callLater(function() {
+                stackView.clear()
+                stackView.push(userViewComponent)
+            })
+        }
         onOrganizationClicked: function(organizationId) {
             window.openOrganizationView(organizationId, "search")
         }
@@ -232,7 +243,7 @@ ApplicationWindow {
             if (searchOrganizationViewModel) {
                 searchOrganizationViewModel.initialize()
             }
-            userViewModel = window.userViewModel
+            // userViewModel = window.userViewModel
         }
 
         Component.onDestruction: {
@@ -261,10 +272,18 @@ ApplicationWindow {
     Component {
         id: organizationViewComponent
         OrganizationView {
-            onProfileRequested: stackView.replace(null, userViewComponent)
+            onProfileRequested: {
+                Qt.callLater(function() {
+                    stackView.clear()
+                    stackView.push(userViewComponent)
+                })
+            }
             onSearchRequested: {
-                stackView.replace(null, searchViewComponent, {
-                    searchOrganizationViewModel: searchOrganizationViewModel
+                Qt.callLater(function() {
+                    stackView.clear()
+                    stackView.push(searchViewComponent, {
+                        searchOrganizationViewModel: searchOrganizationViewModel
+                    })
                 })
             }
             onOrganizationRequested: function(orgId) { window.openOrganizationView(orgId, "sidebar") }
