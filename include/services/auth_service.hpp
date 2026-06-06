@@ -8,25 +8,23 @@
 #include "models/user_dto.hpp"
 #include "services/errors.hpp"
 #include "services/network_client.hpp"
+#include "state/auth_state.hpp"
 
 namespace pawspective::services {
 
 class AuthService : public QObject {
     Q_OBJECT
 public:
-    explicit AuthService(NetworkClient& networkClient, QObject* parent = nullptr);
+    explicit AuthService(NetworkClient& networkClient, state::AuthState& authState, QObject* parent = nullptr);
 
-    // Authentication methods
     void login(const QString& email, const QString& password);
     void logout();
     void refreshToken(const QString& refreshToken);
     void getCurrentUser();
 
-    // Token management
     bool isAuthenticated() const;
     bool hasRefreshToken() const;
 
-    // Session persistence
     void restoreSession();
 
 signals:
@@ -58,12 +56,11 @@ private:
     void handleUnauthorizedAccess();
     void clearSession();
     void clearSessionSilently();
-    void saveTokensToSettings();
-    void clearTokensFromSettings();
 
     std::tuple<QString, QString, QString> parseTokenResponse(const QJsonObject& obj);
 
     NetworkClient& m_networkClient;
+    state::AuthState& m_authState;
     QString m_accessToken;
     QString m_refreshToken;
     std::optional<std::uint64_t> m_userId;

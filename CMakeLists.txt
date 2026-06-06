@@ -63,6 +63,7 @@ add_executable(pawspective-client
     src/services/errors.cpp
     src/services/review_service.cpp
     src/services/post_service.cpp
+    src/state/auth_state.cpp
     src/viewmodels/base.cpp
     src/viewmodels/user_viewmodel.cpp
     src/viewmodels/user_update_viewmodel.cpp

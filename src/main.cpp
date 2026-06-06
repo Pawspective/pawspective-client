@@ -15,6 +15,7 @@
 #include "services/post_service.hpp"
 #include "services/review_service.hpp"
 #include "services/user_service.hpp"
+#include "state/auth_state.hpp"
 #include "viewmodels/adopt_request_list_viewmodel.hpp"
 #include "viewmodels/animal_detail_viewmodel.hpp"
 #include "viewmodels/animal_list_viewmodel.hpp"
@@ -52,7 +53,8 @@ int main(int argc, char* argv[]) {
     // }
 
     pawspective::services::NetworkClient networkClient(&app);
-    pawspective::services::AuthService authService(networkClient);
+    pawspective::state::AuthState authState(&app);
+    pawspective::services::AuthService authService(networkClient, authState);
     pawspective::services::UserService userService(networkClient);
     pawspective::services::OrganizationService organizationService(networkClient);
     pawspective::services::CityService cityService(networkClient);
