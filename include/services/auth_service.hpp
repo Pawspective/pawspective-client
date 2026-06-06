@@ -1,6 +1,7 @@
 #pragma once
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QSettings>
 #include <QString>
 #include <cstdint>
 #include <functional>
@@ -24,6 +25,10 @@ public:
 
     // Token management
     bool isAuthenticated() const;
+    bool hasRefreshToken() const;
+
+    // Session persistence
+    void restoreSession();
 
 signals:
     void loginSuccess(
@@ -32,7 +37,9 @@ signals:
         const QString& tokenType,
         uint64_t userId
     );
+    void logoutSuccess();
     void sessionEnded();
+    void sessionRestored();
     void refreshSuccess(const QString& accessToken, const QString& refreshToken, const QString& tokenType);
     void getCurrentUserSuccess(const models::UserDTO& user);
 
@@ -51,14 +58,19 @@ private:
     );
     void handleUnauthorizedAccess();
     void clearSession();
+    void clearSessionSilently();
+    void saveTokensToSettings();
+    void clearTokensFromSettings();
 
     std::tuple<QString, QString, QString> parseTokenResponse(const QJsonObject& obj);
 
     NetworkClient& m_networkClient;
+    QSettings m_settings;
     QString m_accessToken;
     QString m_refreshToken;
     std::optional<std::uint64_t> m_userId;
     bool m_isRefreshing = false;
+    bool m_isRestoringSession = false;
 };
 
 }  // namespace pawspective::services

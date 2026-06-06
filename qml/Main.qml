@@ -12,6 +12,10 @@ ApplicationWindow {
     property var organizationRefreshHandler: null
     property var organizationRefreshFailHandler: null
 
+    Component.onCompleted: {
+        userViewModel.initialize()
+    }
+
     // Session end handling
     Connections {
         target: authService
@@ -20,6 +24,13 @@ ApplicationWindow {
                 stackView.pop()
             }
             sessionExpiredDialog.open()
+        }
+    }
+
+    Connections {
+        target: userViewModel
+        function onSessionRestored() {
+            stackView.replace(userViewComponent)
         }
     }
 

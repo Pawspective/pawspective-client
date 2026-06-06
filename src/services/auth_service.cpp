@@ -82,21 +82,51 @@ std::optional<uint64_t> extractUserIdFromToken(const QString& token) {
 namespace pawspective::services {
 
 AuthService::AuthService(NetworkClient& networkClient, QObject* parent)
-    : QObject(parent), m_networkClient(networkClient), m_userId(std::nullopt) {
+    : QObject(parent)
+    , m_networkClient(networkClient)
+    , m_settings("Pawspective", "pawspective-client")
+    , m_userId(std::nullopt) {
     connect(&m_networkClient, &NetworkClient::unauthorizedAccess, this, &AuthService::handleUnauthorizedAccess);
     connect(&m_networkClient, &NetworkClient::invalidTokenDetected, this, [this]() { clearSession(); });
+
+    m_accessToken = m_settings.value("auth/access_token").toString();
+    m_refreshToken = m_settings.value("auth/refresh_token").toString();
+
+    if (!m_accessToken.isEmpty()) {
+        auto userId = extractUserIdFromToken(m_accessToken);
+        if (userId.has_value()) {
+            m_userId = userId.value();
+        }
+    }
+
     m_networkClient.setTokenProvider([this]() { return m_accessToken; });
     m_networkClient.setUserId(m_userId);
 }
 
-void AuthService::clearSession() {
+void AuthService::clearSessionSilently() {
     m_isRefreshing = false;
+    m_isRestoringSession = false;
     m_accessToken.clear();
     m_refreshToken.clear();
     m_userId = std::nullopt;
     m_networkClient.setUserId(std::nullopt);
     m_networkClient.clearPendingRequests();
+    clearTokensFromSettings();
+}
+
+void AuthService::clearSession() {
+    clearSessionSilently();
     emit sessionEnded();
+}
+
+void AuthService::saveTokensToSettings() {
+    m_settings.setValue("auth/access_token", m_accessToken);
+    m_settings.setValue("auth/refresh_token", m_refreshToken);
+}
+
+void AuthService::clearTokensFromSettings() {
+    m_settings.remove("auth/access_token");
+    m_settings.remove("auth/refresh_token");
 }
 
 void AuthService::handleError(QNetworkReply& reply, std::function<void(QSharedPointer<BaseError>)> onError) {
@@ -172,6 +202,7 @@ void AuthService::login(const QString& email, const QString& password) {
 
                     m_accessToken = accessToken;
                     m_refreshToken = refreshToken;
+                    saveTokensToSettings();
 
                     auto userId = extractUserIdFromToken(accessToken);
                     if (userId.has_value()) {
@@ -192,22 +223,27 @@ void AuthService::login(const QString& email, const QString& password) {
 }
 
 void AuthService::logout() {
+    QString refreshTokenToSend = m_refreshToken;
+
+    clearSessionSilently();
+    emit logoutSuccess();
+
+    if (refreshTokenToSend.isEmpty()) {
+        return;
+    }
+
     QUrl url("/auth/logout");
-
     QJsonObject json;
-    json["refresh_token"] = m_refreshToken;
-
+    json["refresh_token"] = refreshTokenToSend;
     QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_networkClient.post(
         url,
         std::move(data),
         [this](QNetworkReply& reply) {
-            handleSuccess(
-                reply,
-                [this](const QJsonObject&) { clearSession(); },
-                [this](QSharedPointer<BaseError> error) { emit logoutFailed(error); }
-            );
+            handleSuccess(reply, [](const QJsonObject&) {}, [this](QSharedPointer<BaseError> error) {
+                emit logoutFailed(error);
+            });
         },
         [this](QNetworkReply& reply) {
             handleError(reply, [this](QSharedPointer<BaseError> error) { emit logoutFailed(error); });
@@ -248,6 +284,7 @@ void AuthService::refreshToken(const QString& refreshToken) {
 
                     m_accessToken = accessToken;
                     m_refreshToken = refreshToken;
+                    saveTokensToSettings();
 
                     auto userId = extractUserIdFromToken(accessToken);
                     if (userId.has_value()) {
@@ -259,18 +296,34 @@ void AuthService::refreshToken(const QString& refreshToken) {
                     m_isRefreshing = false;
                     m_networkClient.retryPendingRequests();
 
+                    bool wasRestoring = m_isRestoringSession;
+                    m_isRestoringSession = false;
+
                     emit refreshSuccess(accessToken, refreshToken, tokenType);
+                    if (wasRestoring) {
+                        emit sessionRestored();
+                    }
                 },
                 [this](QSharedPointer<BaseError> error) {
+                    bool wasRestoring = m_isRestoringSession;
                     emit refreshFailed(error);
-                    clearSession();
+                    if (wasRestoring) {
+                        clearSessionSilently();
+                    } else {
+                        clearSession();
+                    }
                 }
             );
         },
         [this](QNetworkReply& reply) {
             handleError(reply, [this](QSharedPointer<BaseError> error) {
+                bool wasRestoring = m_isRestoringSession;
                 emit refreshFailed(error);
-                clearSession();
+                if (wasRestoring) {
+                    clearSessionSilently();
+                } else {
+                    clearSession();
+                }
             });
         }
     );
@@ -304,6 +357,19 @@ void AuthService::getCurrentUser() {
 
 void AuthService::handleUnauthorizedAccess() {
     if (!m_refreshToken.isEmpty() && !m_isRefreshing) {
+        refreshToken(m_refreshToken);
+    }
+}
+
+bool AuthService::hasRefreshToken() const {
+    return !m_refreshToken.isEmpty();
+}
+
+void AuthService::restoreSession() {
+    if (isAuthenticated()) {
+        emit sessionRestored();
+    } else if (!m_refreshToken.isEmpty()) {
+        m_isRestoringSession = true;
         refreshToken(m_refreshToken);
     }
 }

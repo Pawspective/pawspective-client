@@ -37,6 +37,7 @@ signals:
     void userDataLoaded();
     void userDataLoadFailed(const QString& errorMessage);
     void sessionExpired();
+    void sessionRestored();
 
 private slots:
     void handleLoginSuccess(
