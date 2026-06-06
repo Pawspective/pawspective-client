@@ -8,6 +8,7 @@ UserViewModel::UserViewModel(services::AuthService& authService, services::UserS
     // AuthService signals
     connect(&m_authService, &services::AuthService::loginSuccess, this, &UserViewModel::handleLoginSuccess);
     connect(&m_authService, &services::AuthService::loginFailed, this, &UserViewModel::handleLoginFailed);
+    connect(&m_authService, &services::AuthService::logoutSuccess, this, &UserViewModel::handleLogoutSuccess);
     connect(&m_authService, &services::AuthService::sessionEnded, this, &UserViewModel::handleLogoutSuccess);
     connect(&m_authService, &services::AuthService::logoutFailed, this, &UserViewModel::handleLogoutFailed);
     connect(
@@ -31,17 +32,17 @@ UserViewModel::UserViewModel(services::AuthService& authService, services::UserS
         &UserViewModel::handleUpdateUserProfileSuccess
     );
     connect(&m_authService, &services::AuthService::refreshFailed, this, &UserViewModel::handleTokenRefreshFailed);
+    connect(&m_authService, &services::AuthService::sessionRestored, this, [this]() {
+        updateProperty(m_isAuthenticated, true, [this] { emit authStateChanged(); });
+        loadUserData();
+        emit sessionRestored();
+    });
 }
 
 const models::UserDTO& UserViewModel::userData() const { return m_userData; }
 bool UserViewModel::isAuthenticated() const { return m_isAuthenticated; }
 
-void UserViewModel::initialize() {
-    updateProperty(m_isAuthenticated, m_authService.isAuthenticated(), [this] { emit authStateChanged(); });
-    if (m_isAuthenticated) {
-        loadUserData();
-    }
-}
+void UserViewModel::initialize() { m_authService.restoreSession(); }
 
 void UserViewModel::logout() {
     if (isBusy()) {
@@ -84,6 +85,8 @@ void UserViewModel::handleLogoutSuccess() {
 
 void UserViewModel::handleLogoutFailed(QSharedPointer<services::BaseError> error) {
     setIsBusy(false);
+    updateProperty(m_isAuthenticated, false, [this] { emit authStateChanged(); });
+    clearUserData();
     if (error) {
         emitError(ErrorType::NetworkError, error->getMessage());
     }
