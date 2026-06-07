@@ -41,7 +41,7 @@ public:
         const QString& contentType,
         CallbackHandler onSuccess,
         CallbackHandler onError
-    ) {}
+    ) = 0;
 };
 
 }  // namespace pawspective::services

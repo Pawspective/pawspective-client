@@ -70,6 +70,7 @@ public:
         putCalls.append({url, data, ok, err});
     }
     void patch(const QUrl&, const QByteArray&, CallbackHandler, CallbackHandler) override {}
+    void postRaw(const QUrl&, const QByteArray&, const QString&, CallbackHandler, CallbackHandler) override {}
     void deleteResource(const QUrl& url, CallbackHandler ok, CallbackHandler err) override {
         deleteCalls.append({url, {}, ok, err});
     }
