@@ -13,7 +13,8 @@ void NetworkClient::sendRequest(
     const QUrl& endpoint,
     const QByteArray& data,
     CallbackHandler onSuccess,
-    CallbackHandler onError
+    CallbackHandler onError,
+    const QString& contentType
 ) {
     QNetworkRequest request = createRequest(endpoint);
     QNetworkReply* reply = nullptr;
@@ -23,15 +24,15 @@ void NetworkClient::sendRequest(
             reply = m_manager.get(request);
             break;
         case HttpMethod::Post:
-            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+            request.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
             reply = m_manager.post(request, data);
             break;
         case HttpMethod::Put:
-            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+            request.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
             reply = m_manager.put(request, data);
             break;
         case HttpMethod::Patch:
-            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+            request.setHeader(QNetworkRequest::ContentTypeHeader, contentType);
             reply = m_manager.sendCustomRequest(request, "PATCH", data);
             break;
         case HttpMethod::Delete:
@@ -166,6 +167,16 @@ void NetworkClient::patch(
 
 void NetworkClient::deleteResource(const QUrl& endpoint, CallbackHandler onSuccess, CallbackHandler onError) {
     sendRequest(HttpMethod::Delete, endpoint, {}, std::move(onSuccess), std::move(onError));
+}
+
+void NetworkClient::postRaw(
+    const QUrl& endpoint,
+    const QByteArray& data,
+    const QString& contentType,
+    CallbackHandler onSuccess,
+    CallbackHandler onError
+) {
+    sendRequest(HttpMethod::Post, endpoint, data, std::move(onSuccess), std::move(onError), contentType);
 }
 
 QNetworkRequest NetworkClient::createRequest(const QUrl& endpoint) const {

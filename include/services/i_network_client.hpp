@@ -34,6 +34,14 @@ public:
         CallbackHandler onError
     ) = 0;
     virtual void deleteResource(const QUrl& endpoint, CallbackHandler onSuccess, CallbackHandler onError) = 0;
+
+    virtual void postRaw(
+        const QUrl& endpoint,
+        const QByteArray& data,
+        const QString& contentType,
+        CallbackHandler onSuccess,
+        CallbackHandler onError
+    ) {}
 };
 
 }  // namespace pawspective::services

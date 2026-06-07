@@ -63,6 +63,7 @@ add_executable(pawspective-client
     src/services/errors.cpp
     src/services/review_service.cpp
     src/services/post_service.cpp
+    src/services/photo_service.cpp
     src/state/auth_state.cpp
     src/viewmodels/base.cpp
     src/viewmodels/user_viewmodel.cpp
@@ -308,4 +309,24 @@ target_link_libraries(post_service_test PRIVATE
 )
 
 add_test(NAME post_service_test COMMAND post_service_test)
+
+add_executable(photo_service_test
+    tests/photo_service_test.cpp
+    include/services/photo_service.hpp
+    src/services/photo_service.cpp
+    src/services/errors.cpp
+    src/utils/json.cpp
+    src/utils/validator.cpp
+)
+
+target_include_directories(photo_service_test PRIVATE include)
+
+target_link_libraries(photo_service_test PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Network
+    Qt6::Test
+)
+
+add_test(NAME photo_service_test COMMAND photo_service_test)
 

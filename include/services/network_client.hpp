@@ -33,6 +33,13 @@ public:
         CallbackHandler onError
     ) override;
     void deleteResource(const QUrl& endpoint, CallbackHandler onSuccess, CallbackHandler onError) override;
+    void postRaw(
+        const QUrl& endpoint,
+        const QByteArray& data,
+        const QString& contentType,
+        CallbackHandler onSuccess,
+        CallbackHandler onError
+    ) override;
 
     void setTokenProvider(TokenProvider provider);
     void setUserId(std::optional<uint64_t> userId);
@@ -60,7 +67,8 @@ private:
         const QUrl& endpoint,
         const QByteArray& data,
         CallbackHandler onSuccess,
-        CallbackHandler onError
+        CallbackHandler onError,
+        const QString& contentType = "application/json"
     );
     QNetworkRequest createRequest(const QUrl& endpoint) const;
 
