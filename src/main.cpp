@@ -12,6 +12,7 @@
 #include "services/breed_service.hpp"
 #include "services/city_service.hpp"
 #include "services/organization_service.hpp"
+#include "services/photo_service.hpp"
 #include "services/post_service.hpp"
 #include "services/review_service.hpp"
 #include "services/user_service.hpp"
@@ -63,6 +64,7 @@ int main(int argc, char* argv[]) {
     pawspective::services::AdoptRequestService adoptRequestService(networkClient);
     pawspective::services::PostService postService(networkClient);
     pawspective::services::ReviewService reviewService(networkClient);
+    pawspective::services::PhotoService photoService(networkClient);
     auto loginViewModel = new pawspective::viewmodels::LoginViewModel(authService, &app);
     auto registerViewModel = new pawspective::viewmodels::RegisterViewModel(userService, &app);
     auto registerOrganizationViewModel =

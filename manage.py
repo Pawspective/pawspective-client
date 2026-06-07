@@ -105,6 +105,8 @@ def filter_compile_commands(preset="debug"):
                 '.rcc',
                 '/tests/',
                 '\\tests\\',
+                '/_deps/',
+                '\\_deps\\',
             ])
         ]
 

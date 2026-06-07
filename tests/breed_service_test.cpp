@@ -64,6 +64,7 @@ public:
     void put(const QUrl&, const QByteArray&, CallbackHandler, CallbackHandler) override {}
     void patch(const QUrl&, const QByteArray&, CallbackHandler, CallbackHandler) override {}
     void deleteResource(const QUrl&, CallbackHandler, CallbackHandler) override {}
+    void postRaw(const QUrl&, const QByteArray&, const QString&, CallbackHandler, CallbackHandler) override {}
 
     void triggerSuccess(const QByteArray& data, int idx = 0) {
         FakeNetworkReply reply(data);
