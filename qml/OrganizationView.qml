@@ -31,6 +31,7 @@ Rectangle {
     property bool showDescription: organizationViewModel ? organizationViewModel.showDescription : false
     property int currentTab: organizationViewModel ? organizationViewModel.currentTab : 1
     property bool requestsPanelVisible: false
+    readonly property bool isLoading: organizationViewModel ? organizationViewModel.isBusy : false
 
     signal profileRequested()
     signal searchRequested()

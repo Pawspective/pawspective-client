@@ -150,6 +150,8 @@ qt_add_qml_module(pawspective-client
         qml/PostUpdateView.qml
         qml/RequestCardView.qml
         qml/RequestListView.qml
+        qml/SidebarItem.qml
+        qml/ProfileDataField.qml
 )
 
 target_include_directories(pawspective-client PRIVATE

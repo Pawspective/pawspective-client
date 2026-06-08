@@ -30,11 +30,18 @@ Rectangle {
     readonly property real contentMargins: root.height * 0.05
     readonly property real contentSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
-readonly property real loaderTopMargin: 10
+    readonly property real loaderTopMargin: 10.0
 
     property int currentTab: 1
     
     property alias searchInputText: searchInput.text
+
+    // Component.onDestruction: {
+    //     // Гарантируем, что Main.qml не вызовет функции уничтоженного экрана
+    //     window.organizationRefreshHandler = null
+    //     window.organizationRefreshFailHandler = null
+    //     window.organizationRefreshPending = false
+    // }
     
     TextField {
         id: searchInput
@@ -201,8 +208,10 @@ readonly property real loaderTopMargin: 10
                     implicitHeight: searchCardColumn.implicitHeight + root.height * 0.03
                     radius: 12
                     color: theme.pageBg
-                    border.color: theme.purple
-                    border.width: 1
+                    border {
+                        color: theme.purple
+                        width: 1
+                    }
 
                     ColumnLayout {
                         id: searchCardColumn
