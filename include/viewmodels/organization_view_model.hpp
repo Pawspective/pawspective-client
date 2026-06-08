@@ -21,6 +21,7 @@ class OrganizationViewModel : public BaseViewModel {
     Q_PROPERTY(QString organizationName READ organizationName NOTIFY organizationDataChanged)
     Q_PROPERTY(QString organizationCity READ organizationCity NOTIFY organizationDataChanged)
     Q_PROPERTY(QString organizationDescription READ organizationDescription NOTIFY organizationDataChanged)
+    Q_PROPERTY(QString avatarUrl READ avatarUrl NOTIFY organizationDataChanged)
     Q_PROPERTY(bool showDescription READ showDescription WRITE setShowDescription NOTIFY showDescriptionChanged)
     Q_PROPERTY(int currentTab READ currentTab WRITE setCurrentTab NOTIFY currentTabChanged)
     Q_PROPERTY(qint64 currentOrganizationId READ currentOrganizationId NOTIFY currentOrganizationIdChanged)
@@ -40,6 +41,7 @@ public:
     bool showDescription() const;
     int currentTab() const;
     qint64 currentOrganizationId() const;
+    QString avatarUrl() const;
 
     void setShowDescription(bool value);
     void setCurrentTab(int value);

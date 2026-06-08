@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QImage>
 
 #include "models/organization_dto.hpp"
 
@@ -13,7 +14,7 @@ class OrganizationCardViewModel : public QObject {
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
     Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
     Q_PROPERTY(QString city READ city NOTIFY cityChanged)
-
+    Q_PROPERTY(QString avatarUrl READ avatarUrl NOTIFY avatarUrlChanged)
 public:
     explicit OrganizationCardViewModel(QObject* parent = nullptr);
     explicit OrganizationCardViewModel(const models::OrganizationDTO& dto, QObject* parent = nullptr);
@@ -22,7 +23,7 @@ public:
     const QString& name() const { return m_name; }
     const QString& description() const { return m_description; }
     const QString& city() const { return m_city; }
-
+    const QString& avatarUrl() const { return m_avatarUrl; }
     Q_INVOKABLE void setFromDTO(const models::OrganizationDTO& dto);
 
 signals:
@@ -30,12 +31,14 @@ signals:
     void nameChanged();
     void descriptionChanged();
     void cityChanged();
+    void avatarUrlChanged();
 
 private:
     qint64 m_organizationId = 0;
     QString m_name;
     QString m_description;
     QString m_city;
+    QString m_avatarUrl;
 };
 
 }  // namespace pawspective::viewmodels

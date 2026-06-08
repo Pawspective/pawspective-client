@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.15
 
 Rectangle {
     id: root
-    //anchors.fill: parent
     color: "#e8d8cb"
 
     QtObject {
@@ -21,7 +20,8 @@ Rectangle {
     }
 
     property string photoUrl: ""
-        property string errorMessage: ""
+    property string errorMessage: ""
+    property var uploaderViewModel: null
 
     signal backClicked()
     signal registerSuccess()
@@ -36,7 +36,7 @@ Rectangle {
             }
         }
         function onErrorOccurred(type, message) {
-                root.errorMessage = message
+            root.errorMessage = message
         }
     }
 
@@ -109,7 +109,6 @@ Rectangle {
                 color: theme.textMain
                 Layout.bottomMargin: -6
             }
-
 
             TextArea {
                 id: descriptionField
@@ -225,6 +224,17 @@ Rectangle {
                 }
             }
 
+            PhotoUploader {
+                id: photoUploader
+                Layout.fillWidth: true
+                title: "Organization Logo"
+                viewModel: root.uploaderViewModel
+                
+                onUploadCompleted: function(fileName) {
+                    registerOrganizationViewModel.avatarUrl = fileName
+                }
+            }
+
             CustomButton {
                 id: submitBtn
                 text: registerOrganizationViewModel.isBusy ? "Creating..." : "Create organization"
@@ -235,7 +245,7 @@ Rectangle {
                 Layout.topMargin: 4
                 enabled: !registerOrganizationViewModel.isBusy
                 onClicked: {
-                        root.errorMessage = ""
+                    root.errorMessage = ""
                     registerOrganizationViewModel.registerOrganization()
                 }
             }
@@ -259,7 +269,7 @@ Rectangle {
 
             Label {
                 id: errorMessageLabel
-                    text: root.errorMessage
+                text: root.errorMessage
                 color: theme.textError
                 font.family: theme.fontName
                 visible: text.length > 0

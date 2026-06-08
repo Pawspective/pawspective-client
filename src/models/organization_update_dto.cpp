@@ -11,8 +11,11 @@ QJsonObject OrganizationUpdateDTO::toJson() const {
     if (description.has_value()) {
         json["description"] = description.value();
     }
+    if (avatarUrl.has_value()) {
+        json["avatar_url"] = avatarUrl.value();
+    }
     if (cityId.has_value()) {
-        json["city"] = cityId.value();
+        json["city_id"] = cityId.value();
     }
     return json;
 }
@@ -29,6 +32,7 @@ OrganizationUpdateDTO OrganizationUpdateDTO::fromJson(const QJsonObject& json) {
 
     dto.name = readOptionalField(json, "name");
     dto.description = readOptionalField(json, "description");
+    dto.avatarUrl = readOptionalField(json, "avatar_url");
     if (json.contains("city_id") && !json["city_id"].isNull()) {
         if (!json["city_id"].isDouble()) {
             throw std::invalid_argument("city_id must be a number");

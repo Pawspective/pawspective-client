@@ -350,6 +350,7 @@ Rectangle {
                                 organizationName: modelData.name
                                 organizationCity: modelData.city
                                 organizationDescription: modelData.description || ""
+                                avatarUrl: modelData.avatarUrl
 
                                 onClicked: function(id) {
                                     root.organizationClicked(id)

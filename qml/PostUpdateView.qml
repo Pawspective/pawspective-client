@@ -36,6 +36,8 @@ Rectangle {
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
     readonly property real bottomPadding: root.height * 0.05
+    
+    readonly property real avatarSize: root.width * 0.09
 
     Connections {
         target: viewModel

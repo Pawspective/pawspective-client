@@ -11,6 +11,9 @@ QJsonObject OrganizationDTO::toJson() const {
 
     json["id"] = id;
     json["name"] = name;
+    if (avatarUrl.has_value()) {
+        json["avatar_url"] = avatarUrl.value();
+    }
     if (description.has_value()) {
         json["description"] = description.value();
     }
@@ -30,6 +33,9 @@ OrganizationDTO OrganizationDTO::fromJson(const QJsonObject& json) {
         throw std::invalid_argument("Invalid or missing name field");
     }
     dto.name = json["name"].toString();
+    if (json.contains("avatar_url") && json["avatar_url"].isString() && !json["avatar_url"].isNull()) {
+        dto.avatarUrl = json["avatar_url"].toString();
+    }
     if (json.contains("description") && json["description"].isString() && !json["description"].isNull()) {
         dto.description = json["description"].toString();
     }

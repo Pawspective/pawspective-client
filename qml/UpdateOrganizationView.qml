@@ -8,6 +8,7 @@ Rectangle {
 
     property var viewModel: updateOrganizationViewModel
     property string errorMessage: ""
+    property var uploaderViewModel: null
 
     signal saveCompleted()
     signal discard()
@@ -37,6 +38,8 @@ Rectangle {
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
     readonly property real loaderTopMargin: 10
+    
+    readonly property real avatarSize: root.width * 0.09
 
     Connections {
         target: viewModel
@@ -206,6 +209,61 @@ Rectangle {
                             onTextChanged: if(focus) viewModel.description = text
                             background: null
                         }
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: root.fieldSpacing
+                
+                Text {
+                    text: "Current Logo"
+                    font.family: theme.fontName
+                    font.pixelSize: root.fieldLabelFontSize
+                    color: theme.textDark
+                }
+
+                Rectangle {
+                    width: root.avatarSize
+                    height: root.avatarSize
+                    Layout.alignment: Qt.AlignHCenter
+                    radius: 50
+                    color: theme.fieldBg
+                    border.color: theme.purple
+                    border.width: 1
+                    clip: true
+
+                    Image {
+                        id: currentAvatarImage
+                        anchors.fill: parent
+                        anchors.margins: 2
+                        fillMode: Image.PreserveAspectCrop
+                        source: viewModel && viewModel.avatarUrl ? (storageBaseUrl + viewModel.avatarUrl) : ""
+                        visible: status === Image.Ready
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: viewModel && viewModel.name ? viewModel.name[0].toUpperCase() : "?"
+                            font.family: theme.fontName
+                            font.pixelSize: 36
+                            font.bold: true
+                            color: theme.textDark
+                            visible: currentAvatarImage.status !== Image.Ready
+                        }
+                    }
+                }
+            }
+
+            PhotoUploader {
+                id: photoUploader
+                Layout.fillWidth: true
+                title: "Organization Logo"
+                viewModel: root.uploaderViewModel
+                
+                onUploadCompleted: function(fileName) {
+                    if (viewModel) {
+                        viewModel.setAvatarUrl(fileName)
                     }
                 }
             }

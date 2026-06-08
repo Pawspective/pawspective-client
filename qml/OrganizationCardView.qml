@@ -9,6 +9,9 @@ Rectangle {
     property string organizationCity: ""
     property string organizationDescription: ""
     property int organizationId: 0
+    property string avatarUrl: ""
+
+    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
 
     signal clicked(int organizationId)
 
@@ -56,14 +59,25 @@ Rectangle {
                 color: "#e8d8cb"
                 border.color: "#b8abd7"
                 border.width: 1
+                clip: true
 
-                Text {
-                    anchors.centerIn: parent
-                    text: root.organizationName.length > 0 ? root.organizationName[0].toUpperCase() : "?"
-                    font.family: "Comic Sans MS"
-                    font.pixelSize: parent.width * 0.45
-                    font.bold: true
-                    color: "#8572af"
+                Image {
+                    id: avatarImage
+                    anchors.fill: parent
+                    fillMode: Image.PreserveAspectCrop
+                    smooth: true
+                    source: root.avatarUrl ? (root.storageBaseUrl + root.avatarUrl) : ""
+                    visible: status === Image.Ready
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.organizationName.length > 0 ? root.organizationName[0].toUpperCase() : "?"
+                        font.family: "Comic Sans MS"
+                        font.pixelSize: parent.width * 0.45
+                        font.bold: true
+                        color: "#8572af"
+                        visible: avatarImage.status !== Image.Ready
+                    }
                 }
             }
 

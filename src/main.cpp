@@ -38,6 +38,7 @@
 #include "viewmodels/update_review_viewmodel.hpp"
 #include "viewmodels/user_update_viewmodel.hpp"
 #include "viewmodels/user_viewmodel.hpp"
+#include "viewmodels/photo_upload_viewmodel.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
@@ -101,6 +102,7 @@ int main(int argc, char* argv[]) {
     auto adoptRequestListViewModel = new pawspective::viewmodels::AdoptRequestListViewModel(adoptRequestService, &app);
     auto updatePostViewModel = new pawspective::viewmodels::UpdatePostViewModel(postService, &app);
     auto updateReviewViewModel = new pawspective::viewmodels::UpdateReviewViewModel(reviewService, &app);
+    auto photoUploadViewModel = new pawspective::viewmodels::PhotoUploadViewModel(photoService, &app);
 
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
@@ -125,6 +127,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("postCardViewModel", postCardViewModel);
     engine.rootContext()->setContextProperty("adoptRequestListViewModel", adoptRequestListViewModel);
     engine.rootContext()->setContextProperty("updatePostViewModel", updatePostViewModel);
+    engine.rootContext()->setContextProperty("photoUploadViewModel", photoUploadViewModel);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,

@@ -10,6 +10,9 @@ QJsonObject OrganizationRegisterDTO::toJson() const {
     if (description.has_value()) {
         json["description"] = description.value();
     }
+    if (avatarUrl.has_value()) {
+        json["avatar_url"] = avatarUrl.value();
+    }
     json["city_id"] = cityId;
 
     return json;
@@ -24,6 +27,9 @@ OrganizationRegisterDTO OrganizationRegisterDTO::fromJson(const QJsonObject& jso
     dto.name = json["name"].toString();
     if (json.contains("description") && json["description"].isString() && !json["description"].isNull()) {
         dto.description = json["description"].toString();
+    }
+    if (json.contains("avatar_url") && json["avatar_url"].isString() && !json["avatar_url"].isNull()) {
+        dto.avatarUrl = json["avatar_url"].toString();
     }
     if (!json.contains("city_id") || json["city_id"].isNull() || !json["city_id"].isDouble()) {
         throw std::invalid_argument("Invalid or missing city_id field");

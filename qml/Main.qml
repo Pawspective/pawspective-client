@@ -265,6 +265,7 @@ ApplicationWindow {
                 }
                 window.openOrganizationView(null, "sidebar", true)
             }
+            uploaderViewModel: photoUploadViewModel
             Component.onDestruction: registerOrganizationViewModel.cleanup()
         }
     }
@@ -411,6 +412,7 @@ ApplicationWindow {
         id: updateOrganizationViewComponent
         UpdateOrganizationView {
             viewModel: updateOrganizationViewModel
+            uploaderViewModel: photoUploadViewModel
         onDiscard: {
             updateOrganizationViewModel.cleanup()
             stackView.pop()

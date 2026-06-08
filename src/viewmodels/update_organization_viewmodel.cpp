@@ -102,6 +102,10 @@ QString UpdateOrganizationViewModel::description() const {
     return m_changes.description.value_or(m_originalData.description.value_or(""));
 }
 
+QString UpdateOrganizationViewModel::avatarUrl() const {
+    return m_changes.avatarUrl.value_or(m_originalData.avatarUrl.value_or(""));
+}
+
 qint64 UpdateOrganizationViewModel::cityId() const { return m_changes.cityId.value_or(m_originalData.city.id); }
 
 int UpdateOrganizationViewModel::currentCityIndex() const {
@@ -136,6 +140,15 @@ void UpdateOrganizationViewModel::setCityId(qint64 value) {
         m_changes.cityId = (value == m_originalData.city.id) ? std::nullopt : std::make_optional(value);
         emit cityIdChanged();
         emit currentCityIndexChanged();
+        updateDirtyStatus();
+    }
+}
+
+void UpdateOrganizationViewModel::setAvatarUrl(const QString& value) {
+    if (avatarUrl() != value) {
+        QString original = m_originalData.avatarUrl.value_or("");
+        m_changes.avatarUrl = (value == original) ? std::nullopt : std::make_optional(value);
+        emit avatarUrlChanged();
         updateDirtyStatus();
     }
 }
@@ -232,7 +245,7 @@ void UpdateOrganizationViewModel::handleGetCurrentUserFailed(QSharedPointer<serv
 }
 
 void UpdateOrganizationViewModel::updateDirtyStatus() {
-    bool dirty = m_changes.name.has_value() || m_changes.description.has_value() || m_changes.cityId.has_value();
+    bool dirty = m_changes.name.has_value() || m_changes.description.has_value() || m_changes.cityId.has_value() || m_changes.avatarUrl.has_value();
     setDirty(dirty);
 }
 
@@ -245,6 +258,7 @@ void UpdateOrganizationViewModel::notifyAllChanged() {
     emit descriptionChanged();
     emit cityIdChanged();
     emit currentCityIndexChanged();
+    emit avatarUrlChanged();
 }
 
 void UpdateOrganizationViewModel::deleteOrganization() {
