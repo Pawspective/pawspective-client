@@ -10,6 +10,8 @@ Rectangle {
     property string errorMessage: ""
     property var uploaderViewModel: null
 
+    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
+
     signal saveCompleted()
     signal discard()
     signal organizationDeleted()
@@ -39,7 +41,7 @@ Rectangle {
     readonly property real loaderSize: root.height * 0.1
     readonly property real loaderTopMargin: 10
     
-    readonly property real avatarSize: root.width * 0.09
+    readonly property real avatarSize: 120
 
     Connections {
         target: viewModel
@@ -218,53 +220,31 @@ Rectangle {
                 spacing: root.fieldSpacing
                 
                 Text {
-                    text: "Current Logo"
+                    text: "Current Logo, which will be replaced if you upload a new one"
                     font.family: theme.fontName
                     font.pixelSize: root.fieldLabelFontSize
                     color: theme.textDark
                 }
 
-                Rectangle {
+                AvatarImage {
                     width: root.avatarSize
                     height: root.avatarSize
-                    Layout.alignment: Qt.AlignHCenter
-                    radius: 50
-                    color: theme.fieldBg
-                    border.color: theme.purple
-                    border.width: 1
-                    clip: true
-
-                    Image {
-                        id: currentAvatarImage
-                        anchors.fill: parent
-                        anchors.margins: 2
-                        fillMode: Image.PreserveAspectCrop
-                        source: viewModel && viewModel.avatarUrl ? (storageBaseUrl + viewModel.avatarUrl) : ""
-                        visible: status === Image.Ready
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: viewModel && viewModel.name ? viewModel.name[0].toUpperCase() : "?"
-                            font.family: theme.fontName
-                            font.pixelSize: 36
-                            font.bold: true
-                            color: theme.textDark
-                            visible: currentAvatarImage.status !== Image.Ready
-                        }
-                    }
+                    Layout.alignment: Qt.AlignLeft
+                    photoUrl: viewModel ? viewModel.avatarUrl : ""
+                    defaultText: viewModel ? viewModel.name : ""
                 }
             }
 
             PhotoUploader {
                 id: photoUploader
                 Layout.fillWidth: true
-                title: "Organization Logo"
+                title: "New Organization Logo"
                 viewModel: root.uploaderViewModel
-                
+                previewSize: 120
+                previewAlignment: Qt.AlignLeft
+
                 onUploadCompleted: function(fileName) {
-                    if (viewModel) {
-                        viewModel.setAvatarUrl(fileName)
-                    }
+                    updateOrganizationViewModel.avatarUrl = fileName
                 }
             }
 

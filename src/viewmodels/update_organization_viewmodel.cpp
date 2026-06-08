@@ -245,7 +245,9 @@ void UpdateOrganizationViewModel::handleGetCurrentUserFailed(QSharedPointer<serv
 }
 
 void UpdateOrganizationViewModel::updateDirtyStatus() {
-    bool dirty = m_changes.name.has_value() || m_changes.description.has_value() || m_changes.cityId.has_value() || m_changes.avatarUrl.has_value();
+    bool dirty =
+        m_changes.name.has_value() || m_changes.description.has_value() || m_changes.cityId.has_value() ||
+        m_changes.avatarUrl.has_value();
     setDirty(dirty);
 }
 

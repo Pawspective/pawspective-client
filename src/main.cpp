@@ -26,6 +26,7 @@
 #include "viewmodels/login_view_model.hpp"
 #include "viewmodels/organization_card_viewmodel.hpp"
 #include "viewmodels/organization_view_model.hpp"
+#include "viewmodels/photo_upload_viewmodel.hpp"
 #include "viewmodels/post_card_viewmodel.hpp"
 #include "viewmodels/post_list_viewmodel.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
@@ -38,7 +39,6 @@
 #include "viewmodels/update_review_viewmodel.hpp"
 #include "viewmodels/user_update_viewmodel.hpp"
 #include "viewmodels/user_viewmodel.hpp"
-#include "viewmodels/photo_upload_viewmodel.hpp"
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <QImage>
 #include <QObject>
 #include <QString>
-#include <QImage>
 
 #include "models/organization_dto.hpp"
 

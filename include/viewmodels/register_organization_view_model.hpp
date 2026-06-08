@@ -75,7 +75,7 @@ private:
     QString m_description;  // NOLINT(misc-non-private-member-variables-in-classes)
     qint64 m_cityId = 0;    // NOLINT(misc-non-private-member-variables-in-classes)
     QVariantList m_cities;  // NOLINT(misc-non-private-member-variables-in-classes)
-    QString m_avatarUrl; // NOLINT(misc-non-private-member-variables-in-classes)
+    QString m_avatarUrl;    // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace pawspective::viewmodels

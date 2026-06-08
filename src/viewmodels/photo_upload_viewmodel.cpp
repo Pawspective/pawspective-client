@@ -7,13 +7,20 @@ namespace pawspective::viewmodels {
 
 PhotoUploadViewModel::PhotoUploadViewModel(services::PhotoService& photoService, QObject* parent)
     : BaseViewModel(parent), m_photoService(photoService) {
-
     qDebug() << "PhotoUploadViewModel constructor";
 
-    bool connected1 = connect(&m_photoService, &services::PhotoService::uploadPhotoSuccess,
-            this, &PhotoUploadViewModel::onUploadSuccess);
-    bool connected2 = connect(&m_photoService, &services::PhotoService::uploadPhotoFailed,
-            this, &PhotoUploadViewModel::onUploadFailed);
+    bool connected1 = connect(
+        &m_photoService,
+        &services::PhotoService::uploadPhotoSuccess,
+        this,
+        &PhotoUploadViewModel::onUploadSuccess
+    );
+    bool connected2 = connect(
+        &m_photoService,
+        &services::PhotoService::uploadPhotoFailed,
+        this,
+        &PhotoUploadViewModel::onUploadFailed
+    );
 
     qDebug() << "Connected to uploadPhotoSuccess:" << connected1;
     qDebug() << "Connected to uploadPhotoFailed:" << connected2;
@@ -88,4 +95,4 @@ void PhotoUploadViewModel::setUploadedFileName(const QString& value) {
     }
 }
 
-} // namespace pawspective::viewmodels
+}  // namespace pawspective::viewmodels

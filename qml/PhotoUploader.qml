@@ -5,14 +5,17 @@ import QtQuick.Dialogs
 
 Rectangle {
     id: root
-    
+
     property var viewModel: null
     property string title: "Upload Photo"
-    
-    readonly property real avatarSize: root.width * 0.09
-    
+
+    property real previewSize: Math.min(root.width * 0.15, 80)
+    property int previewAlignment: Qt.AlignHCenter
+
+    implicitHeight: contentLayout.implicitHeight
+
     signal uploadCompleted(string fileName)
-    
+
     color: "transparent"
     property string selectedFilePath: ""
     property url previewUrl: ""
@@ -78,7 +81,10 @@ Rectangle {
     }
     
     ColumnLayout {
-        anchors.fill: parent
+        id: contentLayout
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
         spacing: 12
         
         Text {
@@ -91,13 +97,14 @@ Rectangle {
         }
         
         Rectangle {
-            width: root.avatarSize
-            height: root.avatarSize
-            Layout.alignment: Qt.AlignHCenter
-            radius: 50
+            Layout.preferredWidth: root.previewSize
+            Layout.preferredHeight: root.previewSize
+            Layout.alignment: root.previewAlignment
+            radius: Layout.preferredWidth / 2
             color: "#f0ecf9"
             border.color: "#b8abd7"
             border.width: 1
+            clip: true
             
             Image {
                 id: previewImage

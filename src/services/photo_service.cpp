@@ -59,7 +59,8 @@ void PhotoService::uploadPhoto(const QString& filePath) {
             if (parseError.error != QJsonParseError::NoError) {
                 qDebug() << "JSON parse error:" << parseError.errorString();
                 emit uploadPhotoFailed(
-                    QSharedPointer<ClientJsonParseError>::create(QString("JSON parse error: %1").arg(parseError.errorString()))
+                    QSharedPointer<
+                        ClientJsonParseError>::create(QString("JSON parse error: %1").arg(parseError.errorString()))
                 );
                 return;
             }
@@ -117,4 +118,4 @@ void PhotoService::getPhoto(const QString& photoUrl) {
     );
 }
 
-} // namespace pawspective::services
+}  // namespace pawspective::services
