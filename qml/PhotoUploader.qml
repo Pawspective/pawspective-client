@@ -46,6 +46,8 @@ Rectangle {
         ignoreUnknownSignals: true
         
         function onUploadCompleted(fileName) {
+            root.selectedFilePath = ""
+            root.previewUrl = ""
             root.uploadCompleted(fileName)
         }
         

@@ -32,6 +32,12 @@ void AnimalCardViewModel::setFromDTO(const models::AnimalDTO& dto) {
         m_description = desc;
         emit descriptionChanged();
     }
+
+    QString firstPhoto = dto.photos.isEmpty() ? QString{} : dto.photos.first();
+    if (m_firstPhoto != firstPhoto) {
+        m_firstPhoto = firstPhoto;
+        emit firstPhotoChanged();
+    }
 }
 
 }  // namespace pawspective::viewmodels

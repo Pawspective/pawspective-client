@@ -26,6 +26,7 @@ class CreateAnimalViewModel : public BaseViewModel {
     Q_PROPERTY(QString color READ color WRITE setColor NOTIFY colorChanged)
     Q_PROPERTY(QString goodWith READ goodWith WRITE setGoodWith NOTIFY goodWithChanged)
     Q_PROPERTY(bool isBreedEnabled READ isBreedEnabled NOTIFY isBreedEnabledChanged)
+    Q_PROPERTY(QStringList photos READ photos NOTIFY photosChanged)
 
     Q_PROPERTY(QVariantList animalTypes READ animalTypes NOTIFY animalTypesChanged)
     Q_PROPERTY(QVariantList breeds READ breeds NOTIFY breedsChanged)
@@ -44,6 +45,7 @@ public:
 
     const QString& name() const { return m_registerDto.name; }
     QString description() const { return m_registerDto.description.value_or(""); }
+    QStringList photos() const { return m_registerDto.photos; }
     QString animalType() const { return m_animalType.has_value() ? models::toApiString(m_animalType.value()) : ""; }
     qint64 breedId() const { return m_registerDto.breedId; }
     QString size() const { return m_size.has_value() ? models::toApiString(m_size.value()) : ""; }
@@ -157,6 +159,17 @@ public:
 
     Q_INVOKABLE void createAnimal();
     Q_INVOKABLE void loadFilters();
+    Q_INVOKABLE void addPhoto(const QString& fileName) {
+        if (!fileName.isEmpty() && !m_registerDto.photos.contains(fileName)) {
+            m_registerDto.photos.append(fileName);
+            emit photosChanged();
+        }
+    }
+    Q_INVOKABLE void removePhoto(const QString& fileName) {
+        if (m_registerDto.photos.removeOne(fileName)) {
+            emit photosChanged();
+        }
+    }
     Q_INVOKABLE void setOrganizationId(qint64 organizationId) {
         m_organizationId = organizationId;
         m_registerDto.organizationId = organizationId;
@@ -184,6 +197,7 @@ signals:
     void colorChanged();
     void goodWithChanged();
     void isBreedEnabledChanged();
+    void photosChanged();
 
     void animalTypesChanged();
     void breedsChanged();

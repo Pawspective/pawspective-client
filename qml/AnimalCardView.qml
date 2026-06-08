@@ -11,6 +11,7 @@ Rectangle {
     property string animalDescription: ""
     property int animalId: 0
     property bool canBeAdopted: false
+    property string photoUrl: ""
 
     signal clicked(int animalId)
 
@@ -74,22 +75,11 @@ Rectangle {
             Layout.fillWidth: true
             spacing: root.padH
 
-            Rectangle {
+            AvatarImage {
                 width: root.avatarSize
                 height: root.avatarSize
-                radius: width / 2
-                color: "#e8d8cb"
-                border.color: "#8572af"
-                border.width: 1
-
-                Text {
-                    anchors.centerIn: parent
-                    text: root.animalType.length > 0 ? root.animalType[0].toUpperCase() : "?"
-                    font.family: "Comic Sans MS"
-                    font.pixelSize: parent.width * 0.45
-                    font.bold: true
-                    color: "#8572af"
-                }
+                photoUrl: root.photoUrl
+                defaultText: root.animalType
             }
 
             ColumnLayout {

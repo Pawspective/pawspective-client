@@ -451,6 +451,7 @@ ApplicationWindow {
         id: animalCreateViewComponent
         AnimalCreateView {
             viewModel: createAnimalViewModel
+            uploaderViewModel: photoUploadViewModel
 
             onBackClicked: {
             createAnimalViewModel.cleanup()
@@ -569,6 +570,7 @@ ApplicationWindow {
     id: animalUpdateViewComponent
     AnimalUpdateView {
         viewModel: updateAnimalViewModel
+        uploaderViewModel: photoUploadViewModel
         
         onDiscard: {
             updateAnimalViewModel.cleanup()

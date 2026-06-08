@@ -173,6 +173,11 @@ void AnimalDetailViewModel::setFromDTO(const models::AnimalDTO& dto) {
         emit canBeAdoptedChanged();
     }
 
+    if (m_photos != dto.photos) {
+        m_photos = dto.photos;
+        emit photosChanged();
+    }
+
     if (m_organizationId != dto.organizationId) {
         m_organizationId = dto.organizationId;
         emit organizationIdChanged();

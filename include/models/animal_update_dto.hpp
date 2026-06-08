@@ -2,6 +2,7 @@
 
 #include <QJsonObject>
 #include <QString>
+#include <QStringList>
 #include <optional>
 
 #include "animal_enums.hpp"
@@ -18,6 +19,7 @@ struct AnimalUpdateDTO {
     std::optional<GoodWith> goodWith;
     std::optional<qint32> age;
     std::optional<QString> description;
+    std::optional<QStringList> photos;
     std::optional<AnimalStatus> status;
 
     QJsonObject toJson() const;

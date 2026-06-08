@@ -35,6 +35,7 @@ public:
         qint32 age;
         QString animalType;
         bool canBeAdopted = false;
+        QString photoUrl;
     };
 
     // NOLINTNEXTLINE(performance-enum-size)
@@ -45,6 +46,7 @@ public:
         AgeRole,
         AnimalTypeRole,
         CanBeAdoptedRole,
+        PhotoUrlRole,
         ViewModelRole
     };
 

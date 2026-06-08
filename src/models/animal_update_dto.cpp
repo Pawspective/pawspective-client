@@ -1,4 +1,5 @@
 #include "../include/models/animal_update_dto.hpp"
+#include <QJsonArray>
 #include "utils/json.hpp"
 
 namespace pawspective::models {
@@ -32,6 +33,13 @@ QJsonObject AnimalUpdateDTO::toJson() const {
     }
     if (description.has_value()) {
         json["description"] = description.value();
+    }
+    if (photos.has_value()) {
+        QJsonArray photosArray;
+        for (const auto& p : photos.value()) {
+            photosArray.append(p);
+        }
+        json["photos"] = photosArray;
     }
     if (status.has_value()) {
         json["status"] = toApiString(status.value());

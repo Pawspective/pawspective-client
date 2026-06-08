@@ -71,6 +71,7 @@ Rectangle {
     readonly property real fieldSpacing: root.height * 0.008
     readonly property real contentSpacing: root.height * 0.02
     readonly property real sideMargin: root.width * 0.05
+    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
 
     readonly property bool isOwnOrganization: {
         if (!viewModel || !root.currentUserViewModel) return false
@@ -162,24 +163,13 @@ Rectangle {
                         Layout.fillWidth: true
                         spacing: root.width * 0.025
 
-                        Rectangle {
+                        AvatarImage {
                             width: root.height * 0.14
                             height: root.height * 0.14
-                            radius: width / 2
-                            color: theme.chipBg
-                            border.color: theme.border
-                            border.width: 1
                             Layout.alignment: Qt.AlignVCenter
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: (root.viewModel && root.viewModel.animalType && root.viewModel.animalType.length > 0)
-                                    ? root.viewModel.animalType[0].toUpperCase() : "?"
-                                font.family: theme.fontName
-                                font.pixelSize: parent.width * 0.4
-                                font.bold: true
-                                color: theme.textDark
-                            }
+                            photoUrl: (root.viewModel && root.viewModel.photos.length > 0)
+                                ? root.viewModel.photos[0] : ""
+                            defaultText: root.viewModel ? root.viewModel.animalType : ""
                         }
 
                         ColumnLayout {
@@ -205,6 +195,62 @@ Rectangle {
                                 color: theme.textDark
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: root.viewModel && root.viewModel.photos.length > 0
+                Layout.fillWidth: true
+                Layout.leftMargin: root.sideMargin
+                Layout.rightMargin: root.sideMargin
+                color: theme.fieldBg
+                radius: 12
+                border.color: theme.border
+                border.width: 1
+                implicitHeight: galleryScroll.implicitHeight + root.height * 0.03
+
+                ScrollView {
+                    id: galleryScroll
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        top: parent.top
+                        margins: root.height * 0.015
+                    }
+                    implicitHeight: galleryRow.implicitHeight
+                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    clip: true
+
+                    Row {
+                        id: galleryRow
+                        spacing: 10
+
+                        Repeater {
+                            model: root.viewModel ? root.viewModel.photos : []
+                            delegate: Rectangle {
+                                width: root.height * 0.18
+                                height: root.height * 0.18
+                                radius: 8
+                                clip: true
+                                color: theme.chipBg
+
+                                Image {
+                                    anchors.fill: parent
+                                    source: root.storageBaseUrl + modelData
+                                    fillMode: Image.PreserveAspectCrop
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        lightbox.photoUrl = modelData
+                                        lightbox.visible = true
+                                    }
+                                }
                             }
                         }
                     }
@@ -367,6 +413,28 @@ Rectangle {
                 font.pixelSize: root.fieldValueSize
                 color: theme.accentPink
             }
+        }
+    }
+
+    Rectangle {
+        id: lightbox
+        property string photoUrl: ""
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.85)
+        visible: false
+        z: 100
+
+        Image {
+            anchors.centerIn: parent
+            width: Math.min(parent.width * 0.92, implicitWidth > 0 ? implicitWidth : parent.width * 0.92)
+            height: Math.min(parent.height * 0.92, implicitHeight > 0 ? implicitHeight : parent.height * 0.92)
+            source: lightbox.photoUrl ? (root.storageBaseUrl + lightbox.photoUrl) : ""
+            fillMode: Image.PreserveAspectFit
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: lightbox.visible = false
         }
     }
 

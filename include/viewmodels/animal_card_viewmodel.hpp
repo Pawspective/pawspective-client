@@ -13,6 +13,7 @@ class AnimalCardViewModel : public QObject {
     Q_PROPERTY(QString description READ description NOTIFY descriptionChanged)
     Q_PROPERTY(qint32 age READ age NOTIFY ageChanged)
     Q_PROPERTY(QString animalType READ animalType NOTIFY animalTypeChanged)
+    Q_PROPERTY(QString firstPhoto READ firstPhoto NOTIFY firstPhotoChanged)
 
 public:
     explicit AnimalCardViewModel(QObject* parent = nullptr);
@@ -22,6 +23,7 @@ public:
     const QString& description() const { return m_description; }
     qint32 age() const { return m_age; }
     const QString& animalType() const { return m_animalType; }
+    const QString& firstPhoto() const { return m_firstPhoto; }
 
     Q_INVOKABLE void setFromDTO(const models::AnimalDTO& dto);
 
@@ -30,12 +32,14 @@ signals:
     void descriptionChanged();
     void ageChanged();
     void animalTypeChanged();
+    void firstPhotoChanged();
 
 private:
     QString m_name;
     QString m_description;
     qint32 m_age = 0;
     QString m_animalType;
+    QString m_firstPhoto;
 };
 
 }  // namespace pawspective::viewmodels
