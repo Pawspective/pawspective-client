@@ -49,8 +49,9 @@ AnimalDTO AnimalDTO::fromJson(const QJsonObject& json) {
     if (json.contains("photos") && json["photos"].isArray()) {
         const QJsonArray arr = json["photos"].toArray();
         for (const auto& v : arr) {
-            if (v.isString())
+            if (v.isString()) {
                 dto.photos.append(v.toString());
+            }
         }
     }
     dto.status = animalStatusFromApi(pawspective::utils::json::getRequiredString(json, "status"));

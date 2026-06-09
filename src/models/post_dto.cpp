@@ -35,8 +35,9 @@ PostDTO PostDTO::fromJson(const QJsonObject& json) {
     if (json.contains("photos") && json["photos"].isArray()) {
         const QJsonArray photosArr = json["photos"].toArray();
         for (const auto& p : photosArr) {
-            if (p.isString())
+            if (p.isString()) {
                 dto.photos.append(p.toString());
+            }
         }
     }
 
