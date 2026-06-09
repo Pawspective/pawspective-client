@@ -42,6 +42,7 @@ Rectangle {
     readonly property real loaderTopMargin: 10
     
     readonly property real avatarSize: root.height * 0.18
+    readonly property real logoSize: root.avatarSize + 12 + root.buttonHeight
 
     Connections {
         target: viewModel
@@ -216,23 +217,22 @@ Rectangle {
             }
 
             Text {
-                text: "Logo"
+                text: "Current and new logo"
                 font.family: theme.fontName
                 font.pixelSize: root.fieldLabelFontSize
                 color: theme.textDark
             }
 
-            ColumnLayout {
+            RowLayout {
                 Layout.fillWidth: true
-                spacing: root.height * 0.015
-                Layout.alignment: Qt.AlignHCenter
+                spacing: root.width * 0.04
 
                 AvatarImage {
-                    Layout.preferredWidth: root.avatarSize
-                    Layout.preferredHeight: root.avatarSize
-                    Layout.maximumWidth: root.avatarSize
-                    Layout.maximumHeight: root.avatarSize
-                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: root.logoSize
+                    Layout.preferredHeight: root.logoSize
+                    Layout.maximumWidth: root.logoSize
+                    Layout.maximumHeight: root.logoSize
+                    Layout.alignment: Qt.AlignTop
                     photoUrl: viewModel ? viewModel.avatarUrl : ""
                     defaultText: viewModel ? viewModel.name : ""
                 }
@@ -240,10 +240,11 @@ Rectangle {
                 PhotoUploader {
                     id: photoUploader
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
                     title: ""
                     viewModel: root.uploaderViewModel
                     previewSize: root.avatarSize
-                    previewAlignment: Qt.AlignHCenter
+                    previewAlignment: Qt.AlignCenter
                     buttonHeight: root.buttonHeight
                     buttonFontSize: root.buttonFontSize
                     onUploadCompleted: function(fileName) {

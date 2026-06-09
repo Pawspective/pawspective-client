@@ -28,7 +28,7 @@ Rectangle {
     readonly property string organizationCity: organizationViewModel ? organizationViewModel.organizationCity : ""
     readonly property string organizationDescription: organizationViewModel ? organizationViewModel.organizationDescription : ""
     readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
-    readonly property real avatarSize: root.width * 0.1
+    readonly property real avatarSize: root.height * 0.12
 
     property bool showDescription: organizationViewModel ? organizationViewModel.showDescription : false
     property int currentTab: organizationViewModel ? organizationViewModel.currentTab : 1
@@ -380,8 +380,10 @@ Rectangle {
                         spacing: root.width * 0.02
 
                         AvatarImage {
-                            width: root.avatarSize
-                            height: root.avatarSize
+                            Layout.preferredWidth: root.avatarSize
+                            Layout.preferredHeight: root.avatarSize
+                            Layout.maximumWidth: root.avatarSize
+                            Layout.maximumHeight: root.avatarSize
                             photoUrl: organizationViewModel ? organizationViewModel.avatarUrl : ""
                             defaultText: organizationViewModel ? organizationViewModel.organizationName : ""
                         }

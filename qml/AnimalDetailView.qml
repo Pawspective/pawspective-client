@@ -188,6 +188,21 @@ Rectangle {
                             }
 
                             Text {
+                                visible: text.length > 0
+                                text: {
+                                    var type = root.viewModel ? root.viewModel.animalType : ""
+                                    var breed = root.viewModel ? root.viewModel.breedName : ""
+                                    if (type && breed) return type + ", " + breed
+                                    return type || breed
+                                }
+                                font.family: theme.fontName
+                                font.pixelSize: root.height * 0.026
+                                color: theme.accentPink
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
                                 visible: root.viewModel && root.viewModel.description ? root.viewModel.description.length > 0 : false
                                 text: root.viewModel && root.viewModel.description ? root.viewModel.description : ""
                                 font.family: theme.fontName

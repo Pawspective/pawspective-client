@@ -38,6 +38,7 @@ Rectangle {
     readonly property real loaderSize: root.height * 0.1
     readonly property real bottomPadding: root.height * 0.05
     readonly property real photoThumbSize: root.height * 0.13
+    readonly property real uploaderPreviewSize: root.height * 0.22
 
     Connections {
         target: viewModel
@@ -212,7 +213,7 @@ Rectangle {
                     Layout.fillWidth: true
                     title: ""
                     viewModel: root.uploaderViewModel
-                    previewSize: root.photoThumbSize
+                    previewSize: root.uploaderPreviewSize
                     previewRadius: 8
                     buttonHeight: root.buttonHeight
                     buttonFontSize: root.buttonFontSize
