@@ -71,8 +71,6 @@ Rectangle {
     readonly property real fieldSpacing: root.height * 0.008
     readonly property real contentSpacing: root.height * 0.02
     readonly property real sideMargin: root.width * 0.05
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
-
     readonly property bool isOwnOrganization: {
         if (!viewModel || !root.currentUserViewModel) return false
         var userOrgId = root.currentUserViewModel.userData ? Number(root.currentUserViewModel.userData.organizationId) : 0
@@ -282,7 +280,7 @@ Rectangle {
 
                                 Image {
                                     anchors.fill: parent
-                                    source: root.storageBaseUrl + modelData
+                                    source: AppConfig.storageBaseUrl + modelData
                                     fillMode: Image.PreserveAspectCrop
                                 }
 
@@ -434,7 +432,7 @@ Rectangle {
             anchors.centerIn: parent
             width: Math.min(parent.width * 0.92, implicitWidth > 0 ? implicitWidth : parent.width * 0.92)
             height: Math.min(parent.height * 0.92, implicitHeight > 0 ? implicitHeight : parent.height * 0.92)
-            source: lightbox.photoUrl ? (root.storageBaseUrl + lightbox.photoUrl) : ""
+            source: lightbox.photoUrl ? (AppConfig.storageBaseUrl + lightbox.photoUrl) : ""
             fillMode: Image.PreserveAspectFit
         }
 

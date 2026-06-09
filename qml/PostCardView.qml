@@ -25,8 +25,6 @@ Rectangle {
     property bool isExpanded: false
     property int previewLimit: 220
 
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
-
     signal editRequested(int postId, string postText, var postCreatedAt, var postPhotos)
     signal deleteRequested(int postId)
 
@@ -134,7 +132,7 @@ Rectangle {
 
                             Image {
                                 anchors.fill: parent
-                                source: root.storageBaseUrl + modelData
+                                source: AppConfig.storageBaseUrl + modelData
                                 fillMode: Image.PreserveAspectCrop
                             }
                         }

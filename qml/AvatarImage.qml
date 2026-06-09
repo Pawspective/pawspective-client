@@ -4,7 +4,6 @@ Item {
     id: root
     property string photoUrl: ""
     property string defaultText: ""
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
 
     width: 80
     height: 80
@@ -13,7 +12,7 @@ Item {
     // visible:false still loads the image and exposes implicitWidth/Height.
     Image {
         id: sizeHelper
-        source: root.photoUrl ? (root.storageBaseUrl + root.photoUrl) : ""
+        source: root.photoUrl ? (AppConfig.storageBaseUrl + root.photoUrl) : ""
         visible: false
         onStatusChanged: {
             if (status === Image.Ready) canvas.requestPaint()
@@ -45,7 +44,7 @@ Item {
             ctx.fillStyle = "#e8d8cb"
             ctx.fillRect(0, 0, width, height)
 
-            var url = root.photoUrl ? (root.storageBaseUrl + root.photoUrl) : ""
+            var url = root.photoUrl ? (AppConfig.storageBaseUrl + root.photoUrl) : ""
             if (url && canvas.isImageLoaded(url) && sizeHelper.status === Image.Ready) {
                 var iw = sizeHelper.implicitWidth
                 var ih = sizeHelper.implicitHeight
@@ -84,7 +83,7 @@ Item {
 
     onPhotoUrlChanged: {
         if (photoUrl) {
-            canvas.loadImage(root.storageBaseUrl + photoUrl)
+            canvas.loadImage(AppConfig.storageBaseUrl + photoUrl)
         }
         canvas.requestPaint()
     }

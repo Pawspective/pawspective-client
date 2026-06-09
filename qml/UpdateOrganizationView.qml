@@ -10,8 +10,6 @@ Rectangle {
     property string errorMessage: ""
     property var uploaderViewModel: null
 
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
-
     signal saveCompleted()
     signal discard()
     signal organizationDeleted()

@@ -27,7 +27,6 @@ Rectangle {
     readonly property string organizationName: organizationViewModel ? organizationViewModel.organizationName : ""
     readonly property string organizationCity: organizationViewModel ? organizationViewModel.organizationCity : ""
     readonly property string organizationDescription: organizationViewModel ? organizationViewModel.organizationDescription : ""
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
     readonly property real avatarSize: root.height * 0.12
 
     property bool showDescription: organizationViewModel ? organizationViewModel.showDescription : false

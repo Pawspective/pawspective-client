@@ -15,8 +15,6 @@ Rectangle {
     property var postPhotos: []
     property string errorMessage: ""
 
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
-
     signal backClicked()
     signal saveCompleted()
 
@@ -196,7 +194,7 @@ Rectangle {
 
                                 Image {
                                     anchors.fill: parent
-                                    source: root.storageBaseUrl + modelData
+                                    source: AppConfig.storageBaseUrl + modelData
                                     fillMode: Image.PreserveAspectCrop
                                 }
                             }

@@ -39,7 +39,6 @@ Rectangle {
     readonly property real bottomPadding: root.height * 0.05
     readonly property real photoThumbSize: root.height * 0.13
     readonly property real uploaderPreviewSize: root.height * 0.22
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
 
     readonly property real loaderTopMargin: 10
 
@@ -265,7 +264,7 @@ Rectangle {
 
                                 Image {
                                     anchors.fill: parent
-                                    source: root.storageBaseUrl + modelData
+                                    source: AppConfig.storageBaseUrl + modelData
                                     fillMode: Image.PreserveAspectCrop
                                 }
                             }

@@ -32,9 +32,12 @@ PostDTO PostDTO::fromJson(const QJsonObject& json) {
     dto.text = utils::json::getRequiredString(json, "text");
     dto.createdAt = utils::json::getRequiredDateTime(json, "created_at");
 
-    const QJsonArray photosArr = json["photos"].toArray();
-    for (const auto& p : photosArr) {
-        dto.photos.append(p.toString());
+    if (json.contains("photos") && json["photos"].isArray()) {
+        const QJsonArray photosArr = json["photos"].toArray();
+        for (const auto& p : photosArr) {
+            if (p.isString())
+                dto.photos.append(p.toString());
+        }
     }
 
     return dto;
