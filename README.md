@@ -69,7 +69,7 @@ On Windows, `manage.py run` automatically calls `windeployqt` before launching s
 
 ## 🏗 Architecture
 
-```
+```text
 pawspective-client/
 ├── src/
 │   ├── viewmodels/     # MVVM ViewModels — C++ objects exposed to QML
@@ -133,6 +133,7 @@ Unit tests are written with **Qt Test** and built as separate CTest targets. Eac
 # Build debug and run all tests
 python manage.py test debug
 ```
+
 The CI workflow runs the full test suite on every push and pull request.
 
 ---
@@ -150,7 +151,7 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for the
 
 **Example:**
 
-```
+```text
 feat(auth): persist JWT token in OS keychain
 fix(animals): correct breed filter mapping
 ```
