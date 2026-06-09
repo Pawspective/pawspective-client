@@ -33,9 +33,9 @@ void AnimalCardViewModel::setFromDTO(const models::AnimalDTO& dto) {
         emit descriptionChanged();
     }
 
-    QString newFirstPhoto = dto.photos.isEmpty() ? QString{} : dto.photos.first();
-    if (m_firstPhoto != newFirstPhoto) {
-        m_firstPhoto = newFirstPhoto;
+    QString firstPhoto = dto.photos.isEmpty() ? QString{} : dto.photos.first();
+    if (m_firstPhoto != firstPhoto) {
+        m_firstPhoto = firstPhoto;
         emit firstPhotoChanged();
     }
 }

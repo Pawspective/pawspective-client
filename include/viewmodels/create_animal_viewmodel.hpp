@@ -45,7 +45,7 @@ public:
 
     const QString& name() const { return m_registerDto.name; }
     QString description() const { return m_registerDto.description.value_or(""); }
-    const QStringList& photos() const { return m_registerDto.photos; }
+    QStringList photos() const { return m_registerDto.photos; }
     QString animalType() const { return m_animalType.has_value() ? models::toApiString(m_animalType.value()) : ""; }
     qint64 breedId() const { return m_registerDto.breedId; }
     QString size() const { return m_size.has_value() ? models::toApiString(m_size.value()) : ""; }
