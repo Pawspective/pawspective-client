@@ -161,6 +161,8 @@ public:
     Q_INVOKABLE void loadFilters();
     Q_INVOKABLE void addPhoto(const QString& fileName) {
         if (m_registerDto.photos.size() >= 10) {
+            QString errorMsg = QString("Maximum 10 photos allowed. You have %1.").arg(m_registerDto.photos.size());
+            emitError(ErrorType::ValidationError, errorMsg);
             return;
         }
         if (!fileName.isEmpty() && !m_registerDto.photos.contains(fileName)) {

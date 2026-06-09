@@ -58,6 +58,8 @@ void CreatePostViewModel::createPost() {
 
 void CreatePostViewModel::addPhoto(const QString& fileName) {
     if (m_createDto.photos.size() >= 10) {
+        QString errorMsg = QString("Maximum 10 photos allowed. You have %1.").arg(m_createDto.photos.size());
+        emitError(ValidationError, errorMsg);
         return;
     }
     if (!m_createDto.photos.contains(fileName)) {
