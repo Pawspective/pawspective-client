@@ -57,7 +57,9 @@ void CreatePostViewModel::createPost() {
 }
 
 void CreatePostViewModel::addPhoto(const QString& fileName) {
-    if (m_createDto.photos.size() >= 10) return;
+    if (m_createDto.photos.size() >= 10) {
+        return;
+    }
     if (!m_createDto.photos.contains(fileName)) {
         m_createDto.photos.append(fileName);
         emit photosChanged();

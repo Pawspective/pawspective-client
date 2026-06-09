@@ -37,7 +37,10 @@ void UpdatePostViewModel::setText(const QString& value) {
 }
 
 void UpdatePostViewModel::setPostData(
-    qint64 postId, const QString& text, const QDateTime& createdAt, const QStringList& photos
+    qint64 postId,
+    const QString& text,
+    const QDateTime& createdAt,
+    const QStringList& photos
 ) {
     m_postId = postId;
     m_originalData.id = postId;
@@ -49,7 +52,9 @@ void UpdatePostViewModel::setPostData(
 
 void UpdatePostViewModel::addPhoto(const QString& fileName) {
     QStringList current = photos();
-    if (current.size() >= 10) return;
+    if (current.size() >= 10) {
+        return;
+    }
     if (!current.contains(fileName)) {
         current.append(fileName);
         m_changes.photos = current;

@@ -30,7 +30,12 @@ public:
     Q_INVOKABLE void cleanup() override;
     Q_INVOKABLE void saveChanges();
     Q_INVOKABLE void discardChanges();
-    Q_INVOKABLE void setPostData(qint64 postId, const QString& text, const QDateTime& createdAt, const QStringList& photos);
+    Q_INVOKABLE void setPostData(
+        qint64 postId,
+        const QString& text,
+        const QDateTime& createdAt,
+        const QStringList& photos
+    );
     Q_INVOKABLE void addPhoto(const QString& fileName);
     Q_INVOKABLE void removePhoto(const QString& fileName);
 
