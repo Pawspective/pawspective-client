@@ -37,6 +37,8 @@ Rectangle {
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
     readonly property real bottomPadding: root.height * 0.05
+    readonly property real photoThumbSize: root.height * 0.13
+    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
 
     readonly property real loaderTopMargin: 10
 
@@ -249,19 +251,26 @@ Rectangle {
                     Repeater {
                         model: viewModel ? viewModel.photos : []
                         delegate: Item {
-                            width: 70
-                            height: 70
+                            width: root.photoThumbSize + 10
+                            height: root.photoThumbSize + 10
 
-                            AvatarImage {
-                                width: 60
-                                height: 60
+                            Rectangle {
+                                width: root.photoThumbSize
+                                height: root.photoThumbSize
+                                radius: 8
+                                clip: true
                                 anchors.centerIn: parent
-                                photoUrl: modelData
-                                defaultText: "?"
+                                color: "#e8d8cb"
+
+                                Image {
+                                    anchors.fill: parent
+                                    source: root.storageBaseUrl + modelData
+                                    fillMode: Image.PreserveAspectCrop
+                                }
                             }
 
                             Rectangle {
-                                width: 18; height: 18; radius: 9
+                                width: 20; height: 20; radius: 10
                                 color: "#ff6b6b"
                                 anchors.top: parent.top
                                 anchors.right: parent.right
@@ -287,6 +296,10 @@ Rectangle {
                     Layout.fillWidth: true
                     title: ""
                     viewModel: root.uploaderViewModel
+                    previewSize: root.photoThumbSize
+                    previewRadius: 8
+                    buttonHeight: root.buttonHeight
+                    buttonFontSize: root.buttonFontSize
                     onUploadCompleted: function(fileName) {
                         createAnimalViewModel.addPhoto(fileName)
                     }

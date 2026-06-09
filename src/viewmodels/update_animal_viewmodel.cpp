@@ -424,6 +424,7 @@ void UpdateAnimalViewModel::discardChanges() {
 
 void UpdateAnimalViewModel::addPhoto(const QString& fileName) {
     QStringList current = photos();
+    if (current.size() >= 10) return;
     if (!fileName.isEmpty() && !current.contains(fileName)) {
         current.append(fileName);
         m_changes.photos = current;

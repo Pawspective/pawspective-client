@@ -36,12 +36,35 @@ void UpdatePostViewModel::setText(const QString& value) {
     }
 }
 
-void UpdatePostViewModel::setPostData(qint64 postId, const QString& text, const QDateTime& createdAt) {
+void UpdatePostViewModel::setPostData(
+    qint64 postId, const QString& text, const QDateTime& createdAt, const QStringList& photos
+) {
     m_postId = postId;
     m_originalData.id = postId;
     m_originalData.text = text;
     m_originalData.createdAt = createdAt;
+    m_originalData.photos = photos;
     discardChanges();
+}
+
+void UpdatePostViewModel::addPhoto(const QString& fileName) {
+    QStringList current = photos();
+    if (current.size() >= 10) return;
+    if (!current.contains(fileName)) {
+        current.append(fileName);
+        m_changes.photos = current;
+        emit photosChanged();
+        updateDirtyStatus();
+    }
+}
+
+void UpdatePostViewModel::removePhoto(const QString& fileName) {
+    QStringList current = photos();
+    if (current.removeAll(fileName) > 0) {
+        m_changes.photos = current;
+        emit photosChanged();
+        updateDirtyStatus();
+    }
 }
 
 void UpdatePostViewModel::handleUpdateSuccess(const models::PostDTO& post) {
@@ -49,6 +72,8 @@ void UpdatePostViewModel::handleUpdateSuccess(const models::PostDTO& post) {
     m_originalData = post;
     m_changes = models::PostUpdateDTO();
     setDirty(false);
+    emit textChanged();
+    emit photosChanged();
     emit saveCompleted();
 }
 
@@ -85,10 +110,11 @@ void UpdatePostViewModel::discardChanges() {
     m_changes = models::PostUpdateDTO();
     setDirty(false);
     emit textChanged();
+    emit photosChanged();
 }
 
 void UpdatePostViewModel::updateDirtyStatus() {
-    bool dirty = m_changes.text.has_value();
+    bool dirty = m_changes.text.has_value() || m_changes.photos.has_value();
     setDirty(dirty);
 }
 

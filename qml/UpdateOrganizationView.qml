@@ -41,7 +41,7 @@ Rectangle {
     readonly property real loaderSize: root.height * 0.1
     readonly property real loaderTopMargin: 10
     
-    readonly property real avatarSize: 120
+    readonly property real avatarSize: root.height * 0.18
 
     Connections {
         target: viewModel
@@ -215,36 +215,40 @@ Rectangle {
                 }
             }
 
+            Text {
+                text: "Logo"
+                font.family: theme.fontName
+                font.pixelSize: root.fieldLabelFontSize
+                color: theme.textDark
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: root.fieldSpacing
-                
-                Text {
-                    text: "Current Logo, which will be replaced if you upload a new one"
-                    font.family: theme.fontName
-                    font.pixelSize: root.fieldLabelFontSize
-                    color: theme.textDark
-                }
+                spacing: root.height * 0.015
+                Layout.alignment: Qt.AlignHCenter
 
                 AvatarImage {
-                    width: root.avatarSize
-                    height: root.avatarSize
-                    Layout.alignment: Qt.AlignLeft
+                    Layout.preferredWidth: root.avatarSize
+                    Layout.preferredHeight: root.avatarSize
+                    Layout.maximumWidth: root.avatarSize
+                    Layout.maximumHeight: root.avatarSize
+                    Layout.alignment: Qt.AlignHCenter
                     photoUrl: viewModel ? viewModel.avatarUrl : ""
                     defaultText: viewModel ? viewModel.name : ""
                 }
-            }
 
-            PhotoUploader {
-                id: photoUploader
-                Layout.fillWidth: true
-                title: "New Organization Logo"
-                viewModel: root.uploaderViewModel
-                previewSize: 120
-                previewAlignment: Qt.AlignLeft
-
-                onUploadCompleted: function(fileName) {
-                    updateOrganizationViewModel.avatarUrl = fileName
+                PhotoUploader {
+                    id: photoUploader
+                    Layout.fillWidth: true
+                    title: ""
+                    viewModel: root.uploaderViewModel
+                    previewSize: root.avatarSize
+                    previewAlignment: Qt.AlignHCenter
+                    buttonHeight: root.buttonHeight
+                    buttonFontSize: root.buttonFontSize
+                    onUploadCompleted: function(fileName) {
+                        updateOrganizationViewModel.avatarUrl = fileName
+                    }
                 }
             }
 
@@ -279,7 +283,7 @@ Rectangle {
                         root.discard();
                     }
                 }
-                
+
                 CustomButton {
                     text: "Delete Organization"
                     baseColor: "#ff6b6b"
@@ -290,7 +294,7 @@ Rectangle {
                     Layout.preferredHeight: root.buttonHeight
                     enabled: !viewModel.isBusy
                     onClicked: {
-                        deleteConfirmDialog.open() 
+                        deleteConfirmDialog.open()
                     }
                 }
             }

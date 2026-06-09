@@ -8,10 +8,14 @@ Rectangle {
     color: "#e8d8cb"
 
     property var viewModel: null
+    property var uploaderViewModel: null
     property int postId: 0
     property string postText: ""
     property var postCreatedAt: null
+    property var postPhotos: []
     property string errorMessage: ""
+
+    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
 
     signal backClicked()
     signal saveCompleted()
@@ -35,6 +39,7 @@ Rectangle {
     readonly property real buttonFontSize: root.height * 0.025
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
+    readonly property real photoThumbSize: root.height * 0.13
     readonly property real bottomPadding: root.height * 0.05
     
     readonly property real avatarSize: root.width * 0.09
@@ -70,7 +75,7 @@ Rectangle {
 
     Component.onCompleted: {
         if (viewModel && postId > 0) {
-            viewModel.setPostData(postId, postText, postCreatedAt)
+            viewModel.setPostData(postId, postText, postCreatedAt, postPhotos || [])
             viewModel.initialize()
         }
     }
@@ -156,6 +161,82 @@ Rectangle {
                 }
             }
             
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: root.height * 0.01
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
+
+                Text {
+                    text: "Photos"
+                    font.family: theme.fontName
+                    font.pixelSize: root.fieldLabelFontSize
+                    color: theme.textDark
+                }
+
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    visible: viewModel && viewModel.photos.length > 0
+
+                    Repeater {
+                        model: viewModel ? viewModel.photos : []
+                        delegate: Item {
+                            width: root.photoThumbSize + 10
+                            height: root.photoThumbSize + 10
+
+                            Rectangle {
+                                width: root.photoThumbSize
+                                height: root.photoThumbSize
+                                radius: 8
+                                clip: true
+                                anchors.centerIn: parent
+                                color: "#e8d8cb"
+
+                                Image {
+                                    anchors.fill: parent
+                                    source: root.storageBaseUrl + modelData
+                                    fillMode: Image.PreserveAspectCrop
+                                }
+                            }
+
+                            Rectangle {
+                                width: 20; height: 20; radius: 10
+                                color: "#ff6b6b"
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "×"
+                                    color: "white"
+                                    font.pixelSize: 13
+                                    font.bold: true
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: { if (viewModel) viewModel.removePhoto(modelData) }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                PhotoUploader {
+                    Layout.fillWidth: true
+                    title: ""
+                    viewModel: root.uploaderViewModel
+                    previewSize: root.photoThumbSize
+                    previewRadius: 8
+                    buttonHeight: root.buttonHeight
+                    buttonFontSize: root.buttonFontSize
+                    onUploadCompleted: function(fileName) {
+                        updatePostViewModel.addPhoto(fileName)
+                    }
+                }
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.buttonSpacing

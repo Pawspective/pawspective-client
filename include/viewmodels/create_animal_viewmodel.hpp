@@ -160,6 +160,7 @@ public:
     Q_INVOKABLE void createAnimal();
     Q_INVOKABLE void loadFilters();
     Q_INVOKABLE void addPhoto(const QString& fileName) {
+        if (m_registerDto.photos.size() >= 10) return;
         if (!fileName.isEmpty() && !m_registerDto.photos.contains(fileName)) {
             m_registerDto.photos.append(fileName);
             emit photosChanged();

@@ -481,6 +481,7 @@ ApplicationWindow {
         id: postCreateViewComponent
         PostCreateView {
             viewModel: createPostViewModel
+            uploaderViewModel: photoUploadViewModel
             
             onBackClicked: {
                 createPostViewModel.cleanup()
@@ -599,9 +600,11 @@ Component {
     id: postUpdateViewComponent
     PostUpdateView {
         viewModel: updatePostViewModel
+        uploaderViewModel: photoUploadViewModel
         postId: typeof postId !== 'undefined' ? postId : 0
         postText: typeof postText !== 'undefined' ? postText : ""
         postCreatedAt: typeof postCreatedAt !== 'undefined' ? postCreatedAt : null
+        postPhotos: typeof postPhotos !== 'undefined' ? postPhotos : []
         
         onBackClicked: {
             updatePostViewModel.cleanup()

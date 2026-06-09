@@ -24,6 +24,9 @@ Item {
         id: canvas
         anchors.fill: parent
 
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+
         // Fired when canvas.loadImage() finishes
         onImageLoaded: requestPaint()
 

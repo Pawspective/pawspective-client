@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 #include "models/post_dto.hpp"
 
@@ -15,6 +16,7 @@ class PostCardViewModel : public QObject {
     Q_PROPERTY(bool isExpanded READ isExpanded WRITE setIsExpanded NOTIFY isExpandedChanged)
     Q_PROPERTY(QString shortText READ shortText NOTIFY textChanged)
     Q_PROPERTY(bool hasLongText READ hasLongText NOTIFY textChanged)
+    Q_PROPERTY(QStringList photos READ photos NOTIFY photosChanged)
 
 public:
     explicit PostCardViewModel(QObject* parent = nullptr);
@@ -25,6 +27,7 @@ public:
     bool isExpanded() const { return m_isExpanded; }
     QString shortText() const;
     bool hasLongText() const;
+    const QStringList& photos() const { return m_photos; }
 
     void setIsExpanded(bool expanded);
 
@@ -35,11 +38,13 @@ signals:
     void textChanged();
     void createdAtChanged();
     void isExpandedChanged();
+    void photosChanged();
 
 private:
     QString m_text;
     QDateTime m_createdAt;
     bool m_isExpanded = false;
+    QStringList m_photos;
 };
 
 }  // namespace pawspective::viewmodels

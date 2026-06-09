@@ -11,6 +11,9 @@ Rectangle {
 
     property real previewSize: Math.min(root.width * 0.15, 80)
     property int previewAlignment: Qt.AlignHCenter
+    property real previewRadius: root.previewSize / 2
+    property real buttonHeight: 48
+    property real buttonFontSize: 15
 
     implicitHeight: contentLayout.implicitHeight
 
@@ -101,8 +104,10 @@ Rectangle {
         Rectangle {
             Layout.preferredWidth: root.previewSize
             Layout.preferredHeight: root.previewSize
+            Layout.maximumWidth: root.previewSize
+            Layout.maximumHeight: root.previewSize
             Layout.alignment: root.previewAlignment
-            radius: Layout.preferredWidth / 2
+            radius: root.previewRadius
             color: "#f0ecf9"
             border.color: "#b8abd7"
             border.width: 1
@@ -137,18 +142,20 @@ Rectangle {
                 baseColor: "#b8abd7"
                 hoverColor: "#f4a7b9"
                 textColor: "white"
-                fontSize: 12
+                fontSize: root.buttonFontSize
                 Layout.fillWidth: true
+                Layout.preferredHeight: root.buttonHeight
                 onClicked: fileDialog.open()
             }
-            
+
             CustomButton {
                 text: (hasValidViewModel() && viewModel && viewModel.isUploading) ? "Uploading..." : "Upload"
                 baseColor: selectedFilePath !== "" ? "#b8abd7" : "#cccccc"
                 hoverColor: "#f4a7b9"
                 textColor: "white"
-                fontSize: 12
+                fontSize: root.buttonFontSize
                 Layout.fillWidth: true
+                Layout.preferredHeight: root.buttonHeight
                 enabled: selectedFilePath !== "" && hasValidViewModel() && viewModel && !viewModel.isUploading
                 onClicked: uploadPhoto()
             }

@@ -29,6 +29,8 @@ QVariant PostListInternalModel::data(const QModelIndex& index, int role) const {
             return item.text;
         case CreatedAtRole:
             return item.createdAt;
+        case PhotosRole:
+            return item.photos;
         default:
             return QVariant();
     }
@@ -39,6 +41,7 @@ QHash<int, QByteArray> PostListInternalModel::roleNames() const {
     roles[PostIdRole] = "postId";
     roles[TextRole] = "postText";
     roles[CreatedAtRole] = "postCreatedAt";
+    roles[PhotosRole] = "postPhotos";
     return roles;
 }
 
@@ -52,6 +55,7 @@ void PostListInternalModel::update(const QList<models::PostDTO>& dtos) {
             item.id = dto.id;
             item.text = dto.text;
             item.createdAt = dto.createdAt;
+            item.photos = dto.photos;
             m_items.append(item);
         }
         endInsertRows();

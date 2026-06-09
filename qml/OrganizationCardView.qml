@@ -11,13 +11,11 @@ Rectangle {
     property int organizationId: 0
     property string avatarUrl: ""
 
-    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
-
     signal clicked(int organizationId)
 
     readonly property real padV: root.width * 0.025
     readonly property real padH: root.width * 0.06
-    readonly property real avatarSize: root.width * 0.09
+    readonly property real avatarSize: root.width * 0.14
     readonly property real titleSize: root.width * 0.028
     readonly property real subtitleSize: root.width * 0.022
     readonly property real descSize: root.width * 0.016
@@ -52,33 +50,11 @@ Rectangle {
             Layout.fillWidth: true
             spacing: root.padH
 
-            Rectangle {
+            AvatarImage {
                 width: root.avatarSize
                 height: root.avatarSize
-                radius: width / 2
-                color: "#e8d8cb"
-                border.color: "#b8abd7"
-                border.width: 1
-                clip: true
-
-                Image {
-                    id: avatarImage
-                    anchors.fill: parent
-                    fillMode: Image.PreserveAspectCrop
-                    smooth: true
-                    source: root.avatarUrl ? (root.storageBaseUrl + root.avatarUrl) : ""
-                    visible: status === Image.Ready
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: root.organizationName.length > 0 ? root.organizationName[0].toUpperCase() : "?"
-                        font.family: "Comic Sans MS"
-                        font.pixelSize: parent.width * 0.45
-                        font.bold: true
-                        color: "#8572af"
-                        visible: avatarImage.status !== Image.Ready
-                    }
-                }
+                photoUrl: root.avatarUrl
+                defaultText: root.organizationName
             }
 
             ColumnLayout {

@@ -201,62 +201,6 @@ Rectangle {
                 }
             }
 
-            Rectangle {
-                visible: root.viewModel && root.viewModel.photos.length > 0
-                Layout.fillWidth: true
-                Layout.leftMargin: root.sideMargin
-                Layout.rightMargin: root.sideMargin
-                color: theme.fieldBg
-                radius: 12
-                border.color: theme.border
-                border.width: 1
-                implicitHeight: galleryScroll.implicitHeight + root.height * 0.03
-
-                ScrollView {
-                    id: galleryScroll
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                        top: parent.top
-                        margins: root.height * 0.015
-                    }
-                    implicitHeight: galleryRow.implicitHeight
-                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-                    clip: true
-
-                    Row {
-                        id: galleryRow
-                        spacing: 10
-
-                        Repeater {
-                            model: root.viewModel ? root.viewModel.photos : []
-                            delegate: Rectangle {
-                                width: root.height * 0.18
-                                height: root.height * 0.18
-                                radius: 8
-                                clip: true
-                                color: theme.chipBg
-
-                                Image {
-                                    anchors.fill: parent
-                                    source: root.storageBaseUrl + modelData
-                                    fillMode: Image.PreserveAspectCrop
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        lightbox.photoUrl = modelData
-                                        lightbox.visible = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             DetailField {
                 label: "Type"
                 value: root.viewModel ? root.viewModel.animalType : ""
@@ -292,6 +236,53 @@ Rectangle {
             DetailField {
                 label: "Status"
                 value: root.viewModel ? root.viewModel.status : ""
+            }
+
+            Item {
+                visible: root.viewModel && root.viewModel.photos.length > 0
+                Layout.fillWidth: true
+                Layout.leftMargin: root.sideMargin
+                Layout.rightMargin: root.sideMargin
+                Layout.preferredHeight: root.height * 0.27
+
+                ScrollView {
+                    id: galleryScroll
+                    anchors.fill: parent
+                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    clip: true
+
+                    Row {
+                        id: galleryRow
+                        height: root.height * 0.25
+                        spacing: 12
+
+                        Repeater {
+                            model: root.viewModel ? root.viewModel.photos : []
+                            delegate: Rectangle {
+                                width: root.height * 0.25
+                                height: root.height * 0.25
+                                radius: 10
+                                clip: true
+                                color: theme.chipBg
+
+                                Image {
+                                    anchors.fill: parent
+                                    source: root.storageBaseUrl + modelData
+                                    fillMode: Image.PreserveAspectCrop
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        lightbox.photoUrl = modelData
+                                        lightbox.visible = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             OrganizationCardView {

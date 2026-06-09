@@ -15,6 +15,12 @@ QJsonObject PostDTO::toJson() const {
     json["text"] = text;
     json["created_at"] = createdAt.toString(Qt::ISODateWithMs);
 
+    QJsonArray photosArray;
+    for (const auto& photo : photos) {
+        photosArray.append(photo);
+    }
+    json["photos"] = photosArray;
+
     return json;
 }
 
@@ -25,6 +31,11 @@ PostDTO PostDTO::fromJson(const QJsonObject& json) {
     dto.organizationId = utils::json::getRequiredInt64(json, "organization_id");
     dto.text = utils::json::getRequiredString(json, "text");
     dto.createdAt = utils::json::getRequiredDateTime(json, "created_at");
+
+    const QJsonArray photosArr = json["photos"].toArray();
+    for (const auto& p : photosArr) {
+        dto.photos.append(p.toString());
+    }
 
     return dto;
 }

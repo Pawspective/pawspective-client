@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QStringList>
 #include <QVariantList>
 #include <optional>
 
@@ -14,12 +15,14 @@ class UpdatePostViewModel : public BaseViewModel {
     Q_OBJECT
     Q_PROPERTY(QString text READ text WRITE setText NOTIFY textChanged)
     Q_PROPERTY(bool isDirty READ isDirty NOTIFY dirtyChanged)
+    Q_PROPERTY(QStringList photos READ photos NOTIFY photosChanged)
 
 public:
     explicit UpdatePostViewModel(services::PostService& postService, QObject* parent = nullptr);
 
     QString text() const { return m_changes.text.value_or(m_originalData.text); }
     bool isDirty() const { return m_isDirty; }
+    QStringList photos() const { return m_changes.photos.value_or(m_originalData.photos); }
 
     void setText(const QString& value);
 
@@ -27,11 +30,14 @@ public:
     Q_INVOKABLE void cleanup() override;
     Q_INVOKABLE void saveChanges();
     Q_INVOKABLE void discardChanges();
-    Q_INVOKABLE void setPostData(qint64 postId, const QString& text, const QDateTime& createdAt);
+    Q_INVOKABLE void setPostData(qint64 postId, const QString& text, const QDateTime& createdAt, const QStringList& photos);
+    Q_INVOKABLE void addPhoto(const QString& fileName);
+    Q_INVOKABLE void removePhoto(const QString& fileName);
 
 signals:
     void textChanged();
     void dirtyChanged();
+    void photosChanged();
 
     void loadCompleted();
     void loadFailed(const QString& errorMessage);

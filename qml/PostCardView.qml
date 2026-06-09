@@ -20,11 +20,14 @@ Rectangle {
     property int postId: -1
     property string postText: ""
     property var postCreatedAt: null
+    property var postPhotos: []
     property bool canEdit: false
     property bool isExpanded: false
     property int previewLimit: 220
 
-    signal editRequested(int postId, string postText, var postCreatedAt)
+    readonly property string storageBaseUrl: "https://storage.yandexcloud.net/hollow1crown/photos/"
+
+    signal editRequested(int postId, string postText, var postCreatedAt, var postPhotos)
     signal deleteRequested(int postId)
 
     readonly property real padV: root.width * 0.025
@@ -101,6 +104,40 @@ Rectangle {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: root.isExpanded = !root.isExpanded
+                    }
+                }
+            }
+        }
+
+        Item {
+            visible: root.postPhotos && root.postPhotos.length > 0
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.width * 0.28
+
+            ScrollView {
+                anchors.fill: parent
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                clip: true
+
+                Row {
+                    height: root.width * 0.26
+                    spacing: 8
+
+                    Repeater {
+                        model: root.postPhotos || []
+                        delegate: Rectangle {
+                            width: root.width * 0.26
+                            height: root.width * 0.26
+                            radius: 8
+                            clip: true
+                            color: theme.pageBg
+
+                            Image {
+                                anchors.fill: parent
+                                source: root.storageBaseUrl + modelData
+                                fillMode: Image.PreserveAspectCrop
+                            }
+                        }
                     }
                 }
             }
@@ -200,7 +237,7 @@ Rectangle {
                 }
                 onClicked: {
                     optionsPopup.close()
-                    root.editRequested(root.postId, root.postText, root.postCreatedAt)
+                    root.editRequested(root.postId, root.postText, root.postCreatedAt, root.postPhotos)
                 }
             }
 

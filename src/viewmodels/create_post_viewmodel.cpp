@@ -56,10 +56,28 @@ void CreatePostViewModel::createPost() {
     m_postService.createPost(m_createDto);
 }
 
+void CreatePostViewModel::addPhoto(const QString& fileName) {
+    if (m_createDto.photos.size() >= 10) return;
+    if (!m_createDto.photos.contains(fileName)) {
+        m_createDto.photos.append(fileName);
+        emit photosChanged();
+    }
+}
+
+void CreatePostViewModel::removePhoto(const QString& fileName) {
+    if (m_createDto.photos.removeAll(fileName) > 0) {
+        emit photosChanged();
+    }
+}
+
 void CreatePostViewModel::initialize() {}
 
 void CreatePostViewModel::cleanup() {
     updateProperty(m_createDto.text, QString(), [this] { emit textChanged(); });
+    if (!m_createDto.photos.isEmpty()) {
+        m_createDto.photos.clear();
+        emit photosChanged();
+    }
     m_organizationId = 0;
     setIsBusy(false);
 }
