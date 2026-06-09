@@ -2,7 +2,7 @@
 
 namespace pawspective::viewmodels {
 
-static const QString StorageBaseUrl = "https://storage.yandexcloud.net/hollow1crown/photos/";
+static const QString StorageBaseUrl = "https://storage.yandexcloud.net/pawspective/photos/";
 
 OrganizationCardViewModel::OrganizationCardViewModel(QObject* parent) : QObject(parent) {}
 

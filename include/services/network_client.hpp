@@ -79,7 +79,7 @@ private:
     bool m_isRefreshing = false;
     TokenProvider m_tokenProvider;
 
-    const QUrl m_baseUrl = QUrl("http://localhost:8080/");
+    const QUrl m_baseUrl = QUrl("https://pawspective.ru/");
 };
 
 }  // namespace pawspective::services
