@@ -22,10 +22,11 @@ public:
         qint64 id;
         QString text;
         QDateTime createdAt;
+        QStringList photos;
     };
 
     // NOLINTNEXTLINE(performance-enum-size)
-    enum PostRole { PostIdRole = Qt::UserRole + 1, TextRole, CreatedAtRole };
+    enum PostRole { PostIdRole = Qt::UserRole + 1, TextRole, CreatedAtRole, PhotosRole };
 
     explicit PostListInternalModel(QObject* parent = nullptr);
     ~PostListInternalModel() override = default;

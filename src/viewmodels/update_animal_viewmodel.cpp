@@ -422,12 +422,37 @@ void UpdateAnimalViewModel::discardChanges() {
     notifyAllChanged();
 }
 
+void UpdateAnimalViewModel::addPhoto(const QString& fileName) {
+    QStringList current = photos();
+    if (current.size() >= 10) {
+        QString errorMsg = QString("Maximum 10 photos allowed. You have %1.").arg(current.size());
+        emitError(ErrorType::ValidationError, errorMsg);
+        emit saveFailed(errorMsg);
+        return;
+    }
+    if (!fileName.isEmpty() && !current.contains(fileName)) {
+        current.append(fileName);
+        m_changes.photos = current;
+        emit photosChanged();
+        updateDirtyStatus();
+    }
+}
+
+void UpdateAnimalViewModel::removePhoto(const QString& fileName) {
+    QStringList current = photos();
+    if (current.removeOne(fileName)) {
+        m_changes.photos = current;
+        emit photosChanged();
+        updateDirtyStatus();
+    }
+}
+
 void UpdateAnimalViewModel::updateDirtyStatus() {
     bool dirty =
         m_changes.name.has_value() || m_changes.description.has_value() || m_changes.breedId.has_value() ||
         m_changes.size.has_value() || m_changes.gender.has_value() || m_changes.age.has_value() ||
         m_changes.careLevel.has_value() || m_changes.color.has_value() || m_changes.goodWith.has_value() ||
-        m_changes.status.has_value();
+        m_changes.status.has_value() || m_changes.photos.has_value();
     setDirty(dirty);
 }
 
@@ -447,6 +472,7 @@ void UpdateAnimalViewModel::notifyAllChanged() {
     emit colorChanged();
     emit goodWithChanged();
     emit statusChanged();
+    emit photosChanged();
     emit isBreedEnabledChanged();
 }
 

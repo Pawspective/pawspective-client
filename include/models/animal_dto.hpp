@@ -4,6 +4,7 @@
 #include <QList>
 #include <QMetaType>
 #include <QString>
+#include <QStringList>
 #include <optional>
 
 #include "animal_enums.hpp"
@@ -23,6 +24,7 @@ struct AnimalDTO {
     GoodWith goodWith;
     qint32 age = 0;
     std::optional<QString> description;
+    QStringList photos;
     AnimalStatus status;
     bool canBeAdopted = false;
 

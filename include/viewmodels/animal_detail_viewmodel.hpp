@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 #include "base.hpp"
 #include "models/animal_dto.hpp"
@@ -29,6 +30,7 @@ class AnimalDetailViewModel : public BaseViewModel {
     Q_PROPERTY(QString organizationCity READ organizationCity NOTIFY organizationCityChanged)
     Q_PROPERTY(QString organizationDescription READ organizationDescription NOTIFY organizationDescriptionChanged)
     Q_PROPERTY(bool canBeAdopted READ canBeAdopted NOTIFY canBeAdoptedChanged)
+    Q_PROPERTY(QStringList photos READ photos NOTIFY photosChanged)
 
 public:
     explicit AnimalDetailViewModel(
@@ -54,6 +56,7 @@ public:
     const QString& organizationCity() const { return m_organizationCity; }
     const QString& organizationDescription() const { return m_organizationDescription; }
     bool canBeAdopted() const { return m_canBeAdopted; }
+    const QStringList& photos() const { return m_photos; }
 
     Q_INVOKABLE void loadAnimal(qint64 id);
     Q_INVOKABLE void deleteAnimal();
@@ -78,6 +81,7 @@ signals:
     void organizationCityChanged();
     void organizationDescriptionChanged();
     void canBeAdoptedChanged();
+    void photosChanged();
     void deleteSuccess();
     void deleteFailed(const QString& message);
     void adoptSuccess();
@@ -113,6 +117,7 @@ private:
     QString m_organizationCity;
     QString m_organizationDescription;
     bool m_canBeAdopted = false;
+    QStringList m_photos;
 };
 
 }  // namespace pawspective::viewmodels

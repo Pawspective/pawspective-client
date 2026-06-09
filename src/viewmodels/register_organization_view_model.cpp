@@ -86,6 +86,7 @@ void RegisterOrganizationViewModel::registerOrganization() {
 
     pawspective::models::OrganizationRegisterDTO dto{
         m_name,
+        m_avatarUrl.isEmpty() ? std::optional<QString>{} : std::optional<QString>{m_avatarUrl},
         m_description.isEmpty() ? std::optional<QString>{} : std::optional<QString>{m_description},
         m_cityId
     };

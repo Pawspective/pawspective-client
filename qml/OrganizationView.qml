@@ -27,6 +27,7 @@ Rectangle {
     readonly property string organizationName: organizationViewModel ? organizationViewModel.organizationName : ""
     readonly property string organizationCity: organizationViewModel ? organizationViewModel.organizationCity : ""
     readonly property string organizationDescription: organizationViewModel ? organizationViewModel.organizationDescription : ""
+    readonly property real avatarSize: root.height * 0.12
 
     property bool showDescription: organizationViewModel ? organizationViewModel.showDescription : false
     property int currentTab: organizationViewModel ? organizationViewModel.currentTab : 1
@@ -377,21 +378,13 @@ Rectangle {
                         Layout.fillWidth: true
                         spacing: root.width * 0.02
 
-                        Rectangle {
-                            Layout.preferredWidth: root.height * 0.12
-                            Layout.preferredHeight: root.height * 0.12
-                            radius: width / 2
-                            color: theme.pageBg
-                            border.color: theme.purple
-                            border.width: 1
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "Avatar"
-                                font.family: theme.fontName
-                                font.pixelSize: root.height * 0.02
-                                color: theme.textDark
-                            }
+                        AvatarImage {
+                            Layout.preferredWidth: root.avatarSize
+                            Layout.preferredHeight: root.avatarSize
+                            Layout.maximumWidth: root.avatarSize
+                            Layout.maximumHeight: root.avatarSize
+                            photoUrl: organizationViewModel ? organizationViewModel.avatarUrl : ""
+                            defaultText: organizationViewModel ? organizationViewModel.organizationName : ""
                         }
 
                         ColumnLayout {

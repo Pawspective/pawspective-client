@@ -62,6 +62,8 @@ QString OrganizationViewModel::organizationDescription() const {
     return m_organizationData.description.has_value() ? m_organizationData.description.value() : QString();
 }
 
+QString OrganizationViewModel::avatarUrl() const { return m_organizationData.avatarUrl.value_or(QString{}); }
+
 bool OrganizationViewModel::showDescription() const { return m_showDescription; }
 
 int OrganizationViewModel::currentTab() const { return m_currentTab; }

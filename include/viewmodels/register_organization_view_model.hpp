@@ -13,6 +13,7 @@ class RegisterOrganizationViewModel : public BaseViewModel {
     Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
     Q_PROPERTY(qint64 cityId READ cityId WRITE setCityId NOTIFY cityIdChanged)
     Q_PROPERTY(QVariantList cities READ cities NOTIFY citiesChanged)
+    Q_PROPERTY(QString avatarUrl READ avatarUrl WRITE setAvatarUrl NOTIFY avatarUrlChanged)
 
 public:
     explicit RegisterOrganizationViewModel(
@@ -41,6 +42,12 @@ public:
 
     const QVariantList& cities() const { return m_cities; }
 
+    const QString& avatarUrl() const { return m_avatarUrl; }
+
+    void setAvatarUrl(const QString& value) {
+        updateProperty(m_avatarUrl, value, [this] { emit avatarUrlChanged(); });
+    }
+
     Q_INVOKABLE void registerOrganization();
     Q_INVOKABLE void loadCities();
 
@@ -49,6 +56,7 @@ public:
         setName({});
         setDescription({});
         setCityId(0);
+        setAvatarUrl({});
         setIsBusy(false);
     }
 
@@ -57,6 +65,7 @@ signals:
     void descriptionChanged();
     void cityIdChanged();
     void citiesChanged();
+    void avatarUrlChanged();
     void registrationFinished(bool success);
 
 private:
@@ -66,6 +75,7 @@ private:
     QString m_description;  // NOLINT(misc-non-private-member-variables-in-classes)
     qint64 m_cityId = 0;    // NOLINT(misc-non-private-member-variables-in-classes)
     QVariantList m_cities;  // NOLINT(misc-non-private-member-variables-in-classes)
+    QString m_avatarUrl;    // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 }  // namespace pawspective::viewmodels

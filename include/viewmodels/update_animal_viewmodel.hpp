@@ -27,6 +27,7 @@ class UpdateAnimalViewModel : public BaseViewModel {
     Q_PROPERTY(QString status READ status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(bool isBreedEnabled READ isBreedEnabled NOTIFY isBreedEnabledChanged)
     Q_PROPERTY(bool isDirty READ isDirty NOTIFY dirtyChanged)
+    Q_PROPERTY(QStringList photos READ photos NOTIFY photosChanged)
 
     Q_PROPERTY(QVariantList animalTypes READ animalTypes NOTIFY animalTypesChanged)
     Q_PROPERTY(QVariantList breeds READ breeds NOTIFY breedsChanged)
@@ -46,6 +47,7 @@ public:
 
     QString name() const { return m_changes.name.value_or(m_originalData.name); }
     QString description() const { return m_changes.description.value_or(m_originalData.description.value_or("")); }
+    QStringList photos() const { return m_changes.photos.value_or(m_originalData.photos); }
     QString animalType() const;
     qint64 breedId() const;
     QString size() const;
@@ -84,6 +86,8 @@ public:
     Q_INVOKABLE void saveChanges();
     Q_INVOKABLE void discardChanges();
     Q_INVOKABLE void setAnimalId(qint64 animalId) { m_animalId = animalId; }
+    Q_INVOKABLE void addPhoto(const QString& fileName);
+    Q_INVOKABLE void removePhoto(const QString& fileName);
 
 signals:
     void nameChanged();
@@ -99,6 +103,7 @@ signals:
     void statusChanged();
     void isBreedEnabledChanged();
     void dirtyChanged();
+    void photosChanged();
 
     void animalTypesChanged();
     void breedsChanged();

@@ -71,13 +71,15 @@ Item {
             postId: model.postId
             postText: model.postText
             postCreatedAt: model.postCreatedAt
+            postPhotos: model.postPhotos ? model.postPhotos : []
             canEdit: root.canEditPosts
-            onEditRequested: function(postId, postText, postCreatedAt) {
+            onEditRequested: function(postId, postText, postCreatedAt, postPhotos) {
                 console.log("Edit post:", postId)
-                stackView.push(postUpdateViewComponent, { 
-                    postId: postId, 
+                stackView.push(postUpdateViewComponent, {
+                    postId: postId,
                     postText: postText,
-                    postCreatedAt: postCreatedAt
+                    postCreatedAt: postCreatedAt,
+                    postPhotos: postPhotos || []
                 })
             }
             

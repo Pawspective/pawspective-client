@@ -237,6 +237,7 @@ void CreateAnimalViewModel::cleanup() {
     setIsBusy(false);
 
     emit nameChanged();
+    emit photosChanged();
     emit descriptionChanged();
     emit animalTypeChanged();
     emit breedIdChanged();

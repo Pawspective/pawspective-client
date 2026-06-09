@@ -26,6 +26,7 @@
 #include "viewmodels/login_view_model.hpp"
 #include "viewmodels/organization_card_viewmodel.hpp"
 #include "viewmodels/organization_view_model.hpp"
+#include "viewmodels/photo_upload_viewmodel.hpp"
 #include "viewmodels/post_card_viewmodel.hpp"
 #include "viewmodels/post_list_viewmodel.hpp"
 #include "viewmodels/register_organization_view_model.hpp"
@@ -101,7 +102,10 @@ int main(int argc, char* argv[]) {
     auto adoptRequestListViewModel = new pawspective::viewmodels::AdoptRequestListViewModel(adoptRequestService, &app);
     auto updatePostViewModel = new pawspective::viewmodels::UpdatePostViewModel(postService, &app);
     auto updateReviewViewModel = new pawspective::viewmodels::UpdateReviewViewModel(reviewService, &app);
+    auto photoUploadViewModel = new pawspective::viewmodels::PhotoUploadViewModel(photoService, &app);
 
+    engine.rootContext()
+        ->setContextProperty("storageBaseUrl", QString("https://storage.yandexcloud.net/pawspective/photos/"));
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
     engine.rootContext()->setContextProperty("registerViewModel", registerViewModel);
@@ -125,6 +129,7 @@ int main(int argc, char* argv[]) {
     engine.rootContext()->setContextProperty("postCardViewModel", postCardViewModel);
     engine.rootContext()->setContextProperty("adoptRequestListViewModel", adoptRequestListViewModel);
     engine.rootContext()->setContextProperty("updatePostViewModel", updatePostViewModel);
+    engine.rootContext()->setContextProperty("photoUploadViewModel", photoUploadViewModel);
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreated,

@@ -8,6 +8,7 @@ Rectangle {
 
     property var viewModel: updateOrganizationViewModel
     property string errorMessage: ""
+    property var uploaderViewModel: null
 
     signal saveCompleted()
     signal discard()
@@ -37,6 +38,9 @@ Rectangle {
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
     readonly property real loaderTopMargin: 10
+    
+    readonly property real avatarSize: root.height * 0.18
+    readonly property real logoSize: root.avatarSize + 12 + root.buttonHeight
 
     Connections {
         target: viewModel
@@ -210,6 +214,43 @@ Rectangle {
                 }
             }
 
+            Text {
+                text: "Current and new logo"
+                font.family: theme.fontName
+                font.pixelSize: root.fieldLabelFontSize
+                color: theme.textDark
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.width * 0.04
+
+                AvatarImage {
+                    Layout.preferredWidth: root.logoSize
+                    Layout.preferredHeight: root.logoSize
+                    Layout.maximumWidth: root.logoSize
+                    Layout.maximumHeight: root.logoSize
+                    Layout.alignment: Qt.AlignTop
+                    photoUrl: viewModel ? viewModel.avatarUrl : ""
+                    defaultText: viewModel ? viewModel.name : ""
+                }
+
+                PhotoUploader {
+                    id: photoUploader
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    title: ""
+                    viewModel: root.uploaderViewModel
+                    previewSize: root.avatarSize
+                    previewAlignment: Qt.AlignCenter
+                    buttonHeight: root.buttonHeight
+                    buttonFontSize: root.buttonFontSize
+                    onUploadCompleted: function(fileName) {
+                        updateOrganizationViewModel.avatarUrl = fileName
+                    }
+                }
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: root.buttonSpacing
@@ -241,7 +282,7 @@ Rectangle {
                         root.discard();
                     }
                 }
-                
+
                 CustomButton {
                     text: "Delete Organization"
                     baseColor: "#ff6b6b"
@@ -252,7 +293,7 @@ Rectangle {
                     Layout.preferredHeight: root.buttonHeight
                     enabled: !viewModel.isBusy
                     onClicked: {
-                        deleteConfirmDialog.open() 
+                        deleteConfirmDialog.open()
                     }
                 }
             }

@@ -8,6 +8,7 @@ Rectangle {
     color: "#e8d8cb"
 
     property var viewModel: null
+    property var uploaderViewModel: null
     property string errorMessage: ""
 
     signal backClicked()
@@ -36,6 +37,8 @@ Rectangle {
     readonly property real buttonSpacing: root.height * 0.02
     readonly property real loaderSize: root.height * 0.1
     readonly property real bottomPadding: root.height * 0.05
+    readonly property real photoThumbSize: root.height * 0.13
+    readonly property real uploaderPreviewSize: root.height * 0.22
 
     readonly property real loaderTopMargin: 10
 
@@ -225,6 +228,82 @@ Rectangle {
                 onValueSelected: (val) => { if (viewModel) viewModel.goodWith = val }
                 Layout.leftMargin: root.width * 0.05
                 Layout.rightMargin: root.width * 0.05
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: root.fieldSpacing
+                Layout.leftMargin: root.width * 0.05
+                Layout.rightMargin: root.width * 0.05
+
+                Text {
+                    text: "Photos"
+                    font.family: theme.fontName
+                    font.pixelSize: root.fieldLabelFontSize
+                    color: theme.textDark
+                }
+
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 8
+                    visible: viewModel && viewModel.photos.length > 0
+
+                    Repeater {
+                        model: viewModel ? viewModel.photos : []
+                        delegate: Item {
+                            width: root.photoThumbSize + 10
+                            height: root.photoThumbSize + 10
+
+                            Rectangle {
+                                width: root.photoThumbSize
+                                height: root.photoThumbSize
+                                radius: 8
+                                clip: true
+                                anchors.centerIn: parent
+                                color: "#e8d8cb"
+
+                                Image {
+                                    anchors.fill: parent
+                                    source: storageBaseUrl + modelData
+                                    fillMode: Image.PreserveAspectCrop
+                                }
+                            }
+
+                            Rectangle {
+                                width: 20; height: 20; radius: 10
+                                color: "#ff6b6b"
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "×"
+                                    color: "white"
+                                    font.pixelSize: 13
+                                    font.bold: true
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: { if (viewModel) viewModel.removePhoto(modelData) }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                PhotoUploader {
+                    Layout.fillWidth: true
+                    title: ""
+                    viewModel: root.uploaderViewModel
+                    previewSize: root.uploaderPreviewSize
+                    previewRadius: 8
+                    buttonHeight: root.buttonHeight
+                    buttonFontSize: root.buttonFontSize
+                    onUploadCompleted: function(fileName) {
+                        createAnimalViewModel.addPhoto(fileName)
+                    }
+                }
             }
 
             ColumnLayout {

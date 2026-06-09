@@ -17,6 +17,7 @@ class UpdateOrganizationViewModel : public BaseViewModel {
     Q_PROPERTY(QString description READ description WRITE setDescription NOTIFY descriptionChanged)
     Q_PROPERTY(qint64 cityId READ cityId WRITE setCityId NOTIFY cityIdChanged)
     Q_PROPERTY(QVariantList cities READ cities NOTIFY citiesChanged)
+    Q_PROPERTY(QString avatarUrl READ avatarUrl WRITE setAvatarUrl NOTIFY avatarUrlChanged)
     Q_PROPERTY(int currentCityIndex READ currentCityIndex NOTIFY currentCityIndexChanged)
     Q_PROPERTY(bool isDirty READ isDirty NOTIFY dirtyChanged)
 
@@ -32,11 +33,13 @@ public:
     QString description() const;
     qint64 cityId() const;
     const QVariantList& cities() const { return m_cities; }
+    QString avatarUrl() const;
     int currentCityIndex() const;
     bool isDirty() const { return m_isDirty; }
 
     void setName(const QString& value);
     void setDescription(const QString& value);
+    void setAvatarUrl(const QString& value);
     void setCityId(qint64 value);
 
     Q_INVOKABLE void initialize() override;
@@ -52,6 +55,7 @@ signals:
     void citiesChanged();
     void currentCityIndexChanged();
     void dirtyChanged();
+    void avatarUrlChanged();
 
     void loadCompleted();
     void loadFailed(const QString& errorMessage);

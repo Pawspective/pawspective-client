@@ -104,6 +104,7 @@ Item {
             animalType: model.animalType ? model.animalType : ""
             animalId: model.animalId ? model.animalId : -1
             canBeAdopted: model.canBeAdopted ? model.canBeAdopted : false
+            photoUrl: model.photoUrl ? model.photoUrl : ""
             onClicked: function(animalId) {
                 stackView.push(animalDetailViewComponent, { animalId: animalId })
             }

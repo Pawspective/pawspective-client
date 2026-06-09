@@ -71,7 +71,6 @@ Rectangle {
     readonly property real fieldSpacing: root.height * 0.008
     readonly property real contentSpacing: root.height * 0.02
     readonly property real sideMargin: root.width * 0.05
-
     readonly property bool isOwnOrganization: {
         if (!viewModel || !root.currentUserViewModel) return false
         var userOrgId = root.currentUserViewModel.userData ? Number(root.currentUserViewModel.userData.organizationId) : 0
@@ -162,24 +161,13 @@ Rectangle {
                         Layout.fillWidth: true
                         spacing: root.width * 0.025
 
-                        Rectangle {
-                            width: root.height * 0.14
-                            height: root.height * 0.14
-                            radius: width / 2
-                            color: theme.chipBg
-                            border.color: theme.border
-                            border.width: 1
+                        AvatarImage {
+                            width: root.height * 0.16
+                            height: root.height * 0.16
                             Layout.alignment: Qt.AlignVCenter
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: (root.viewModel && root.viewModel.animalType && root.viewModel.animalType.length > 0)
-                                    ? root.viewModel.animalType[0].toUpperCase() : "?"
-                                font.family: theme.fontName
-                                font.pixelSize: parent.width * 0.4
-                                font.bold: true
-                                color: theme.textDark
-                            }
+                            photoUrl: (root.viewModel && root.viewModel.photos.length > 0)
+                                ? root.viewModel.photos[0] : ""
+                            defaultText: root.viewModel ? root.viewModel.animalType : ""
                         }
 
                         ColumnLayout {
@@ -193,6 +181,21 @@ Rectangle {
                                 font.pixelSize: root.height * 0.048
                                 font.bold: true
                                 color: theme.textDark
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                visible: text.length > 0
+                                text: {
+                                    var type = root.viewModel ? root.viewModel.animalType : ""
+                                    var breed = root.viewModel ? root.viewModel.breedName : ""
+                                    if (type && breed) return type + ", " + breed
+                                    return type || breed
+                                }
+                                font.family: theme.fontName
+                                font.pixelSize: root.height * 0.026
+                                color: theme.accentPink
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
@@ -246,6 +249,53 @@ Rectangle {
             DetailField {
                 label: "Status"
                 value: root.viewModel ? root.viewModel.status : ""
+            }
+
+            Item {
+                visible: root.viewModel && root.viewModel.photos.length > 0
+                Layout.fillWidth: true
+                Layout.leftMargin: root.sideMargin
+                Layout.rightMargin: root.sideMargin
+                Layout.preferredHeight: root.height * 0.27
+
+                ScrollView {
+                    id: galleryScroll
+                    anchors.fill: parent
+                    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+                    clip: true
+
+                    Row {
+                        id: galleryRow
+                        height: root.height * 0.25
+                        spacing: 12
+
+                        Repeater {
+                            model: root.viewModel ? root.viewModel.photos : []
+                            delegate: Rectangle {
+                                width: root.height * 0.25
+                                height: root.height * 0.25
+                                radius: 10
+                                clip: true
+                                color: theme.chipBg
+
+                                Image {
+                                    anchors.fill: parent
+                                    source: storageBaseUrl + modelData
+                                    fillMode: Image.PreserveAspectCrop
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        lightbox.photoUrl = modelData
+                                        lightbox.visible = true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             OrganizationCardView {
@@ -367,6 +417,28 @@ Rectangle {
                 font.pixelSize: root.fieldValueSize
                 color: theme.accentPink
             }
+        }
+    }
+
+    Rectangle {
+        id: lightbox
+        property string photoUrl: ""
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.85)
+        visible: false
+        z: 100
+
+        Image {
+            anchors.centerIn: parent
+            width: Math.min(parent.width * 0.92, implicitWidth > 0 ? implicitWidth : parent.width * 0.92)
+            height: Math.min(parent.height * 0.92, implicitHeight > 0 ? implicitHeight : parent.height * 0.92)
+            source: lightbox.photoUrl ? (storageBaseUrl + lightbox.photoUrl) : ""
+            fillMode: Image.PreserveAspectFit
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: lightbox.visible = false
         }
     }
 

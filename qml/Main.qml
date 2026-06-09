@@ -265,6 +265,7 @@ ApplicationWindow {
                 }
                 window.openOrganizationView(null, "sidebar", true)
             }
+            uploaderViewModel: photoUploadViewModel
             Component.onDestruction: registerOrganizationViewModel.cleanup()
         }
     }
@@ -411,6 +412,7 @@ ApplicationWindow {
         id: updateOrganizationViewComponent
         UpdateOrganizationView {
             viewModel: updateOrganizationViewModel
+            uploaderViewModel: photoUploadViewModel
         onDiscard: {
             updateOrganizationViewModel.cleanup()
             stackView.pop()
@@ -449,6 +451,7 @@ ApplicationWindow {
         id: animalCreateViewComponent
         AnimalCreateView {
             viewModel: createAnimalViewModel
+            uploaderViewModel: photoUploadViewModel
 
             onBackClicked: {
             createAnimalViewModel.cleanup()
@@ -478,6 +481,7 @@ ApplicationWindow {
         id: postCreateViewComponent
         PostCreateView {
             viewModel: createPostViewModel
+            uploaderViewModel: photoUploadViewModel
             
             onBackClicked: {
                 createPostViewModel.cleanup()
@@ -567,6 +571,7 @@ ApplicationWindow {
     id: animalUpdateViewComponent
     AnimalUpdateView {
         viewModel: updateAnimalViewModel
+        uploaderViewModel: photoUploadViewModel
         
         onDiscard: {
             updateAnimalViewModel.cleanup()
@@ -595,9 +600,11 @@ Component {
     id: postUpdateViewComponent
     PostUpdateView {
         viewModel: updatePostViewModel
+        uploaderViewModel: photoUploadViewModel
         postId: typeof postId !== 'undefined' ? postId : 0
         postText: typeof postText !== 'undefined' ? postText : ""
         postCreatedAt: typeof postCreatedAt !== 'undefined' ? postCreatedAt : null
+        postPhotos: typeof postPhotos !== 'undefined' ? postPhotos : []
         
         onBackClicked: {
             updatePostViewModel.cleanup()

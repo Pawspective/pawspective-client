@@ -35,6 +35,11 @@ void PostCardViewModel::setFromDTO(const models::PostDTO& dto) {
         emit createdAtChanged();
     }
 
+    if (m_photos != dto.photos) {
+        m_photos = dto.photos;
+        emit photosChanged();
+    }
+
     m_isExpanded = false;
     emit isExpandedChanged();
 }

@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QJsonObject>
 #include <QString>
+#include <QStringList>
 
 namespace pawspective::models {
 
@@ -11,6 +12,7 @@ struct PostDTO {
     qint64 organizationId{};
     QString text;
     QDateTime createdAt{};
+    QStringList photos;
 
     QJsonObject toJson() const;
     static PostDTO fromJson(const QJsonObject& json);

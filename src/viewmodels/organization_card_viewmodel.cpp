@@ -2,6 +2,8 @@
 
 namespace pawspective::viewmodels {
 
+static const QString StorageBaseUrl = "https://storage.yandexcloud.net/pawspective/photos/";
+
 OrganizationCardViewModel::OrganizationCardViewModel(QObject* parent) : QObject(parent) {}
 
 OrganizationCardViewModel::OrganizationCardViewModel(const models::OrganizationDTO& dto, QObject* parent)
@@ -29,6 +31,12 @@ void OrganizationCardViewModel::setFromDTO(const models::OrganizationDTO& dto) {
     if (m_city != dto.city.name) {
         m_city = dto.city.name;
         emit cityChanged();
+    }
+
+    QString newAvatarUrl = dto.avatarUrl.has_value() ? dto.avatarUrl.value() : QString{};
+    if (m_avatarUrl != newAvatarUrl) {
+        m_avatarUrl = newAvatarUrl;
+        emit avatarUrlChanged();
     }
 }
 
