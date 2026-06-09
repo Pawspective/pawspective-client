@@ -22,6 +22,12 @@ Rectangle {
     color: "transparent"
     property string selectedFilePath: ""
     property url previewUrl: ""
+    onPreviewUrlChanged: {
+        if (previewUrl && previewCanvas) {
+            previewCanvas.loadImage(previewUrl)
+        }
+        if (previewCanvas) previewCanvas.requestPaint()
+    }
     
     function cleanFilePath(fileUrl) {
         var path = fileUrl.toString()
@@ -50,7 +56,6 @@ Rectangle {
         
         function onUploadCompleted(fileName) {
             root.selectedFilePath = ""
-            root.previewUrl = ""
             root.uploadCompleted(fileName)
         }
         
@@ -101,35 +106,74 @@ Rectangle {
             visible: root.title.length > 0
         }
         
-        Rectangle {
+        Item {
             Layout.preferredWidth: root.previewSize
             Layout.preferredHeight: root.previewSize
             Layout.maximumWidth: root.previewSize
             Layout.maximumHeight: root.previewSize
             Layout.alignment: root.previewAlignment
-            radius: root.previewRadius
-            color: "#f0ecf9"
-            border.color: "#b8abd7"
-            border.width: 1
-            clip: true
-            
+
+            // Hidden Image used to obtain natural image dimensions
             Image {
-                id: previewImage
-                anchors.fill: parent
-                anchors.margins: 2
-                fillMode: Image.PreserveAspectCrop
+                id: previewSizeHelper
                 source: root.previewUrl
-                visible: status === Image.Ready
-                
-                Text {
-                    anchors.centerIn: parent
-                    text: "No\nPhoto"
-                    font.family: "Comic Sans MS"
-                    font.pixelSize: 14
-                    color: "#b8abd7"
-                    horizontalAlignment: Text.AlignHCenter
-                    visible: !previewImage.visible
+                visible: false
+                onStatusChanged: {
+                    if (status === Image.Ready) previewCanvas.requestPaint()
                 }
+            }
+
+            Canvas {
+                id: previewCanvas
+                anchors.fill: parent
+
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+
+                onImageLoaded: requestPaint()
+
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+
+                    // Background fill
+                    ctx.fillStyle = "#f0ecf9"
+                    ctx.fillRect(0, 0, width, height)
+
+                    var url = root.previewUrl ? root.previewUrl : ""
+                    if (url && previewCanvas.isImageLoaded(url) && previewSizeHelper.status === Image.Ready) {
+                        var iw = previewSizeHelper.implicitWidth
+                        var ih = previewSizeHelper.implicitHeight
+                        if (iw > 0 && ih > 0) {
+                            var side = Math.min(iw, ih)
+                            var sx = (iw - side) / 2
+                            var sy = (ih - side) / 2
+                            ctx.drawImage(url, sx, sy, side, side, 0, 0, width, height)
+                        } else {
+                            ctx.drawImage(url, 0, 0, width, height)
+                        }
+                    }
+                }
+            }
+
+            // Border on top (square)
+            Rectangle {
+                anchors.fill: parent
+                radius: 0
+                color: "transparent"
+                border.color: "#b8abd7"
+                border.width: 1
+            }
+
+            // Placeholder text
+            Text {
+                anchors.centerIn: parent
+                text: "No\nPhoto"
+                font.family: "Comic Sans MS"
+                font.pixelSize: 14
+                color: "#b8abd7"
+                horizontalAlignment: Text.AlignHCenter
+                visible: !root.previewUrl || previewSizeHelper.status !== Image.Ready
             }
         }
         

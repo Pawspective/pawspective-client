@@ -53,6 +53,9 @@ void UpdatePostViewModel::setPostData(
 void UpdatePostViewModel::addPhoto(const QString& fileName) {
     QStringList current = photos();
     if (current.size() >= 10) {
+        QString errorMsg = QString("Maximum 10 photos allowed. You have %1.").arg(current.size());
+        emitError(ErrorType::ValidationError, errorMsg);
+        emit saveFailed(errorMsg);
         return;
     }
     if (!current.contains(fileName)) {
