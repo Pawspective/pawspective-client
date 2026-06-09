@@ -17,8 +17,8 @@ public:
     explicit PhotoUploadViewModel(services::PhotoService& photoService, QObject* parent = nullptr);
 
     bool isUploading() const { return m_isUploading; }
-    QString errorMessage() const { return m_errorMessage; }
-    QString uploadedFileName() const { return m_uploadedFileName; }
+    const QString& errorMessage() const { return m_errorMessage; }
+    const QString& uploadedFileName() const { return m_uploadedFileName; }
 
     Q_INVOKABLE void uploadPhoto(const QString& filePath);
     Q_INVOKABLE void clear();

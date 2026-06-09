@@ -21,7 +21,7 @@ public:
 
     const QString& text() const { return m_createDto.text; }
     bool isValid() const { return !m_createDto.text.trimmed().isEmpty(); }
-    QStringList photos() const { return m_createDto.photos; }
+    const QStringList& photos() const { return m_createDto.photos; }
 
     void setText(const QString& value) {
         updateProperty(m_createDto.text, value, [this] { emit textChanged(); });
