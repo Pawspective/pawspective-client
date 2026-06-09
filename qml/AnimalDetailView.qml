@@ -164,8 +164,8 @@ Rectangle {
                         spacing: root.width * 0.025
 
                         AvatarImage {
-                            width: root.height * 0.14
-                            height: root.height * 0.14
+                            width: root.height * 0.16
+                            height: root.height * 0.16
                             Layout.alignment: Qt.AlignVCenter
                             photoUrl: (root.viewModel && root.viewModel.photos.length > 0)
                                 ? root.viewModel.photos[0] : ""
