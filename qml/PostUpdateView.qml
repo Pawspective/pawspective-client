@@ -194,7 +194,7 @@ Rectangle {
 
                                 Image {
                                     anchors.fill: parent
-                                    source: AppConfig.storageBaseUrl + modelData
+                                    source: storageBaseUrl + modelData
                                     fillMode: Image.PreserveAspectCrop
                                 }
                             }

@@ -104,6 +104,8 @@ int main(int argc, char* argv[]) {
     auto updateReviewViewModel = new pawspective::viewmodels::UpdateReviewViewModel(reviewService, &app);
     auto photoUploadViewModel = new pawspective::viewmodels::PhotoUploadViewModel(photoService, &app);
 
+    engine.rootContext()
+        ->setContextProperty("storageBaseUrl", QString("https://storage.yandexcloud.net/hollow1crown/photos/"));
     engine.rootContext()->setContextProperty("loginViewModel", loginViewModel);
     engine.rootContext()->setContextProperty("authService", &authService);
     engine.rootContext()->setContextProperty("registerViewModel", registerViewModel);

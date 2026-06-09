@@ -155,7 +155,6 @@ qt_add_qml_module(pawspective-client
         qml/ProfileDataField.qml
         qml/PhotoUploader.qml
         qml/AvatarImage.qml
-        qml/AppConfig.qml
 )
 
 target_include_directories(pawspective-client PRIVATE

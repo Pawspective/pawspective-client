@@ -280,7 +280,7 @@ Rectangle {
 
                                 Image {
                                     anchors.fill: parent
-                                    source: AppConfig.storageBaseUrl + modelData
+                                    source: storageBaseUrl + modelData
                                     fillMode: Image.PreserveAspectCrop
                                 }
 
@@ -432,7 +432,7 @@ Rectangle {
             anchors.centerIn: parent
             width: Math.min(parent.width * 0.92, implicitWidth > 0 ? implicitWidth : parent.width * 0.92)
             height: Math.min(parent.height * 0.92, implicitHeight > 0 ? implicitHeight : parent.height * 0.92)
-            source: lightbox.photoUrl ? (AppConfig.storageBaseUrl + lightbox.photoUrl) : ""
+            source: lightbox.photoUrl ? (storageBaseUrl + lightbox.photoUrl) : ""
             fillMode: Image.PreserveAspectFit
         }
 
