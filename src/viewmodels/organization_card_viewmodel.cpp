@@ -33,9 +33,9 @@ void OrganizationCardViewModel::setFromDTO(const models::OrganizationDTO& dto) {
         emit cityChanged();
     }
 
-    QString avatarUrl = dto.avatarUrl.has_value() ? dto.avatarUrl.value() : QString{};
-    if (m_avatarUrl != avatarUrl) {
-        m_avatarUrl = avatarUrl;
+    QString newAvatarUrl = dto.avatarUrl.has_value() ? dto.avatarUrl.value() : QString{};
+    if (m_avatarUrl != newAvatarUrl) {
+        m_avatarUrl = newAvatarUrl;
         emit avatarUrlChanged();
     }
 }
